@@ -1,26 +1,151 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Colors ── */
+  --color-background: #ffffff;
+  --color-foreground: #333333;
+  --color-foreground-strong: #231f20;
+  --color-foreground-dark: #1f1f1f;
+  --color-foreground-mid: #3a3a3a;
+  --color-foreground-subtle: #8c8c8c;
+  --color-foreground-muted: #666666;
+  --color-on-dark: #ffffff;
+  --color-primary: #1e1e1e;
+  --color-primary-alt: #212020;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #e55151;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #e1000d;
+  --color-card: #ffffff;
+  --color-muted: #f5f5f5;
+  --color-muted-2: #f1f1f1;
+  --color-sidebar: #f1f3f6;
+  --color-border: #dddddd;
+  --color-border-input: #0e1113;
+  --color-border-light: #eeeeee;
+  --color-input: #ffffff;
+  --color-footer-bg: #f5f5f5;
+  --color-footer-text: #8b8b8b;
+  --color-badge-cart: #e64984;
+
+  /* ── Typography ── */
+  --font-primary: "Fjalla One", Arial, Tahoma, Verdana, sans-serif;
+  --font-secondary: Montserrat, Helvetica, Arial, sans-serif;
+  --font-checkout: Lato, sans-serif;
+
+  /* ── Spacing ── */
+  --space-1: 0.125rem;  /* 2px  */
+  --space-2: 0.25rem;   /* 4px  */
+  --space-3: 0.5rem;    /* 8px  */
+  --space-4: 0.75rem;   /* 12px */
+  --space-5: 1rem;      /* 16px */
+  --space-6: 1.25rem;   /* 20px */
+  --space-8: 1.5rem;    /* 24px */
+  --space-10: 2rem;     /* 32px */
+  --space-12: 3rem;     /* 48px */
+  --space-15: 3.75rem;  /* 60px */
+
+  /* ── Border Radius ── */
+  --radius-none: 0px;
+  --radius-swatch: 2px;
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 32px;
+  --radius-full: 50%;
+
+  /* ── Shadows ── */
+  --shadow-0: none;
+  --shadow-1: 0 0 2px #bbb;
+  --shadow-2: 0 0 10px rgba(0, 0, 0, 0.1);
+  --shadow-3: 0 4px 4px rgba(0, 0, 0, 0.059);
+  --shadow-4: 0 0 20px rgba(51, 51, 51, 0.3);
+
+  /* ── Motion ── */
+  --transition-fast: 100ms linear;
+  --transition-base: 150ms ease-out;
+  --transition-slow: 200ms ease-in;
+  --transition-nav: 300ms ease-in-out;
+
+  /* ── Layout constants ── */
+  --header-height-desktop: 92px;
+  --header-height-mobile: 80px;
+  --header-px-desktop: 60px;
+  --header-px-mobile: 15px;
+  --atc-height: 56px;
+  --cart-drawer-width: 458px;
+  --checkout-max-width: 58rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  /* Fonts */
+  --font-sans: var(--font-primary);
   --font-mono: var(--font-geist-mono);
-}
+  --font-secondary: var(--font-secondary);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Colors */
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-foreground-strong: var(--color-foreground-strong);
+  --color-foreground-dark: var(--color-foreground-dark);
+  --color-foreground-mid: var(--color-foreground-mid);
+  --color-foreground-subtle: var(--color-foreground-subtle);
+  --color-foreground-muted: var(--color-foreground-muted);
+  --color-on-dark: var(--color-on-dark);
+  --color-primary: var(--color-primary);
+  --color-primary-alt: var(--color-primary-alt);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-destructive: var(--color-destructive);
+  --color-card: var(--color-card);
+  --color-muted: var(--color-muted);
+  --color-muted-2: var(--color-muted-2);
+  --color-sidebar: var(--color-sidebar);
+  --color-border: var(--color-border);
+  --color-border-input: var(--color-border-input);
+  --color-border-light: var(--color-border-light);
+  --color-input: var(--color-input);
+  --color-footer-bg: var(--color-footer-bg);
+  --color-footer-text: var(--color-footer-text);
+  --color-badge-cart: var(--color-badge-cart);
+
+  /* Border Radius */
+  --radius-none: var(--radius-none);
+  --radius-swatch: var(--radius-swatch);
+  --radius-sm: var(--radius-sm);
+  --radius-base: var(--radius-base);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+  --radius-full: var(--radius-full);
+
+  /* Shadows */
+  --shadow-0: var(--shadow-0);
+  --shadow-1: var(--shadow-1);
+  --shadow-2: var(--shadow-2);
+  --shadow-3: var(--shadow-3);
+  --shadow-4: var(--shadow-4);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-primary);
+  font-size: 15px;
+  line-height: 21px;
+  letter-spacing: 0.3px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position: 800px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 1600px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--radius-sm);
 }
