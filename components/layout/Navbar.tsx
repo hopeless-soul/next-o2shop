@@ -30,19 +30,19 @@ export default function Navbar({
 
   const routeConfig: NavbarProps = pathname === "/"
     ? {
-        background: "var(--color-foreground-dark)",
-        textColor: "var(--color-on-dark)",
-        scrolledBackground: "var(--color-foreground-dark)",
-        scrolledColor: "var(--color-on-dark)",
-      }
+      background: "var(--color-foreground-dark)",
+      textColor: "var(--color-on-dark)",
+      scrolledBackground: "var(--color-foreground-dark)",
+      scrolledColor: "var(--color-on-dark)",
+    }
     : pathname.startsWith("/products")
-    ? {
+      ? {
         background: "transparent",
         textColor: "var(--color-foreground-dark)",
         scrolledBackground: "var(--color-foreground-dark)",
         scrolledColor: "var(--color-on-dark)",
       }
-    : {
+      : {
         background: "var(--color-foreground-dark)",
         textColor: "var(--color-on-dark)",
         scrolledBackground: "var(--color-foreground-dark)",
@@ -54,6 +54,7 @@ export default function Navbar({
   const resolvedScrolledBg = scrolledBackground ?? routeConfig.scrolledBackground!;
   const resolvedScrolledColor = scrolledColor ?? routeConfig.scrolledColor!;
 
+  const currentBackground = scrolled ? resolvedScrolledBg : resolvedBg;
   const currentColor = scrolled ? resolvedScrolledColor : resolvedText;
   const logoFilter =
     currentColor === "var(--color-on-dark)"
@@ -88,7 +89,7 @@ export default function Navbar({
       <header
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: scrolled ? resolvedScrolledBg : resolvedBg,
+          backgroundColor: currentBackground,
           transition: "background-color var(--transition-nav)",
         }}
       >
@@ -177,64 +178,22 @@ export default function Navbar({
         style={{
           top: "var(--header-height-desktop)",
           height: "40px",
-          backgroundColor: scrolled ? resolvedScrolledBg : resolvedBg,
+          backgroundColor: currentBackground,
           boxShadow: scrolled ? "var(--shadow-3)" : "none",
           transition: "background-color var(--transition-nav), box-shadow var(--transition-nav)",
         }}
       >
-          {MOCK_CATEGORIES.map((cat) =>
-            cat.items?.length ? (
-              <div
-                key={cat.slug}
-                className="relative"
-                onMouseEnter={() => openDropdown(cat.slug)}
-                onMouseLeave={closeDropdown}
-              >
-                <Link
-                  href={`/products?category=${cat.slug}`}
-                  className="flex items-center px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
-                  style={{
-                    color: currentColor,
-                    lineHeight: "40px",
-                    transition: "var(--transition-nav)",
-                  }}
-                >
-                  {cat.name}
-                  <ChevronDown size={12} strokeWidth={2} className="ml-1" />
-                </Link>
-
-                {/* Dropdown panel */}
-                {activeDropdown === cat.slug && (
-                  <div
-                    className="absolute top-full left-0 min-w-[190px] py-3"
-                    style={{
-                      backgroundColor: "var(--color-foreground-strong)",
-                      boxShadow: "var(--shadow-4)",
-                    }}
-                    onMouseEnter={() => openDropdown(cat.slug)}
-                    onMouseLeave={closeDropdown}
-                  >
-                    {cat.items.map((item) => (
-                      <Link
-                        key={item.slug}
-                        href={`/products?category=${item.slug}`}
-                        className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100"
-                        style={{
-                          color: "var(--color-on-dark)",
-                          transition: "var(--transition-nav)",
-                        }}
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
+        {MOCK_CATEGORIES.map((cat) =>
+          cat.items?.length ? (
+            <div
+              key={cat.slug}
+              className="relative"
+              onMouseEnter={() => openDropdown(cat.slug)}
+              onMouseLeave={closeDropdown}
+            >
               <Link
-                key={cat.slug}
                 href={`/products?category=${cat.slug}`}
-                className="block px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
+                className="flex items-center px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
                 style={{
                   color: currentColor,
                   lineHeight: "40px",
@@ -242,16 +201,57 @@ export default function Navbar({
                 }}
               >
                 {cat.name}
+                <ChevronDown size={12} strokeWidth={2} className="ml-1" />
               </Link>
-            )
-          )}
+
+              {/* Dropdown panel */}
+              {activeDropdown === cat.slug && (
+                <div
+                  className="absolute top-full left-0 min-w-[190px] py-3"
+                  style={{
+                    backgroundColor: "var(--color-foreground-strong)",
+                    boxShadow: "var(--shadow-4)",
+                  }}
+                  onMouseEnter={() => openDropdown(cat.slug)}
+                  onMouseLeave={closeDropdown}
+                >
+                  {cat.items.map((item) => (
+                    <Link
+                      key={item.slug}
+                      href={`/products?category=${item.slug}`}
+                      className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100"
+                      style={{
+                        color: "var(--color-on-dark)",
+                        transition: "var(--transition-nav)",
+                      }}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              key={cat.slug}
+              href={`/products?category=${cat.slug}`}
+              className="block px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
+              style={{
+                color: currentColor,
+                lineHeight: "40px",
+                transition: "var(--transition-nav)",
+              }}
+            >
+              {cat.name}
+            </Link>
+          )
+        )}
       </nav>
 
       {/* ── Mobile drawer overlay ── */}
       <div
-        className={`fixed inset-0 z-[60] transition-opacity duration-300 ${
-          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-[60] transition-opacity duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
         onClick={() => setMobileOpen(false)}
       />
@@ -260,15 +260,14 @@ export default function Navbar({
       <SearchPopup
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
-        background={resolvedBg}
-        textColor={resolvedText}
+        background={currentBackground === 'transparent' ? resolvedScrolledColor : currentBackground}
+        textColor={currentColor}
       />
 
       {/* ── Mobile drawer panel ── */}
       <div
-        className={`fixed top-0 right-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col transition-transform duration-300 ease-in-out ${
-          mobileOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         style={{ backgroundColor: "var(--color-foreground-strong)" }}
       >
         <div
