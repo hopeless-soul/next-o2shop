@@ -25,7 +25,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     ? "sold-out"
     : product.compareAtPrice && product.compareAtPrice > product.basePrice
     ? "sale"
-    : product.tags.includes("new")
+    : product.tags?.includes("new")
     ? "new"
     : undefined;
 

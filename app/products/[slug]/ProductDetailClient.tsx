@@ -66,9 +66,10 @@ export default function ProductDetailClient({ product, reviews }: Props) {
         ? ("new" as const)
         : undefined;
 
-  const textBlock = product.description.find((b) => b.type === "text");
-  const pointsBlock = product.description.find((b) => b.type === "points");
-  const detailItems = pointsBlock?.type === "points" ? pointsBlock.content : [];
+  const descBlocks = product.description?.blocks ?? [];
+  const textBlock = descBlocks.find((b) => b.type === "text");
+  const pointsBlock = descBlocks.find((b) => b.type === "points");
+  const detailItems = pointsBlock?.type === "points" ? pointsBlock.items : [];
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)" }}>
@@ -157,7 +158,7 @@ export default function ProductDetailClient({ product, reviews }: Props) {
 
         {/* ── Right: product info (40%) ── */}
         <div className="md:w-[40%] flex flex-col gap-5 md:pl-4">
-          {badge && <Badge variant={badge} />}
+          {badge && <Badge variant={badge} className="self-start" />}
 
           <h1
             className="font-sans uppercase leading-tight"

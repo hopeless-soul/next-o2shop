@@ -126,6 +126,7 @@ Remove `"use client"` if data fetching moves to a Server Component. `ProductCard
 |---|---|---|
 | 2026-05-25 | session-2 | Initial prototype — 8 mock products, shimmer skeleton, filter strip placeholder, skeleton toggle button |
 | 2026-05-26 | session-10 | Converted to async RSC; wired `listProducts()` via `lib/api/products.ts`; `searchParams` drives `categorySlug` + `search`; filter strip uses `<Link>` elements; removed skeleton toggle; product count from `result.total` |
+| 2026-05-26 | session-11 | Fixed `product.tags?.includes()` — tags absent from list DTO; verified 0 console errors against live API |
 
 ---
 
@@ -172,6 +173,7 @@ Currently `"use client"` because of `useParams()` + variant state. If migrating 
 |---|---|---|
 | 2026-05-25 | session-2 | Initial prototype — 60/40 split layout, mock product lookup by slug, variant picker, ATC button, accordion, reviews |
 | 2026-05-26 | session-10 | Split into RSC wrapper (`page.tsx`) + client island (`ProductDetailClient.tsx`); wired `getProductBySlug()` + `listReviewsByProduct(product.id)`; `notFound()` on 404; removed skeleton toggle and mock imports |
+| 2026-05-26 | session-11 | Fixed `description` shape (`{ blocks: [] }` not flat array); fixed points block field (`items` not `content`); fixed badge `self-start` to prevent full-width stretch in flex-col; verified 0 console errors against live API |
 
 ---
 

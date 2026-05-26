@@ -307,3 +307,36 @@ Backend sets `access_token` + `refresh_token` as HttpOnly cookies on login, OAut
 - Build `CartDrawer` (blocked on backend cart endpoint)
 - Add Suspense / `loading.tsx` files for streaming skeletons on product and account routes
 - Implement live search results in `SearchPopup` using `listProducts({ search: q })`
+
+---
+
+## Session 11 — Product Route Testing + API Shape Fixes
+
+**Date:** 2026-05-26
+**Files changed:** `lib/types.ts`, `lib/mock-data.ts`, `components/products/ProductCard.tsx`, `app/products/[slug]/ProductDetailClient.tsx`, `specs/FRONTEND_TRACKING.md`
+
+### Bugs found and fixed
+
+**`lib/types.ts` — three API shape mismatches**
+1. `ProductDescriptionBlock` "points" variant used `content: string[]` — API uses `items: string[]`
+2. `Product.description` typed as `ProductDescriptionBlock[]` (flat array) — API returns `{ blocks: ProductDescriptionBlock[] }` (object wrapper); calling `.find()` on the object would throw at runtime
+3. `Product.tags` typed as required `string[]` — absent from `ProductListItemResponseDto`; `product.tags.includes()` in `ProductCard` crashed on list-endpoint data
+4. `ProductVariant.quantityRule` typed as `number` — API returns `QuantityRuleResponseDto` (`{ min, max, increment }`)
+
+**`lib/mock-data.ts`** — updated all 8 products to match corrected types: `description: { blocks: [...] }`, points blocks use `items`, `quantityRule: { min: 1, max: null, increment: 1 }`.
+
+**`ProductCard.tsx`** — `product.tags.includes("new")` → `product.tags?.includes("new")`.
+
+**`ProductDetailClient.tsx`**
+- `product.description.find(...)` → `(product.description?.blocks ?? []).find(...)`
+- `pointsBlock.content` → `pointsBlock.items`
+- Badge usage `<Badge variant={badge} />` → `<Badge variant={badge} className="self-start" />` — badge was stretching full-width as a flex-col item
+
+### Routes verified against live API
+
+| Route | Products shown | Console errors |
+|---|---|---|
+| `/products` | 3 real products (Oversized Hoodie, Classic White Tee, Black Wool Cap) with SALE badges + correct prices | 0 |
+| `/products/oversized_hoodie` | Full detail — title, price, color/size pickers, description text, 3 reviews | 0 |
+
+Only warning present: pre-existing Next.js logo SVG aspect-ratio notice in Navbar.

@@ -78,7 +78,7 @@ export type ProductVariant = {
   compareAtPrice?: number;
   weight?: number;
   inventoryPolicy: "deny" | "continue";
-  quantityRule: number;
+  quantityRule: { min: number; max: number | null; increment: number };
   barcode?: string;
   featuredImageId?: string;
   featuredImage?: ProductPhoto;
@@ -90,7 +90,7 @@ export type ProductSize  = { label: string; available: boolean };
 
 export type ProductDescriptionBlock =
   | { type: "text"; content: string }
-  | { type: "points"; content: string[] };
+  | { type: "points"; items: string[] };
 
 export type Product = {
   id: string;
@@ -103,8 +103,8 @@ export type Product = {
   priceMax: number;
   priceVaries: boolean;
   compareAtPrice?: number;
-  tags: string[];
-  description: ProductDescriptionBlock[];
+  tags?: string[];
+  description?: { blocks: ProductDescriptionBlock[] };
   rating: number;
   photos: ProductPhoto[];
   variants: ProductVariant[];
