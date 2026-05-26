@@ -186,7 +186,7 @@ Added `editable?: boolean` (default `false`). When `true`, renders Edit (neutral
 - Replaced the inline payment `<span>` (which had hardcoded hex) with `<PaymentStatusBadge status={order.paymentStatus} />`
 - Added `editable={true}` to both `<AddressCard>` usages in the Saved Addresses section
 
-### Build verified
+### Build verified (session 8)
 - `npm run lint` — clean (0 errors, 0 warnings)
 
 ---
@@ -235,5 +235,75 @@ All type definitions removed (now in `lib/types.ts`). All mock arrays updated to
 - `app/account/page.tsx` — `order.number→orderNumber`, `date→createdAt`, `total→totalAmount`; pass `addr.shippingAddress` to `AddressCard` with `addr.name` as heading
 - `app/account/orders/[id]/page.tsx` — `STATUS_STEPS` updated to `["unfulfilled","partially_fulfilled","fulfilled"]`; order + item field renames; subtotal derived from `items.reduce`; "Color / Size" column removed
 
-### Build verified
+### Build verified (session 9)
 - `npm run lint` — clean (0 errors, 0 warnings)
+
+---
+
+## Session 10 — API Integration Layer
+
+**Date:** 2026-05-26
+**Files created:** `.env.local`, `lib/api/errors.ts`, `lib/api/server.ts`, `lib/api/client.ts`, `lib/api/categories.ts`, `lib/api/auth.ts`, `lib/api/products.ts`, `lib/api/reviews.ts`, `lib/api/orders.ts`, `lib/api/addresses.ts`, `lib/api/cart.ts`, `app/products/[slug]/ProductDetailClient.tsx`
+**Files modified:** `app/layout.tsx`, `components/layout/Navbar.tsx`, `app/account/page.tsx`, `app/account/orders/[id]/page.tsx`, `app/products/page.tsx`, `app/products/[slug]/page.tsx`, `CLAUDE.md`, `specs/FRONTEND_TRACKING.md`
+
+### Dependencies added
+- `axios` — HTTP client for all API calls
+- `server-only` — compile-time guard preventing server-side Axios instance from leaking into browser bundles
+
+### Infrastructure built
+
+**Error layer (`lib/api/errors.ts`)**
+Typed error class hierarchy: `ApiError` (base) → `AuthError` (401), `ForbiddenError` (403), `NotFoundError` (404), `ValidationError` (400). `parseApiError()` factory normalises any Axios error or network failure into the correct subclass using `ErrorResponseDto` shape from the backend.
+
+**Server Axios instance (`lib/api/server.ts`)**
+- `import 'server-only'` at top — hard build error if accidentally imported client-side
+- Reads `access_token` from HttpOnly cookie via `await cookies()` (Next.js 15 async API)
+- Attaches as `Authorization: Bearer <token>` on every request
+- Response interceptor normalises errors via `parseApiError`
+
+**Client Axios instance (`lib/api/client.ts`)**
+- `withCredentials: true` — browser sends HttpOnly cookies automatically
+- Token refresh interceptor: on 401, calls `POST /auth/refresh`, queues concurrent requests, retries original after refresh; on refresh failure → `window.location.href = '/login'`
+- `_retry` flag prevents infinite retry loops
+
+**Domain services**
+
+| File | Key functions |
+|---|---|
+| `lib/api/categories.ts` | `listCategories()`, `getCategoryById()` |
+| `lib/api/auth.ts` | `login()`, `register()`, `logout()`, `refreshTokens()`, `getMe()` |
+| `lib/api/products.ts` | `listProducts(params)`, `getProductBySlug(slug)` |
+| `lib/api/reviews.ts` | `listReviewsByProduct(productId, params)`, `deleteReview(id)` |
+| `lib/api/orders.ts` | `listMyOrders(params)`, `getOrderByNumber(orderNumber)` |
+| `lib/api/addresses.ts` | `listAddresses()`, `createAddress()`, `updateAddress()`, `deleteAddress()` |
+| `lib/api/cart.ts` | Documented stub — no cart endpoint in API yet |
+
+### Pages wired to real API
+
+**`app/layout.tsx`** — made async; calls `listCategories({ limit: 100 })` with `[]` fallback; passes `categories` prop to `<Navbar>`.
+
+**`components/layout/Navbar.tsx`** — removed `MOCK_CATEGORIES` import; accepts `categories: Category[]` prop (default `[]`); both desktop nav and mobile drawer use prop.
+
+**`app/products/page.tsx`** — converted from `"use client"` to async RSC; `searchParams` drives `categorySlug` and `search` params; filter strip uses `<Link>` elements (URL-driven); product count from `result.total`; skeleton shown when API unreachable; skeleton demo toggle removed.
+
+**`app/products/[slug]/page.tsx`** — converted to async RSC wrapper; fetches product by slug → `notFound()` on `NotFoundError`; fetches reviews by `product.id` (UUID); renders `<ProductDetailClient>`.
+
+**`app/products/[slug]/ProductDetailClient.tsx`** *(new file)* — client island extracted from old `page.tsx`; accepts `product: Product` and `reviews: Review[]` props; contains all variant state, image selection, ATC button.
+
+**`app/account/page.tsx`** — made async; auth guard via `getMe()` → `redirect('/login')` on `AuthError`; `Promise.all` for orders + addresses; order detail links use `order.orderNumber`; skeleton demo toggle removed.
+
+**`app/account/orders/[id]/page.tsx`** — converted from `"use client"` to async RSC; `params.id` is the `orderNumber` display string (e.g. `ORD-20240101-0001`); `getOrderByNumber(id)` → `notFound()` on 404; all `useState` and skeleton toggle removed.
+
+### Auth design
+Backend sets `access_token` + `refresh_token` as HttpOnly cookies on login, OAuth redirect, and token refresh. Frontend never reads or stores token values. Server instance attaches the cookie value as a Bearer header for RSC requests; client instance relies on browser's automatic cookie sending.
+
+### Key gotchas recorded
+- `GET /orders/{orderNumber}` takes display string, not UUID — order detail `href` must be `order.orderNumber`
+- `GET /products/{productId}/reviews` requires product UUID, not slug — two-step fetch on product detail page
+- `cookies()` from `next/headers` is async in Next.js 15 — must be awaited
+
+### Next priorities
+- Wire `/login` and `/register` pages to `auth.ts` (Server Actions or Client Component form submissions)
+- Build `CartDrawer` (blocked on backend cart endpoint)
+- Add Suspense / `loading.tsx` files for streaming skeletons on product and account routes
+- Implement live search results in `SearchPopup` using `listProducts({ search: q })`

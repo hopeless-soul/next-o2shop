@@ -5,10 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
-import { MOCK_CATEGORIES } from "@/lib/mock-data";
 import SearchPopup from "@/components/layout/SearchPopup";
+import type { Category } from "@/lib/types";
 
 interface NavbarProps {
+  categories?: Category[];
   background?: string;
   textColor?: string;
   scrolledBackground?: string;
@@ -16,6 +17,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({
+  categories = [],
   background,
   textColor,
   scrolledBackground,
@@ -183,7 +185,7 @@ export default function Navbar({
           transition: "background-color var(--transition-nav), box-shadow var(--transition-nav)",
         }}
       >
-        {MOCK_CATEGORIES.map((cat) =>
+        {categories.map((cat) =>
           cat.subCategories.length ? (
             <div
               key={cat.slug}
@@ -291,7 +293,7 @@ export default function Navbar({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-5 py-6">
-          {MOCK_CATEGORIES.map((cat) =>
+          {categories.map((cat) =>
             cat.subCategories.length ? (
               <div key={cat.slug} className="mb-7">
                 <p

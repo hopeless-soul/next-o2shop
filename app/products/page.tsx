@@ -1,18 +1,33 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { MOCK_PRODUCTS } from "@/lib/mock-data";
+import { listProducts } from "@/lib/api/products";
 import ProductCard from "@/components/products/ProductCard";
 import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
 
-export default function ProductsPage() {
-  const [loading, setLoading] = useState(true);
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; q?: string }>;
+}) {
+  const { category, q } = await searchParams;
+
+  let result: Awaited<ReturnType<typeof listProducts>> | null = null;
+  try {
+    result = await listProducts({ categorySlug: category, search: q, limit: 20 });
+  } catch {
+    // API unreachable — show empty grid
+  }
+
+  const products = result?.data ?? [];
+  const total = result?.total ?? 0;
+
+  const pageTitle = category
+    ? category.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : q
+      ? `Search: "${q}"`
+      : "All Products";
 
   return (
-    <div
-      style={{ paddingTop: "var(--header-height-desktop)" }}
-    >
+    <div style={{ paddingTop: "var(--header-height-desktop)" }}>
       {/* Page header */}
       <div
         className="flex items-end justify-between py-6 border-b"
@@ -34,38 +49,24 @@ export default function ProductsPage() {
               Home
             </Link>
             {" / "}
-            <span>Hats</span>
+            <span>{pageTitle}</span>
           </p>
           <h1
             className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none"
             style={{ color: "var(--color-foreground-dark)" }}
           >
-            Hats
+            {pageTitle}
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <span
-            className="text-[13px]"
-            style={{
-              fontFamily: "var(--font-secondary)",
-              color: "var(--color-foreground-subtle)",
-            }}
-          >
-            {MOCK_PRODUCTS.length} products
-          </span>
-          {/* Skeleton toggle for demo */}
-          <button
-            onClick={() => setLoading((v) => !v)}
-            className="font-sans text-[11px] uppercase tracking-widest px-3 py-1.5 border hover:opacity-70"
-            style={{
-              borderColor: "var(--color-border)",
-              color: "var(--color-foreground-muted)",
-              transition: "var(--transition-base)",
-            }}
-          >
-            {loading ? "Show Products" : "Show Skeleton"}
-          </button>
-        </div>
+        <span
+          className="text-[13px]"
+          style={{
+            fontFamily: "var(--font-secondary)",
+            color: "var(--color-foreground-subtle)",
+          }}
+        >
+          {total} products
+        </span>
       </div>
 
       {/* Filter strip placeholder */}
@@ -77,36 +78,39 @@ export default function ProductsPage() {
           borderColor: "var(--color-border)",
         }}
       >
-        {["All", "Beanies", "Snapbacks", "Bucket Hats", "Dad Caps"].map(
-          (f) => (
-            <button
-              key={f}
+        {[
+          { label: "All", slug: undefined },
+          { label: "Beanies", slug: "beanies" },
+          { label: "Snapbacks", slug: "snapbacks" },
+          { label: "Bucket Hats", slug: "bucket-hats" },
+          { label: "Dad Caps", slug: "dad-caps" },
+        ].map((f) => {
+          const active = f.slug ? category === f.slug : !category;
+          return (
+            <Link
+              key={f.label}
+              href={f.slug ? `/products?category=${f.slug}` : "/products"}
               className="flex-shrink-0 font-sans text-[12px] uppercase tracking-widest px-4 py-2 border hover:opacity-70"
               style={{
-                borderColor: f === "All" ? "var(--color-foreground-dark)" : "var(--color-border)",
-                backgroundColor: f === "All" ? "var(--color-foreground-dark)" : "transparent",
-                color: f === "All" ? "var(--color-on-dark)" : "var(--color-foreground)",
+                borderColor: active ? "var(--color-foreground-dark)" : "var(--color-border)",
+                backgroundColor: active ? "var(--color-foreground-dark)" : "transparent",
+                color: active ? "var(--color-on-dark)" : "var(--color-foreground)",
                 transition: "var(--transition-base)",
               }}
             >
-              {f}
-            </button>
-          )
-        )}
+              {f.label}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Product grid */}
-      <div
-        className="grid grid-cols-2 md:grid-cols-4"
-        style={{ gap: "2px", padding: "2px" }}
-      >
-        {loading
-          ? Array.from({ length: 8 }).map((_, i) => (
-              <ProductCardSkeleton key={i} />
-            ))
-          : MOCK_PRODUCTS.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+      <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: "2px", padding: "2px" }}>
+        {result === null
+          ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
+          : products.length > 0
+            ? products.map((product) => <ProductCard key={product.id} product={product} />)
+            : Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
       </div>
     </div>
   );

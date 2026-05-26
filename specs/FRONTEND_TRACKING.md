@@ -25,13 +25,14 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 | Task | Type | Status | Owner | Updated |
 |---|---|---|---|---|
 | `/` home hero | route | ✅ done | session-2 | 2026-05-25 |
-| `/products` list | route | ⬜ todo | — | — |
-| `/products/[slug]` detail | route | ⬜ todo | — | — |
+| `/products` list | route | ✅ done | session-10 | 2026-05-26 |
+| `/products/[slug]` detail | route | ✅ done | session-10 | 2026-05-26 |
 | `/login` | route | ⬜ todo | — | — |
 | `/register` | route | ⬜ todo | — | — |
-| `/account` dashboard | route | ⬜ todo | — | — |
-| `/account/orders/[id]` | route | ⬜ todo | — | — |
+| `/account` dashboard | route | ✅ done | session-10 | 2026-05-26 |
+| `/account/orders/[id]` | route | ✅ done | session-10 | 2026-05-26 |
 | `CartDrawer` | component | ⬜ todo | — | — |
+| API integration layer | infra | ✅ done | session-10 | 2026-05-26 |
 | `SearchPopup` | component | ✅ done | session-6 | 2026-05-26 |
 | `Navbar` | component | ✅ done | session-5 | 2026-05-26 |
 | `Footer` | component | 🔒 stable | session-4 | 2026-05-25 |
@@ -89,8 +90,8 @@ Done. No API work needed for initial launch.
 
 ### `/products` — Products List
 
-**Status:** `⬜ todo`
-**Owner:** —
+**Status:** `✅ done`
+**Owner:** session-10
 **Files:** `app/products/page.tsx`
 
 **Current state**
@@ -124,14 +125,15 @@ Remove `"use client"` if data fetching moves to a Server Component. `ProductCard
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial prototype — 8 mock products, shimmer skeleton, filter strip placeholder, skeleton toggle button |
+| 2026-05-26 | session-10 | Converted to async RSC; wired `listProducts()` via `lib/api/products.ts`; `searchParams` drives `categorySlug` + `search`; filter strip uses `<Link>` elements; removed skeleton toggle; product count from `result.total` |
 
 ---
 
 ### `/products/[slug]` — Product Detail
 
-**Status:** `⬜ todo`
-**Owner:** —
-**Files:** `app/products/[slug]/page.tsx`
+**Status:** `✅ done`
+**Owner:** session-10
+**Files:** `app/products/[slug]/page.tsx`, `app/products/[slug]/ProductDetailClient.tsx`
 
 **Current state**
 Prototype that reads `slug` from `useParams()` and finds the product in `MOCK_PRODUCTS`. Has a manual skeleton toggle — **remove it** when wiring real data. `VariantPicker`, ATC button, `<details>` accordion, and reviews section all present.
@@ -169,6 +171,7 @@ Currently `"use client"` because of `useParams()` + variant state. If migrating 
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial prototype — 60/40 split layout, mock product lookup by slug, variant picker, ATC button, accordion, reviews |
+| 2026-05-26 | session-10 | Split into RSC wrapper (`page.tsx`) + client island (`ProductDetailClient.tsx`); wired `getProductBySlug()` + `listReviewsByProduct(product.id)`; `notFound()` on 404; removed skeleton toggle and mock imports |
 
 ---
 
@@ -246,8 +249,8 @@ Mirror the auth strategy chosen for `/login`.
 
 ### `/account` — Account Dashboard
 
-**Status:** `⬜ todo`
-**Owner:** —
+**Status:** `✅ done`
+**Owner:** session-10
 **Files:** `app/account/page.tsx`
 
 **Current state**
@@ -284,13 +287,14 @@ Requires auth — add a redirect to `/login` if no session. `AddressCard` "Edit"
 |---|---|---|
 | 2026-05-25 | session-2 | Initial prototype — order history table, saved addresses grid, mock data from lib/mock-data.ts |
 | 2026-05-26 | session-8 | Replace inline payment span with `PaymentStatusBadge`; add `editable={true}` to `AddressCard` usages |
+| 2026-05-26 | session-10 | Made async RSC; auth guard via `getMe()` → `redirect('/login')` on `AuthError`; wired `listMyOrders()` + `listAddresses()`; order detail `href` updated to use `order.orderNumber` |
 
 ---
 
 ### `/account/orders/[id]` — Order Detail
 
-**Status:** `⬜ todo`
-**Owner:** —
+**Status:** `✅ done`
+**Owner:** session-10
 **Files:** `app/account/orders/[id]/page.tsx`
 
 **Current state**
@@ -328,6 +332,38 @@ The `id` param must match the backend's order ID format. If IDs are UUIDs (not t
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial prototype — status timeline stepper, line items table with totals, address cards, shimmer skeleton toggle |
+| 2026-05-26 | session-10 | Converted from `"use client"` to async RSC; `params.id` is the `orderNumber` display string; wired `getOrderByNumber(id)` → `notFound()` on 404; removed skeleton toggle and all `useState` |
+
+---
+
+## Infrastructure
+
+---
+
+### API Integration Layer
+
+**Status:** `✅ done`
+**Owner:** session-10
+**Files:** `lib/api/errors.ts`, `lib/api/server.ts`, `lib/api/client.ts`, `lib/api/categories.ts`, `lib/api/auth.ts`, `lib/api/products.ts`, `lib/api/reviews.ts`, `lib/api/orders.ts`, `lib/api/addresses.ts`, `lib/api/cart.ts`, `.env.local`
+
+**What was built**
+- `errors.ts` — typed error classes (`ApiError`, `AuthError`, `NotFoundError`, `ValidationError`, `ForbiddenError`) + `parseApiError()` factory normalising Axios errors
+- `server.ts` — server-only Axios instance (`import 'server-only'`); reads `access_token` HttpOnly cookie via `next/headers` and attaches as Bearer
+- `client.ts` — browser Axios instance (`withCredentials: true`); 401 → refresh → retry interceptor; concurrent 401s queued
+- Domain services: one file per API domain with typed function signatures
+- `cart.ts` — documented stub (no cart endpoint in API yet)
+
+**Key decisions**
+- Auth: HttpOnly cookies managed entirely by the backend — no token storage in JS
+- URL: `NEXT_PUBLIC_API_URL=http://localhost:3001` in `.env.local` (same for both instances)
+- `GET /orders/{orderNumber}` takes the display string, not a UUID
+- `GET /products/{productId}/reviews` takes a UUID — requires product fetch first
+
+**Change Log**
+
+| Date | Agent | Change |
+|---|---|---|
+| 2026-05-26 | session-10 | Initial build — all infrastructure files created, all data-bearing routes wired to real API |
 
 ---
 

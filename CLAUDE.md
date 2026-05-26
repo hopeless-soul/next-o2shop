@@ -47,3 +47,35 @@ All tokens are available as Tailwind utilities via `@theme inline` in `globals.c
 - **OpenAPI Specification:** The dynamic backend API schema is located locally at:
   `C:\Users\hk\Documents\Development\nest\nest-o2shop\specs\openapi.json`
 - **Agent Instruction:** Because the backend is actively being developed, this `openapi.json` file is highly dynamic. **You must re-scan/re-read this file every time you need to rely on, update, or integrate with the backend API endpoints.** Do not rely on cached structures of this file across different tasks.
+
+## API Layer
+
+The HTTP layer lives in `lib/api/`. All data fetching goes through Axios — never use `fetch` directly.
+
+**Two Axios instances:**
+
+- `lib/api/server.ts` — Server-side only. Guarded with `import 'server-only'` (will cause a build error if imported in a Client Component). Reads `access_token` from HttpOnly cookies via `next/headers` and attaches it as `Authorization: Bearer`. Use this in RSC pages and Server Actions for read operations.
+- `lib/api/client.ts` — Browser only. Uses `withCredentials: true` so the browser sends HttpOnly cookies automatically. Includes a 401 → refresh → retry interceptor. Use this in Client Components for mutations (cart, auth forms, address CRUD).
+
+**Domain services** (`lib/api/*.ts`):
+
+| File | Covers |
+|---|---|
+| `categories.ts` | `GET /categories`, `GET /categories/{id}` |
+| `auth.ts` | login, register, logout, refresh, `GET /me` |
+| `products.ts` | product list (paginated + filters), product by slug |
+| `reviews.ts` | reviews by product, delete review |
+| `orders.ts` | `GET /me/orders`, `GET /orders/{orderNumber}` |
+| `addresses.ts` | list, create, update, delete saved addresses |
+| `cart.ts` | stub — no cart endpoint in API yet |
+
+**Error handling:** All errors are normalised by `lib/api/errors.ts` into typed subclasses (`AuthError`, `NotFoundError`, `ValidationError`, `ForbiddenError`, `ApiError`). In RSC pages, catch `NotFoundError` → `notFound()` and `AuthError` → `redirect('/login')`.
+
+**Auth:** The backend sets `access_token` and `refresh_token` as HttpOnly cookies on login/refresh. The frontend never reads or stores tokens directly. The client instance silently refreshes on 401.
+
+**Environment:** Set `NEXT_PUBLIC_API_URL` in `.env.local` (e.g. `http://localhost:3001`). Both instances share this variable.
+
+**Key gotchas:**
+- `GET /orders/{orderNumber}` takes the display-format string (e.g. `ORD-20240101-0001`), not a UUID. Order detail links must use `order.orderNumber`.
+- `GET /products/{productId}/reviews` takes the product UUID, not the slug. Fetch the product first to get its `id`, then fetch reviews.
+- `cookies()` from `next/headers` is async in Next.js 15 — always `await` it.

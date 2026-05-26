@@ -1,5 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 import Link from "next/link";
-import { MOCK_ORDERS, MOCK_ADDRESSES } from "@/lib/mock-data";
+import { redirect } from "next/navigation";
+import { getMe } from "@/lib/api/auth";
+import { listMyOrders } from "@/lib/api/orders";
+import { listAddresses } from "@/lib/api/addresses";
+import { AuthError } from "@/lib/api/errors";
 import OrderStatusBadge from "@/components/account/OrderStatusBadge";
 import PaymentStatusBadge from "@/components/account/PaymentStatusBadge";
 import AddressCard from "@/components/account/AddressCard";
@@ -12,7 +18,20 @@ function formatDate(dateStr: string) {
   });
 }
 
-export default function AccountPage() {
+export default async function AccountPage() {
+  try {
+    await getMe();
+  } catch (err) {
+    if (err instanceof AuthError) redirect("/login");
+    throw err;
+  }
+
+  const [ordersResult, addresses] = await Promise.all([
+    listMyOrders({ limit: 20 }),
+    listAddresses(),
+  ]);
+  const orders = ordersResult.data;
+
   return (
     <div
       style={{
@@ -77,7 +96,7 @@ export default function AccountPage() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_ORDERS.map((order) => (
+                {orders.map((order) => (
                   <tr
                     key={order.id}
                     className="border-b"
@@ -118,7 +137,7 @@ export default function AccountPage() {
                     </td>
                     <td className="py-4">
                       <Link
-                        href={`/account/orders/${order.id}`}
+                        href={`/account/orders/${order.orderNumber}`}
                         className="font-sans text-[11px] uppercase tracking-widest px-3 py-2 hover:opacity-80"
                         style={{
                           backgroundColor: "var(--color-accent)",
@@ -157,7 +176,7 @@ export default function AccountPage() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-            {MOCK_ADDRESSES.map((addr) => (
+            {addresses.map((addr) => (
               <AddressCard key={addr.id} address={addr.shippingAddress} heading={addr.name} editable={true} />
             ))}
           </div>
