@@ -174,6 +174,7 @@ Currently `"use client"` because of `useParams()` + variant state. If migrating 
 | 2026-05-25 | session-2 | Initial prototype — 60/40 split layout, mock product lookup by slug, variant picker, ATC button, accordion, reviews |
 | 2026-05-26 | session-10 | Split into RSC wrapper (`page.tsx`) + client island (`ProductDetailClient.tsx`); wired `getProductBySlug()` + `listReviewsByProduct(product.id)`; `notFound()` on 404; removed skeleton toggle and mock imports |
 | 2026-05-26 | session-11 | Fixed `description` shape (`{ blocks: [] }` not flat array); fixed points block field (`items` not `content`); fixed badge `self-start` to prevent full-width stretch in flex-col; verified 0 console errors against live API |
+| 2026-05-26 | session-12 | Move reviews section from full-width sibling into right column (40%), below description accordion; remove avatar from `ReviewItem` |
 
 ---
 
@@ -669,6 +670,7 @@ Initials avatar circle (`var(--color-foreground-mid)` bg), author name Fjalla On
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — initials avatar, star rating, Montserrat body copy |
 | 2026-05-26 | session-9 | Schema alignment: `author→displayName`, `text→content`, `date→createdAt`; normalise `rating/2` for StarRating (API is 1–10) |
+| 2026-05-26 | session-12 | Remove initials avatar and `getInitials` function; flatten layout to direct content render |
 
 ---
 

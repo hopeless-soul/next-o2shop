@@ -287,50 +287,43 @@ export default function ProductDetailClient({ product, reviews }: Props) {
               </details>
             ))}
           </div>
-        </div>
-      </div>
 
-      {/* ── Reviews ── */}
-      <div
-        className="border-t py-10"
-        style={{
-          paddingLeft: "var(--header-px-desktop)",
-          paddingRight: "var(--header-px-desktop)",
-          borderColor: "var(--color-border)",
-        }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2
-            className="font-sans text-[18px] uppercase tracking-[0.36px]"
-            style={{ color: "var(--color-foreground-dark)" }}
-          >
-            Reviews
-          </h2>
-          {reviews.length > 0 && (
-            <div className="flex items-center gap-3">
-              <StarRating rating={avgRating} size={16} />
-              <span
-                className="text-[14px]"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground-subtle)",
-                }}
+          {/* ── Reviews ── */}
+          <div className="mt-6 border-t pt-6" style={{ borderColor: "var(--color-border)" }}>
+            <div className="flex items-center justify-between mb-6">
+              <h2
+                className="font-sans text-[18px] uppercase tracking-[0.36px]"
+                style={{ color: "var(--color-foreground-dark)" }}
               >
-                {avgRating.toFixed(1)} / 5 &nbsp;·&nbsp; {reviews.length} reviews
-              </span>
+                Reviews
+              </h2>
+              {reviews.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <StarRating rating={avgRating} size={16} />
+                  <span
+                    className="text-[14px]"
+                    style={{
+                      fontFamily: "var(--font-secondary)",
+                      color: "var(--color-foreground-subtle)",
+                    }}
+                  >
+                    {avgRating.toFixed(1)} / 5 &nbsp;·&nbsp; {reviews.length} reviews
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="max-w-2xl">
-          {reviews.map((review) => (
-            <ReviewItem key={review.id} review={review} />
-          ))}
-        </div>
+            <div>
+              {reviews.map((review) => (
+                <ReviewItem key={review.id} review={review} />
+              ))}
+            </div>
 
-        <Button variant="ghost" size="base" className="mt-8">
-          Write a Review
-        </Button>
+            <Button variant="ghost" size="base" className="mt-8">
+              Write a Review
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

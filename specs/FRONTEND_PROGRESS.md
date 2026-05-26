@@ -340,3 +340,24 @@ Backend sets `access_token` + `refresh_token` as HttpOnly cookies on login, OAut
 | `/products/oversized_hoodie` | Full detail — title, price, color/size pickers, description text, 3 reviews | 0 |
 
 Only warning present: pre-existing Next.js logo SVG aspect-ratio notice in Navbar.
+
+---
+
+## Session 12 — Product Page Reviews: Remove Avatar + Reposition
+
+**Date:** 2026-05-26
+**Files changed:** `components/products/ReviewItem.tsx`, `app/products/[slug]/ProductDetailClient.tsx`, `specs/FRONTEND_TRACKING.md`
+
+### Changes
+
+**`ReviewItem.tsx` — avatar removed**
+- Deleted `getInitials()` helper and the 40×40px initials circle `<div>` (background `var(--color-foreground-mid)`)
+- Removed the outer `flex items-start gap-4` wrapper and the `flex-1 min-w-0` inner wrapper
+- Content (author name, date, StarRating, body text) now renders flat inside the border-b row container
+
+**`ProductDetailClient.tsx` — reviews repositioned**
+- Removed the full-width `Reviews` section that sat below the main 2-column layout (had its own `paddingLeft`/`paddingRight`/`border-t`/`py-10`)
+- Added reviews block as the last child of the right column (`md:w-[40%]`), directly after the description `<details>` accordion, with `mt-6 border-t pt-6` spacing
+
+### Build verified (session 12)
+- `npm run lint` — clean (0 errors, 0 warnings)
