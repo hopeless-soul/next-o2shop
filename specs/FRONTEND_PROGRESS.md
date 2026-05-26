@@ -148,3 +148,12 @@ All routes compile with zero TypeScript errors and zero ESLint warnings.
 - Live search results in SearchPopup (debounced API call, result rows)
 - Sticky ATC bar on mobile product page (§10 open question #3)
 - Confirm header scroll-state background color (§10 open question #9)
+
+---
+
+## Session 7 — Badge Resize
+
+**Date:** 2026-05-26
+**Files changed:** `components/ui/Badge.tsx`, `specs/FRONTEND_TRACKING.md`
+
+Resized the `Badge` component to match the reference product card tag. Padding changed from `px-2 py-0.5` (8px/2px) to `px-2.5 py-1.5` (10px/6px). Font size changed from `text-[11px]` (arbitrary value — constraint violation) to `text-xs` (12px). Added `style={{ WebkitTextStroke: "0.3px white" }}` for legibility on colored backgrounds, matching the reference's `-webkit-text-stroke: 0.3px white`. Lint passes clean.

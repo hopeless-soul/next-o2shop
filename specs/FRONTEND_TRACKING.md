@@ -36,7 +36,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 | `Navbar` | component | ✅ done | session-5 | 2026-05-26 |
 | `Footer` | component | 🔒 stable | session-4 | 2026-05-25 |
 | `Skeleton` | component | 🔒 stable | session-2 | 2026-05-25 |
-| `Badge` | component | 🔒 stable | session-2 | 2026-05-25 |
+| `Badge` | component | 🔒 stable | session-7 | 2026-05-26 |
 | `Button` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `StarRating` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `ProductCard` | component | 🔒 stable | session-2 | 2026-05-25 |
@@ -471,13 +471,14 @@ interface BadgeProps {
 ```
 
 **Notes**
-Fjalla One 11px uppercase, `rounded-none`, tight padding. `sale` → red (`bg-accent`), `new` → black (`bg-primary`), `sold-out` → grey.
+Fjalla One 12px (`text-xs`) uppercase, `rounded-none`. Padding `px-2.5 py-1.5` (10px/6px). `-webkit-text-stroke: 0.3px white` for legibility on colored backgrounds. `sale` → red (`bg-accent`), `new` → black (`bg-primary`), `sold-out` → grey.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — sale/new/sold-out variants |
+| 2026-05-26 | session-7 | Resize to match reference — px-2.5 py-1.5 text-xs, add webkit-text-stroke, fix arbitrary text-[11px] violation |
 
 ---
 

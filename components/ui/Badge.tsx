@@ -20,7 +20,9 @@ const LABELS: Record<BadgeVariant, string> = {
 export default function Badge({ variant, className = "" }: BadgeProps) {
   return (
     <span
-      className={`inline-block px-2 py-0.5 text-[11px] leading-none tracking-widest uppercase font-sans rounded-none ${VARIANT_STYLES[variant]} ${className}`}
+      className={`inline-block px-2.5 py-1.5 text-xs leading-none tracking-widest uppercase font-sans rounded-none ${VARIANT_STYLES[variant]} ${className}`}
+      // subtle stroke improves legibility on colored backgrounds
+      style={{ WebkitTextStroke: "0.3px white" }}
     >
       {LABELS[variant]}
     </span>
