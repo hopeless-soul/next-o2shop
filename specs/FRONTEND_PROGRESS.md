@@ -113,6 +113,31 @@ All routes compile with zero TypeScript errors and zero ESLint warnings.
 
 ---
 
+---
+
+## Session 6 — Navbar Search Popup Component
+
+**Files changed:** `components/layout/SearchPopup.tsx` *(created)*, `components/layout/Navbar.tsx`, `specs/FRONTEND_TRACKING.md`
+
+### Changes
+
+- Created `components/layout/SearchPopup.tsx` — fixed banner that slides down from `top: 0` on search icon click
+- Popup uses `background` + `textColor` props passed from Navbar so it always matches the current route theme
+- Semi-transparent dark backdrop (rgba 0,0,0,0.55) behind popup; backdrop click closes it
+- Close triggers: close (×) button, backdrop click, Esc key
+- Form submits via `router.push('/products?q=...')` — no dedicated `/search` route needed
+- Static shell only — no live search results in this iteration
+- No React portal needed: popup rendered as a fragment sibling to `<header>` (not nested inside it), so z-index stacking context is clean without a portal
+- Backdrop `z-[70]`, popup panel `z-[80]` — both above mobile drawer (z-60/z-61) and Navbar (z-50)
+- Wired Navbar Search icon `onClick → setSearchOpen(true)`; merged body `overflow: hidden` effect to block on either `mobileOpen || searchOpen`
+- Removed `SearchOverlay` entry from `FRONTEND_TRACKING.md`; added `SearchPopup` entry in Components group
+
+### Build verified
+
+- `npm run lint` — clean (0 errors, 0 warnings)
+
+---
+
 ## What's Next
 
 - Connect pages to the O2Shop API (`C:\Users\hk\Documents\Development\nest\nest-o2shop\specs\openapi.json`)
@@ -120,6 +145,6 @@ All routes compile with zero TypeScript errors and zero ESLint warnings.
 - Implement actual auth flow (login/register → session/token handling)
 - Cart drawer component (458px wide, per design spec §8o)
 - Hero section on home page with real imagery
-- Search overlay / command palette
+- Live search results in SearchPopup (debounced API call, result rows)
 - Sticky ATC bar on mobile product page (§10 open question #3)
 - Confirm header scroll-state background color (§10 open question #9)

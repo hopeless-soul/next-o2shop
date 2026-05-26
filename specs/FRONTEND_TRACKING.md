@@ -32,7 +32,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 | `/account` dashboard | route | ⬜ todo | — | — |
 | `/account/orders/[id]` | route | ⬜ todo | — | — |
 | `CartDrawer` | component | ⬜ todo | — | — |
-| `SearchOverlay` | component | ⬜ todo | — | — |
+| `SearchPopup` | component | ✅ done | session-6 | 2026-05-26 |
 | `Navbar` | component | ✅ done | session-5 | 2026-05-26 |
 | `Footer` | component | 🔒 stable | session-4 | 2026-05-25 |
 | `Skeleton` | component | 🔒 stable | session-2 | 2026-05-25 |
@@ -376,43 +376,6 @@ Navbar cart icon badge count must be wired to cart item count from the same cart
 
 ---
 
-### `SearchOverlay` — Full-screen Search
-
-**Status:** `⬜ todo`
-**Owner:** —
-**Files:** `components/layout/SearchOverlay.tsx` *(create)*
-
-**Props interface**
-```ts
-interface SearchOverlayProps {
-  open: boolean;
-  onClose: () => void;
-}
-```
-
-**API resources** *(check openapi.json for exact paths/schemas)*
-- **Search products** — GET `/products?q=` or a dedicated search endpoint. Returns product list.
-
-**Skeleton spec**
-Show 4 × skeleton result rows (image thumb + title + price) while fetching. Debounce query input ~300ms before firing.
-
-**Visual notes**
-- Triggered by the search icon (Lucide `Search`) in `Navbar`
-- Full-screen overlay, dark background, centered input
-- Input: large (32px+ text), Fjalla One, no border radius, white text on dark bg
-- Results list below input: same card-style as `ProductCard` but horizontal thumbnail layout
-- Esc key closes the overlay
-
-**Comments / Blockers**
-Wire the search icon click in `Navbar.tsx` to open this overlay (currently does nothing). Keep overlay as a portal (`ReactDOM.createPortal`) to avoid z-index conflicts with the fixed Navbar.
-
-**Change Log**
-
-| Date | Agent | Change |
-|---|---|---|
-
----
-
 ## Components — Stable (do not modify without explicit instruction)
 
 ---
@@ -709,3 +672,36 @@ Border `var(--color-border)`. Optional `heading` label rendered as Fjalla One 11
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — address display, optional heading, inert Edit button |
+
+---
+
+### `SearchPopup` — Search Banner
+
+**Status:** `✅ done`
+**Owner:** session-6
+**Files:** `components/layout/SearchPopup.tsx` *(created)*
+
+**Props interface**
+```ts
+interface SearchPopupProps {
+  open: boolean;
+  onClose: () => void;
+  background: string;  // CSS var string, e.g. "var(--color-foreground-dark)"
+  textColor: string;   // CSS var string, e.g. "var(--color-on-dark)"
+}
+```
+
+**Visual notes**
+- Fixed banner at `top: 0`, full viewport width, slides down from `-translateY(100%)` to `translateY(0)`
+- Background and text color match current Navbar route theme (passed as props from Navbar)
+- Semi-transparent dark backdrop (rgba 0,0,0,0.55) behind the popup; click backdrop to close
+- Contains: close (X) button, h4 "What are you looking for?", search input + submit button
+- Esc key closes; form submit navigates to `/products?q=...` via `router.push`
+- Static shell only — no live results in this iteration
+- Portal-rendered (`ReactDOM.createPortal`) to avoid z-index conflicts; backdrop z-[70], popup z-[80]
+
+**Change Log**
+
+| Date | Agent | Change |
+|---|---|---|
+| 2026-05-26 | session-6 | Created SearchPopup component; wired Search icon in Navbar |

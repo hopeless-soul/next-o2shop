@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
 import { MOCK_CATEGORIES } from "@/lib/mock-data";
+import SearchPopup from "@/components/layout/SearchPopup";
 
 interface NavbarProps {
   background?: string;
@@ -23,6 +24,7 @@ export default function Navbar({
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -65,11 +67,11 @@ export default function Navbar({
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    document.body.style.overflow = (mobileOpen || searchOpen) ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, searchOpen]);
 
   const openDropdown = (slug: string) => {
     if (dropdownTimer.current) clearTimeout(dropdownTimer.current);
@@ -134,6 +136,7 @@ export default function Navbar({
               className="opacity-80 hover:opacity-100"
               style={{ color: currentColor, transition: "var(--transition-nav)" }}
               aria-label="Search"
+              onClick={() => setSearchOpen(true)}
             >
               <Search size={19} strokeWidth={1.75} />
             </button>
@@ -251,6 +254,14 @@ export default function Navbar({
         }`}
         style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
         onClick={() => setMobileOpen(false)}
+      />
+
+      {/* ── Search popup ── */}
+      <SearchPopup
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        background={resolvedBg}
+        textColor={resolvedText}
       />
 
       {/* ── Mobile drawer panel ── */}
