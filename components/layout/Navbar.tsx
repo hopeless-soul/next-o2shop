@@ -184,7 +184,7 @@ export default function Navbar({
         }}
       >
         {MOCK_CATEGORIES.map((cat) =>
-          cat.items?.length ? (
+          cat.subCategories.length ? (
             <div
               key={cat.slug}
               className="relative"
@@ -200,7 +200,7 @@ export default function Navbar({
                   transition: "var(--transition-nav)",
                 }}
               >
-                {cat.name}
+                {cat.displayName}
                 <ChevronDown size={12} strokeWidth={2} className="ml-1" />
               </Link>
 
@@ -215,17 +215,17 @@ export default function Navbar({
                   onMouseEnter={() => openDropdown(cat.slug)}
                   onMouseLeave={closeDropdown}
                 >
-                  {cat.items.map((item) => (
+                  {cat.subCategories.map((subCat) => (
                     <Link
-                      key={item.slug}
-                      href={`/products?category=${item.slug}`}
+                      key={subCat.slug}
+                      href={`/products?category=${subCat.slug}`}
                       className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100"
                       style={{
                         color: "var(--color-on-dark)",
                         transition: "var(--transition-nav)",
                       }}
                     >
-                      {item.name}
+                      {subCat.displayName}
                     </Link>
                   ))}
                 </div>
@@ -242,7 +242,7 @@ export default function Navbar({
                 transition: "var(--transition-nav)",
               }}
             >
-              {cat.name}
+              {cat.displayName}
             </Link>
           )
         )}
@@ -292,18 +292,18 @@ export default function Navbar({
 
         <nav className="flex-1 overflow-y-auto px-5 py-6">
           {MOCK_CATEGORIES.map((cat) =>
-            cat.items?.length ? (
+            cat.subCategories.length ? (
               <div key={cat.slug} className="mb-7">
                 <p
                   className="font-sans text-[11px] uppercase tracking-widest mb-3"
                   style={{ color: "var(--color-on-dark)", opacity: 0.4 }}
                 >
-                  {cat.name}
+                  {cat.displayName}
                 </p>
-                {cat.items.map((item) => (
+                {cat.subCategories.map((subCat) => (
                   <Link
-                    key={item.slug}
-                    href={`/products?category=${item.slug}`}
+                    key={subCat.slug}
+                    href={`/products?category=${subCat.slug}`}
                     className="block py-2 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
                     style={{
                       color: "var(--color-on-dark)",
@@ -311,7 +311,7 @@ export default function Navbar({
                     }}
                     onClick={() => setMobileOpen(false)}
                   >
-                    {item.name}
+                    {subCat.displayName}
                   </Link>
                 ))}
               </div>
@@ -326,7 +326,7 @@ export default function Navbar({
                 }}
                 onClick={() => setMobileOpen(false)}
               >
-                {cat.name}
+                {cat.displayName}
               </Link>
             )
           )}

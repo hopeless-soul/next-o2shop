@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { MOCK_ORDERS } from "@/lib/mock-data";
+import type { OrderStatus } from "@/lib/types";
 import OrderStatusBadge from "@/components/account/OrderStatusBadge";
 import AddressCard from "@/components/account/AddressCard";
 import Skeleton from "@/components/ui/Skeleton";
-import type { OrderStatus } from "@/lib/mock-data";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -18,10 +18,9 @@ function formatDate(dateStr: string) {
 }
 
 const STATUS_STEPS: OrderStatus[] = [
-  "pending",
-  "processing",
-  "shipped",
-  "delivered",
+  "unfulfilled",
+  "partially_fulfilled",
+  "fulfilled",
 ];
 
 export default function OrderPage() {
@@ -30,8 +29,10 @@ export default function OrderPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const currentStep = STATUS_STEPS.indexOf(
-    order.fulfillmentStatus === "cancelled" ? "pending" : order.fulfillmentStatus
+    order.fulfillmentStatus === "cancelled" ? "unfulfilled" : order.fulfillmentStatus
   );
+
+  const subtotal = order.items.reduce((s, item) => s + item.total, 0);
 
   return (
     <div
@@ -59,7 +60,7 @@ export default function OrderPage() {
           </Link>
           {" / "}
           <span style={{ color: "var(--color-foreground-dark)" }}>
-            Order #{order.number}
+            Order #{order.orderNumber}
           </span>
         </p>
       </div>
@@ -93,7 +94,7 @@ export default function OrderPage() {
                 className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none mb-2"
                 style={{ color: "var(--color-foreground-dark)" }}
               >
-                Order #{order.number}
+                Order #{order.orderNumber}
               </h1>
               <p
                 className="text-sm"
@@ -102,7 +103,7 @@ export default function OrderPage() {
                   color: "var(--color-foreground-muted)",
                 }}
               >
-                Placed {formatDate(order.date)}
+                Placed {formatDate(order.createdAt)}
               </p>
             </div>
             <OrderStatusBadge status={order.fulfillmentStatus} className="text-[13px] px-4 py-2" />
@@ -142,7 +143,7 @@ export default function OrderPage() {
                           : "var(--color-foreground-subtle)",
                     }}
                   >
-                    {step}
+                    {step.replace("_", " ")}
                   </span>
                 </div>
                 {i < STATUS_STEPS.length - 1 && (
@@ -176,7 +177,7 @@ export default function OrderPage() {
             <table className="w-full border-collapse">
               <thead>
                 <tr style={{ borderBottom: "2px solid var(--color-border)" }}>
-                  {["Product", "SKU", "Color / Size", "Unit Price", "Qty", "Total"].map(
+                  {["Product", "SKU", "Unit Price", "Qty", "Total"].map(
                     (h) => (
                       <th
                         key={h}
@@ -193,7 +194,7 @@ export default function OrderPage() {
                 {isLoading ? (
                   Array.from({ length: 2 }).map((_, i) => (
                     <tr key={i} className="border-b" style={{ borderColor: "var(--color-border-light)" }}>
-                      {Array.from({ length: 6 }).map((__, j) => (
+                      {Array.from({ length: 5 }).map((__, j) => (
                         <td key={j} className="py-4 pr-4">
                           <Skeleton className="h-4 rounded-none" style={{ width: j === 0 ? "140px" : "60px" }} />
                         </td>
@@ -212,7 +213,7 @@ export default function OrderPage() {
                           className="font-sans text-[13px] uppercase tracking-widest"
                           style={{ color: "var(--color-foreground-dark)" }}
                         >
-                          {item.name}
+                          {item.productName}
                         </span>
                       </td>
                       <td className="py-4 pr-6">
@@ -223,18 +224,7 @@ export default function OrderPage() {
                             color: "var(--color-foreground-muted)",
                           }}
                         >
-                          {item.sku}
-                        </span>
-                      </td>
-                      <td className="py-4 pr-6">
-                        <span
-                          className="text-sm"
-                          style={{
-                            fontFamily: "var(--font-secondary)",
-                            color: "var(--color-foreground-muted)",
-                          }}
-                        >
-                          {item.color} / {item.size}
+                          {item.productSku}
                         </span>
                       </td>
                       <td className="py-4 pr-6">
@@ -242,7 +232,7 @@ export default function OrderPage() {
                           className="font-sans text-[13px]"
                           style={{ color: "var(--color-foreground)" }}
                         >
-                          ${item.unitPrice}
+                          ${item.productPrice}
                         </span>
                       </td>
                       <td className="py-4 pr-6">
@@ -258,7 +248,7 @@ export default function OrderPage() {
                           className="font-sans text-[13px]"
                           style={{ color: "var(--color-foreground-dark)" }}
                         >
-                          ${item.unitPrice * item.quantity}
+                          ${item.total}
                         </span>
                       </td>
                     </tr>
@@ -285,7 +275,7 @@ export default function OrderPage() {
                   className="font-sans text-[13px]"
                   style={{ color: "var(--color-foreground)" }}
                 >
-                  ${order.subtotal}
+                  ${subtotal}
                 </span>
               </div>
               <div className="flex justify-between w-full">
@@ -302,7 +292,7 @@ export default function OrderPage() {
                   className="font-sans text-[13px]"
                   style={{ color: "var(--color-foreground)" }}
                 >
-                  {order.shipping === 0 ? "Free" : `$${order.shipping}`}
+                  {order.shippingPrice === 0 ? "Free" : `$${order.shippingPrice}`}
                 </span>
               </div>
               <div
@@ -319,7 +309,7 @@ export default function OrderPage() {
                   className="font-sans text-[16px]"
                   style={{ color: "var(--color-foreground-dark)" }}
                 >
-                  ${order.total}
+                  ${order.totalAmount}
                 </span>
               </div>
             </div>

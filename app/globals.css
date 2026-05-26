@@ -28,6 +28,14 @@
   --color-footer-text: #8b8b8b;
   --color-badge-cart: #e64984;
 
+  /* ── Status badge colors ── */
+  --color-status-success-bg: #d4edda;
+  --color-status-success-fg: #155724;
+  --color-status-warning-bg: #ffd2d5;
+  --color-status-warning-fg: #e1000d;
+  --color-status-info-bg: #cce5ff;
+  --color-status-info-fg: #004085;
+
   /* ── Typography ── */
   --font-primary: "Fjalla One", Arial, Tahoma, Verdana, sans-serif;
   --font-secondary: Montserrat, Helvetica, Arial, sans-serif;
@@ -110,6 +118,12 @@
   --color-footer-bg: var(--color-footer-bg);
   --color-footer-text: var(--color-footer-text);
   --color-badge-cart: var(--color-badge-cart);
+  --color-status-success-bg: var(--color-status-success-bg);
+  --color-status-success-fg: var(--color-status-success-fg);
+  --color-status-warning-bg: var(--color-status-warning-bg);
+  --color-status-warning-fg: var(--color-status-warning-fg);
+  --color-status-info-bg: var(--color-status-info-bg);
+  --color-status-info-fg: var(--color-status-info-fg);
 
   /* Border Radius */
   --radius-none: var(--radius-none);

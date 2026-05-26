@@ -1,4 +1,4 @@
-import type { Review } from "@/lib/mock-data";
+import type { Review } from "@/lib/types";
 import StarRating from "@/components/ui/StarRating";
 
 interface ReviewItemProps {
@@ -38,7 +38,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
             backgroundColor: "var(--color-foreground-mid)",
           }}
         >
-          {getInitials(review.author)}
+          {getInitials(review.displayName)}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -48,7 +48,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
               className="font-sans text-[14px] uppercase tracking-[0.3px]"
               style={{ color: "var(--color-foreground-dark)" }}
             >
-              {review.author}
+              {review.displayName}
             </span>
             <span
               className="text-[12px]"
@@ -57,11 +57,11 @@ export default function ReviewItem({ review }: ReviewItemProps) {
                 color: "var(--color-foreground-subtle)",
               }}
             >
-              {formatDate(review.date)}
+              {formatDate(review.createdAt)}
             </span>
           </div>
 
-          <StarRating rating={review.rating} size={13} className="mb-3" />
+          <StarRating rating={review.rating / 2} size={13} className="mb-3" />
 
           <p
             className="text-sm leading-relaxed"
@@ -70,7 +70,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
               color: "var(--color-foreground)",
             }}
           >
-            {review.text}
+            {review.content}
           </p>
         </div>
       </div>

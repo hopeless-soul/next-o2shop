@@ -157,3 +157,83 @@ All routes compile with zero TypeScript errors and zero ESLint warnings.
 **Files changed:** `components/ui/Badge.tsx`, `specs/FRONTEND_TRACKING.md`
 
 Resized the `Badge` component to match the reference product card tag. Padding changed from `px-2 py-0.5` (8px/2px) to `px-2.5 py-1.5` (10px/6px). Font size changed from `text-[11px]` (arbitrary value — constraint violation) to `text-xs` (12px). Added `style={{ WebkitTextStroke: "0.3px white" }}` for legibility on colored backgrounds, matching the reference's `-webkit-text-stroke: 0.3px white`. Lint passes clean.
+
+---
+
+## Session 8 — Account: Payment Badge + AddressCard editable prop
+
+**Date:** 2026-05-26
+**Files changed:** `app/globals.css`, `components/account/PaymentStatusBadge.tsx` *(created)*, `components/account/OrderStatusBadge.tsx`, `components/account/AddressCard.tsx`, `app/account/page.tsx`
+
+### Changes
+
+**New status color tokens (`app/globals.css`)**
+Added 6 semantic tokens for status badge colors (both in `:root` and `@theme inline`):
+- `--color-status-success-bg/fg` — green (paid, delivered)
+- `--color-status-warning-bg/fg` — amber (processing)
+- `--color-status-info-bg/fg` — blue (shipped)
+
+**New `PaymentStatusBadge` component**
+Created `components/account/PaymentStatusBadge.tsx` — handles `"paid" | "pending" | "refunded"`. Uniform `h-6 min-w-[72px] inline-flex items-center justify-center` sizing. No hardcoded hex — uses `--color-status-success-*`, `--color-muted-2`, `--color-foreground-muted`, `--color-destructive` tokens.
+
+**`OrderStatusBadge` — token cleanup + uniform sizing**
+Replaced all hardcoded hex values (`#fff3cd`, `#856404`, `#cce5ff`, `#004085`, `#d4edda`, `#155724`, `#ffd9d9`) with `var(--color-status-*)` token references. Added `h-6 min-w-[72px] inline-flex items-center justify-center` so payment and fulfillment columns in the order table have uniform box dimensions.
+
+**`AddressCard` — `editable` prop**
+Added `editable?: boolean` (default `false`). When `true`, renders Edit (neutral ghost) + Delete (`--color-destructive` border/text) buttons side-by-side. Defaults to `false` so read-only usages (e.g. order detail page address cards) require no changes.
+
+**`app/account/page.tsx`**
+- Replaced the inline payment `<span>` (which had hardcoded hex) with `<PaymentStatusBadge status={order.paymentStatus} />`
+- Added `editable={true}` to both `<AddressCard>` usages in the Saved Addresses section
+
+### Build verified
+- `npm run lint` — clean (0 errors, 0 warnings)
+
+---
+
+## Session 9 — Schema Alignment: lib/types.ts + Mock Data
+
+**Date:** 2026-05-26
+**Files changed:** `lib/types.ts` *(created)*, `lib/mock-data.ts`, `components/account/OrderStatusBadge.tsx`, `components/account/PaymentStatusBadge.tsx`, `components/account/AddressCard.tsx`, `components/products/ReviewItem.tsx`, `components/products/ProductCard.tsx`, `components/products/VariantPicker.tsx`, `components/layout/Navbar.tsx`, `app/products/[slug]/page.tsx`, `app/account/page.tsx`, `app/account/orders/[id]/page.tsx`, `specs/FRONTEND_TRACKING.md`
+
+### Changes
+
+**New `lib/types.ts`**
+Extracted all TypeScript type definitions out of `lib/mock-data.ts` into a dedicated `lib/types.ts`. All types are now API-aligned against the backend's OpenAPI schema:
+- `SubCategory`, `Category`, `Collection` — navigation hierarchy types; `Category` replaces flat `items?` with `subCategories: SubCategory[]`
+- `AddressDto` — flat address fields aligned to API (`address1`, `province`, `postalCode`, `country` ISO code); replaces old `Address`
+- `SavedAddress` — outer wrapper with `id`, `name`, `shippingAddress`, `billingAddress`, `billingIsSameAsShipping`
+- `ProductVariant` — full variant shape with `colorName`, `colorValue`, `size`, `sku`, `stock`, `available`, `inventoryPolicy`, etc.
+- `ProductColor` / `ProductSize` — retained as UI adapter types, derived from variants at call sites
+- `ProductDescriptionBlock` — discriminated union `{ type:"text"; content:string } | { type:"points"; content:string[] }`
+- `Product` — API-aligned: `name` (slug), `displayName`, `basePrice`, `compareAtPrice`, `currency`, `available`, `tags`, `description: ProductDescriptionBlock[]`, `photos`, `variants[]`; removed `title`, `price`, `originalPrice`, `badge`, `colors`, `sizes`, `type`, `images`
+- `Review` — `displayName`, `content`, `createdAt`, `photoUrls`; `rating` is 1–10 (API scale)
+- `OrderItem` — `productName`, `productSku`, `productPrice`, `productCurrency`, `total`; removed `color`, `size`
+- `OrderStatus` — `"unfulfilled" | "fulfilled" | "partially_fulfilled" | "cancelled"`
+- `PaymentStatus` — `"pending" | "paid" | "failed" | "refunded"` (adds `"failed"`)
+- `Order` — `orderNumber`, `createdAt`, `totalAmount`, `shippingPrice`, `shippingMethodName`, `totalCurrency`, `shippingCurrency`
+
+**`lib/mock-data.ts` — rewritten**
+All type definitions removed (now in `lib/types.ts`). All mock arrays updated to new field names and structures:
+- `MOCK_CATEGORIES` — added `id`, `createdAt`, `updatedAt`; `name→displayName`; `items→subCategories` (always array)
+- `MOCK_PRODUCTS` — `slug→name` (underscores), `title→displayName`, `price→basePrice`, `originalPrice→compareAtPrice`; removed `type`, `badge`, `colors`, `sizes`, `images`; added `variants[]` (full variant objects per product), `description` as blocks, `currency`, `available`, `priceMin/Max`, `priceVaries`, `rating`, `photos: []`
+- `MOCK_REVIEWS` — `author→displayName`, `text→content`, `date→createdAt`; ratings converted to 1–10 scale
+- `MOCK_ADDRESSES` — changed from `Address[]` to `SavedAddress[]`; each entry wraps `shippingAddress` and `billingAddress` as `AddressDto`
+- `MOCK_ORDERS` — `number→orderNumber`, `date→createdAt`, `total→totalAmount`, `shipping→shippingPrice`; added `totalCurrency`, `shippingCurrency`, `shippingMethodName`; order items updated to new `OrderItem` shape; addresses now `AddressDto`
+
+**Component updates (schema alignment)**
+- `OrderStatusBadge` — new `OrderStatus` enum and STATUS_CONFIG (`unfulfilled`→grey, `partially_fulfilled`→amber, `fulfilled`→green, `cancelled`→blue-info)
+- `PaymentStatusBadge` — added `"failed"` status (warning colours)
+- `AddressCard` — prop `Address→AddressDto`; field refs updated (`line1→address1`, `state→province`, `zip→postalCode`)
+- `ReviewItem` — field refs updated (`author→displayName`, `text→content`, `date→createdAt`); rating normalised `÷2` for StarRating
+- `ProductCard` — colors derived from `variants[0/1].colorValue`; `title→displayName`, `price→basePrice`, `originalPrice→compareAtPrice`; badge derived from `available`/`compareAtPrice`/`tags`; href uses `product.name`
+- `VariantPicker` — import path only: `@/lib/mock-data` → `@/lib/types`
+- `Navbar` — `cat.name→cat.displayName`, `cat.items→cat.subCategories`, `item.name→subCat.displayName` throughout desktop + mobile nav
+
+**Page updates**
+- `app/products/[slug]/page.tsx` — find by `product.name`; derive `uniqueColors`/`uniqueSizes` from variants; render `ProductDescriptionBlock[]`; normalise avgRating `÷2`; badge derived inline
+- `app/account/page.tsx` — `order.number→orderNumber`, `date→createdAt`, `total→totalAmount`; pass `addr.shippingAddress` to `AddressCard` with `addr.name` as heading
+- `app/account/orders/[id]/page.tsx` — `STATUS_STEPS` updated to `["unfulfilled","partially_fulfilled","fulfilled"]`; order + item field renames; subtotal derived from `items.reduce`; "Color / Size" column removed
+
+### Build verified
+- `npm run lint` — clean (0 errors, 0 warnings)

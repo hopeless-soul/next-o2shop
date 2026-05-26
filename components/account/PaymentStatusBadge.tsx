@@ -1,40 +1,40 @@
-import type { OrderStatus } from "@/lib/types";
+import type { PaymentStatus } from "@/lib/types";
 
-interface OrderStatusBadgeProps {
-  status: OrderStatus;
+interface PaymentStatusBadgeProps {
+  status: PaymentStatus;
   className?: string;
 }
 
 const STATUS_CONFIG: Record<
-  OrderStatus,
+  PaymentStatus,
   { label: string; bg: string; color: string }
 > = {
-  unfulfilled: {
-    label: "Unfulfilled",
-    bg: "var(--color-muted-2)",
-    color: "var(--color-foreground-muted)",
-  },
-  partially_fulfilled: {
-    label: "Partial",
-    bg: "var(--color-status-warning-bg)",
-    color: "var(--color-status-warning-fg)",
-  },
-  fulfilled: {
-    label: "Fulfilled",
+  paid: {
+    label: "Paid",
     bg: "var(--color-status-success-bg)",
     color: "var(--color-status-success-fg)",
   },
-  cancelled: {
-    label: "Cancelled",
-    bg: "var(--color-status-info-bg)",
-    color: "var(--color-status-info-fg)",
+  pending: {
+    label: "Pending",
+    bg: "var(--color-muted-2)",
+    color: "var(--color-foreground-muted)",
+  },
+  refunded: {
+    label: "Refunded",
+    bg: "var(--color-status-warning-bg)",
+    color: "var(--color-status-warning-fg)",
+  },
+  failed: {
+    label: "Failed",
+    bg: "var(--color-muted-2)",
+    color: "var(--color-destructive)",
   },
 };
 
-export default function OrderStatusBadge({
+export default function PaymentStatusBadge({
   status,
   className = "",
-}: OrderStatusBadgeProps) {
+}: PaymentStatusBadgeProps) {
   const cfg = STATUS_CONFIG[status];
   return (
     <span

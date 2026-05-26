@@ -1,7 +1,7 @@
 # Frontend Tracking — o2shop
 
 > Pair file: `specs/FRONTEND_PROGRESS.md` (completed work history) · `specs/DESIGN_SYSTEM.md` (visual spec)
-> Last updated: 2026-05-25
+> Last updated: 2026-05-26
 
 ---
 
@@ -39,12 +39,13 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 | `Badge` | component | 🔒 stable | session-7 | 2026-05-26 |
 | `Button` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `StarRating` | component | 🔒 stable | session-2 | 2026-05-25 |
-| `ProductCard` | component | 🔒 stable | session-2 | 2026-05-25 |
+| `ProductCard` | component | 🔒 stable | session-9 | 2026-05-26 |
 | `ProductCardSkeleton` | component | 🔒 stable | session-2 | 2026-05-25 |
-| `VariantPicker` | component | 🔒 stable | session-2 | 2026-05-25 |
-| `ReviewItem` | component | 🔒 stable | session-2 | 2026-05-25 |
-| `OrderStatusBadge` | component | 🔒 stable | session-2 | 2026-05-25 |
-| `AddressCard` | component | 🔒 stable | session-2 | 2026-05-25 |
+| `VariantPicker` | component | 🔒 stable | session-9 | 2026-05-26 |
+| `ReviewItem` | component | 🔒 stable | session-9 | 2026-05-26 |
+| `OrderStatusBadge` | component | 🔒 stable | session-9 | 2026-05-26 |
+| `AddressCard` | component | 🔒 stable | session-9 | 2026-05-26 |
+| `PaymentStatusBadge` | component | 🔒 stable | session-9 | 2026-05-26 |
 
 ---
 
@@ -282,6 +283,7 @@ Requires auth — add a redirect to `/login` if no session. `AddressCard` "Edit"
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial prototype — order history table, saved addresses grid, mock data from lib/mock-data.ts |
+| 2026-05-26 | session-8 | Replace inline payment span with `PaymentStatusBadge`; add `editable={true}` to `AddressCard` usages |
 
 ---
 
@@ -407,6 +409,7 @@ Fixed header with route-based theming via `usePathname()`. Logo is centered (3-c
 | 2026-05-25 | session-3 | SVG logo centered (3-col grid), NavbarProps (background/textColor/scrolledBackground/scrolledColor), route-based theming via usePathname for `/` and `/products*` |
 | 2026-05-25 | session-3 | Extracted `<nav>` from `<header>`; logo row owns `height: var(--header-height-desktop)`; category nav is fixed sibling at `top: var(--header-height-desktop)`, height 40px, with shadow |
 | 2026-05-26 | session-5 | Made `Category.items` optional in `lib/mock-data.ts`; added `ChevronDown` (lucide-react) to expandable category labels; desktop + mobile drawer render plain links for categories with no items |
+| 2026-05-26 | session-9 | Schema alignment: `cat.name→cat.displayName`, `cat.items→cat.subCategories`, `item.name→subCat.displayName` throughout desktop nav and mobile drawer |
 
 ---
 
@@ -553,6 +556,7 @@ Client component (hover zone state). Left/right hover zones → opacity fade on 
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — left/right hover zones, color-tinted placeholder divs, 4:5 ratio, badge overlay |
+| 2026-05-26 | session-9 | Schema alignment: `product.colors→variants`, derive `mainBg`/`hoverBg` from `variants[].colorValue`; `title→displayName`, `price→basePrice`, `originalPrice→compareAtPrice`; badge derived from `available`/`compareAtPrice`/`tags`; href uses `product.name` |
 
 ---
 
@@ -602,6 +606,7 @@ Color swatches: 149×30px rectangles per design spec, `border-radius: var(--radi
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — 149×30px color swatches, size buttons, sold-out states |
+| 2026-05-26 | session-9 | Schema alignment: import `ProductColor`/`ProductSize` from `@/lib/types` instead of `@/lib/mock-data` |
 
 ---
 
@@ -625,6 +630,7 @@ Initials avatar circle (`var(--color-foreground-mid)` bg), author name Fjalla On
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — initials avatar, star rating, Montserrat body copy |
+| 2026-05-26 | session-9 | Schema alignment: `author→displayName`, `text→content`, `date→createdAt`; normalise `rating/2` for StarRating (API is 1–10) |
 
 ---
 
@@ -642,13 +648,15 @@ interface OrderStatusBadgeProps {
 ```
 
 **Notes**
-Color map: pending → grey, processing → amber (`#fff3cd`/`#856404`), shipped → blue (`#cce5ff`/`#004085`), delivered → green (`#d4edda`/`#155724`), cancelled → destructive red. Fjalla One 11px uppercase, `rounded-none`.
+Color map: pending → grey, processing → amber (`--color-status-warning-*`), shipped → blue (`--color-status-info-*`), delivered → green (`--color-status-success-*`), cancelled → destructive red. Fjalla One 11px uppercase, `rounded-none`. Uniform `h-6 min-w-[72px]` sizing via `inline-flex items-center justify-center`.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — 5-status color map, Fjalla One uppercase |
+| 2026-05-26 | session-8 | Replace hardcoded hex with `--color-status-*` tokens; add `h-6 min-w-[72px] inline-flex` for uniform sizing |
+| 2026-05-26 | session-9 | Schema alignment: `OrderStatus` → `"unfulfilled"|"fulfilled"|"partially_fulfilled"|"cancelled"`; updated STATUS_CONFIG labels and color map |
 
 ---
 
@@ -662,17 +670,45 @@ Color map: pending → grey, processing → amber (`#fff3cd`/`#856404`), shipped
 interface AddressCardProps {
   address: Address; // { id, label, firstName, lastName, line1, line2?, city, state, zip, country }
   heading?: string; // e.g. "Shipping Address"
+  editable?: boolean; // default false — when true, renders inert Edit + Delete buttons
 }
 ```
 
 **Notes**
-Border `var(--color-border)`. Optional `heading` label rendered as Fjalla One 11px uppercase above the address. "Edit" button is currently inert — wire when edit flow is designed.
+Border `var(--color-border)`. Optional `heading` label rendered as Fjalla One 11px uppercase above the address. When `editable={true}`, renders inert Edit (neutral ghost) + Delete (destructive border/text) buttons. Defaults to `false` — read-only call sites (e.g. order detail page) require no changes.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — address display, optional heading, inert Edit button |
+| 2026-05-26 | session-8 | Add `editable` prop (default `false`); when true shows Edit + Delete buttons; Delete uses `--color-destructive` border/text |
+| 2026-05-26 | session-9 | Schema alignment: prop `Address→AddressDto`; `line1→address1`, `line2→address2`, `state→province`, `zip→postalCode` |
+
+---
+
+### `PaymentStatusBadge`
+
+**Status:** `🔒 stable`
+**Files:** `components/account/PaymentStatusBadge.tsx`
+
+**Props interface**
+```ts
+interface PaymentStatusBadgeProps {
+  status: "paid" | "pending" | "refunded";
+  className?: string;
+}
+```
+
+**Notes**
+Color map: paid → green (`--color-status-success-*`), pending → grey (`--color-muted-2` / `--color-foreground-muted`), refunded → grey bg + `--color-destructive` text. Uniform `h-6 min-w-[72px] inline-flex items-center justify-center` sizing matching `OrderStatusBadge`. Fjalla One 11px uppercase, `rounded-none`.
+
+**Change Log**
+
+| Date | Agent | Change |
+|---|---|---|
+| 2026-05-26 | session-8 | Initial build — 3-status color map, uniform h-6 min-w-[72px] sizing, token colors only |
+| 2026-05-26 | session-9 | Schema alignment: `PaymentStatus` adds `"failed"` → warning bg/fg; import from `@/lib/types` |
 
 ---
 

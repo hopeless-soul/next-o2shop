@@ -1,125 +1,61 @@
-export type Category = {
-  name: string;
-  slug: string;
-  items?: { name: string; slug: string }[];
-};
-
-export type ProductColor = {
-  name: string;
-  hex: string;
-  available: boolean;
-};
-
-export type ProductSize = {
-  label: string;
-  available: boolean;
-};
-
-export type Product = {
-  id: string;
-  slug: string;
-  title: string;
-  type: string;
-  price: number;
-  originalPrice?: number;
-  badge?: "sale" | "new" | "sold-out";
-  colors: ProductColor[];
-  sizes: ProductSize[];
-  images: string[];
-  description: string;
-  details: string[];
-};
-
-export type Review = {
-  id: string;
-  author: string;
-  rating: number;
-  date: string;
-  text: string;
-};
-
-export type OrderItem = {
-  id: string;
-  name: string;
-  sku: string;
-  color: string;
-  size: string;
-  unitPrice: number;
-  quantity: number;
-};
-
-export type Address = {
-  id: string;
-  label: string;
-  firstName: string;
-  lastName: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-};
-
-export type OrderStatus =
-  | "pending"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
-
-export type PaymentStatus = "paid" | "pending" | "refunded";
-
-export type Order = {
-  id: string;
-  number: string;
-  date: string;
-  paymentStatus: PaymentStatus;
-  fulfillmentStatus: OrderStatus;
-  items: OrderItem[];
-  subtotal: number;
-  shipping: number;
-  total: number;
-  shippingAddress: Address;
-  billingAddress: Address;
-};
+import type {
+  Category,
+  Product,
+  Review,
+  SavedAddress,
+  Order,
+  AddressDto,
+} from "@/lib/types";
 
 // ─── Categories ────────────────────────────────────────────────────────────────
 
 export const MOCK_CATEGORIES: Category[] = [
   {
-    name: "Hats",
+    id: "cat1",
     slug: "hats",
-    items: [
-      { name: "Beanies", slug: "beanies" },
-      { name: "Snapbacks", slug: "snapbacks" },
-      { name: "Bucket Hats", slug: "bucket-hats" },
-      { name: "Dad Caps", slug: "dad-caps" },
+    displayName: "Hats",
+    subCategories: [
+      { id: "sub1", slug: "beanies",     displayName: "Beanies",     categoryId: "cat1" },
+      { id: "sub2", slug: "snapbacks",   displayName: "Snapbacks",   categoryId: "cat1" },
+      { id: "sub3", slug: "bucket-hats", displayName: "Bucket Hats", categoryId: "cat1" },
+      { id: "sub4", slug: "dad-caps",    displayName: "Dad Caps",    categoryId: "cat1" },
     ],
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
   },
   {
-    name: "Shirts",
+    id: "cat2",
     slug: "shirts",
-    items: [
-      { name: "T-Shirts", slug: "t-shirts" },
-      { name: "Long Sleeves", slug: "long-sleeves" },
-      { name: "Hoodies", slug: "hoodies" },
-      { name: "Jackets", slug: "jackets" },
+    displayName: "Shirts",
+    subCategories: [
+      { id: "sub5", slug: "t-shirts",     displayName: "T-Shirts",     categoryId: "cat2" },
+      { id: "sub6", slug: "long-sleeves", displayName: "Long Sleeves", categoryId: "cat2" },
+      { id: "sub7", slug: "hoodies",      displayName: "Hoodies",      categoryId: "cat2" },
+      { id: "sub8", slug: "jackets",      displayName: "Jackets",      categoryId: "cat2" },
     ],
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
   },
   {
-    name: "Accessories",
+    id: "cat3",
     slug: "accessories",
-    items: [
-      { name: "Bags", slug: "bags" },
-      { name: "Socks", slug: "socks" },
-      { name: "Pins & Patches", slug: "pins-patches" },
-      { name: "Stickers", slug: "stickers" },
+    displayName: "Accessories",
+    subCategories: [
+      { id: "sub9",  slug: "bags",         displayName: "Bags",         categoryId: "cat3" },
+      { id: "sub10", slug: "socks",        displayName: "Socks",        categoryId: "cat3" },
+      { id: "sub11", slug: "pins-patches", displayName: "Pins & Patches", categoryId: "cat3" },
+      { id: "sub12", slug: "stickers",     displayName: "Stickers",     categoryId: "cat3" },
     ],
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
   },
   {
-    name: "Sale",
+    id: "cat4",
     slug: "sale",
+    displayName: "Sale",
+    subCategories: [],
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
   },
 ];
 
@@ -128,342 +64,391 @@ export const MOCK_CATEGORIES: Category[] = [
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: "1",
-    slug: "play-cool-beanie",
-    title: "The Play Cool Beanie",
-    type: "Beanie",
-    price: 35,
-    colors: [
-      { name: "Black", hex: "#1e1e1e", available: true },
-      { name: "Red", hex: "#e55151", available: true },
-      { name: "White", hex: "#f5f5f5", available: true },
+    name: "play_cool_beanie",
+    displayName: "The Play Cool Beanie",
+    basePrice: 35,
+    currency: "USD",
+    available: true,
+    priceMin: 35,
+    priceMax: 35,
+    priceVaries: false,
+    tags: [],
+    description: [
+      { type: "text", content: "The signature beanie you didn't know you needed. Ribbed knit, one size fits most." },
+      { type: "points", content: ["100% acrylic", "One size fits most", "Machine washable", "Ribbed cuff"] },
     ],
-    sizes: [],
-    images: [],
-    description:
-      "The signature beanie you didn't know you needed. Ribbed knit, one size fits most.",
-    details: [
-      "100% acrylic",
-      "One size fits most",
-      "Machine washable",
-      "Ribbed cuff",
+    rating: 4.6,
+    photos: [],
+    variants: [
+      { id: "v1-1", productId: "1", colorName: "Black",  colorValue: "#1e1e1e", size: "One Size", sku: "BEANIE-BLK-OS", stock: 10, available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v1-2", productId: "1", colorName: "Red",    colorValue: "#e55151", size: "One Size", sku: "BEANIE-RED-OS", stock: 8,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v1-3", productId: "1", colorName: "White",  colorValue: "#f5f5f5", size: "One Size", sku: "BEANIE-WHT-OS", stock: 5,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
     ],
   },
   {
     id: "2",
-    slug: "classic-snapback",
-    title: "Classic Snapback",
-    type: "Hat",
-    price: 42,
-    colors: [
-      { name: "Black", hex: "#1e1e1e", available: true },
-      { name: "Navy", hex: "#1a237e", available: true },
+    name: "classic_snapback",
+    displayName: "Classic Snapback",
+    basePrice: 42,
+    currency: "USD",
+    available: true,
+    priceMin: 42,
+    priceMax: 42,
+    priceVaries: false,
+    tags: [],
+    description: [
+      { type: "text", content: "Structured flat brim snapback with embroidered logo." },
+      { type: "points", content: ["100% cotton", "Structured 6-panel", "Flat brim", "Snapback closure"] },
     ],
-    sizes: [],
-    images: [],
-    description:
-      "Structured flat brim snapback with embroidered logo.",
-    details: [
-      "100% cotton",
-      "Structured 6-panel",
-      "Flat brim",
-      "Snapback closure",
+    rating: 4.3,
+    photos: [],
+    variants: [
+      { id: "v2-1", productId: "2", colorName: "Black", colorValue: "#1e1e1e", size: "One Size", sku: "SNAP-BLK-OS", stock: 12, available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v2-2", productId: "2", colorName: "Navy",  colorValue: "#1a237e", size: "One Size", sku: "SNAP-NVY-OS", stock: 7,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
     ],
   },
   {
     id: "3",
-    slug: "og-logo-tee",
-    title: "OG Logo T-Shirt",
-    type: "T-Shirt",
-    price: 28,
-    badge: "new",
-    colors: [
-      { name: "White", hex: "#f5f5f5", available: true },
-      { name: "Black", hex: "#1e1e1e", available: true },
-      { name: "Grey", hex: "#9e9e9e", available: true },
+    name: "og_logo_tee",
+    displayName: "OG Logo T-Shirt",
+    basePrice: 28,
+    currency: "USD",
+    available: true,
+    priceMin: 28,
+    priceMax: 28,
+    priceVaries: false,
+    tags: ["new"],
+    description: [
+      { type: "text", content: "Heavy cotton boxy tee with screen-printed OG logo." },
+      { type: "points", content: ["100% heavyweight cotton", "Boxy fit", "Screen printed graphic", "Reinforced collar"] },
     ],
-    sizes: [
-      { label: "XS", available: true },
-      { label: "S", available: true },
-      { label: "M", available: true },
-      { label: "L", available: true },
-      { label: "XL", available: false },
-      { label: "2XL", available: false },
-    ],
-    images: [],
-    description: "Heavy cotton boxy tee with screen-printed OG logo.",
-    details: [
-      "100% heavyweight cotton",
-      "Boxy fit",
-      "Screen printed graphic",
-      "Reinforced collar",
+    rating: 4.8,
+    photos: [],
+    variants: [
+      { id: "v3-1", productId: "3", colorName: "White", colorValue: "#f5f5f5", size: "XS", sku: "TEE-WHT-XS", stock: 4,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-2", productId: "3", colorName: "White", colorValue: "#f5f5f5", size: "S",  sku: "TEE-WHT-S",  stock: 8,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-3", productId: "3", colorName: "White", colorValue: "#f5f5f5", size: "M",  sku: "TEE-WHT-M",  stock: 10, available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-4", productId: "3", colorName: "White", colorValue: "#f5f5f5", size: "L",  sku: "TEE-WHT-L",  stock: 6,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-5", productId: "3", colorName: "White", colorValue: "#f5f5f5", size: "XL", sku: "TEE-WHT-XL", stock: 0,  available: false, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-6", productId: "3", colorName: "White", colorValue: "#f5f5f5", size: "2XL",sku: "TEE-WHT-2XL",stock: 0,  available: false, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-7", productId: "3", colorName: "Black", colorValue: "#1e1e1e", size: "XS", sku: "TEE-BLK-XS", stock: 3,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-8", productId: "3", colorName: "Black", colorValue: "#1e1e1e", size: "S",  sku: "TEE-BLK-S",  stock: 9,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-9", productId: "3", colorName: "Black", colorValue: "#1e1e1e", size: "M",  sku: "TEE-BLK-M",  stock: 11, available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-10",productId: "3", colorName: "Black", colorValue: "#1e1e1e", size: "L",  sku: "TEE-BLK-L",  stock: 5,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-11",productId: "3", colorName: "Black", colorValue: "#1e1e1e", size: "XL", sku: "TEE-BLK-XL", stock: 0,  available: false, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-12",productId: "3", colorName: "Black", colorValue: "#1e1e1e", size: "2XL",sku: "TEE-BLK-2XL",stock: 0,  available: false, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-13",productId: "3", colorName: "Grey",  colorValue: "#9e9e9e", size: "S",  sku: "TEE-GRY-S",  stock: 7,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-14",productId: "3", colorName: "Grey",  colorValue: "#9e9e9e", size: "M",  sku: "TEE-GRY-M",  stock: 8,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v3-15",productId: "3", colorName: "Grey",  colorValue: "#9e9e9e", size: "L",  sku: "TEE-GRY-L",  stock: 4,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
     ],
   },
   {
     id: "4",
-    slug: "heavyweight-hoodie",
-    title: "Heavyweight Hoodie",
-    type: "Hoodie",
-    price: 65,
-    colors: [
-      { name: "Black", hex: "#1e1e1e", available: true },
-      { name: "Charcoal", hex: "#616161", available: true },
+    name: "heavyweight_hoodie",
+    displayName: "Heavyweight Hoodie",
+    basePrice: 65,
+    currency: "USD",
+    available: true,
+    priceMin: 65,
+    priceMax: 65,
+    priceVaries: false,
+    tags: [],
+    description: [
+      { type: "text", content: "16oz fleece pullover hoodie. Built to last." },
+      { type: "points", content: ["60% cotton, 40% polyester", "16oz heavyweight fleece", "Kangaroo pocket", "Ribbed cuffs and hem"] },
     ],
-    sizes: [
-      { label: "S", available: true },
-      { label: "M", available: true },
-      { label: "L", available: true },
-      { label: "XL", available: true },
-      { label: "2XL", available: true },
-    ],
-    images: [],
-    description: "16oz fleece pullover hoodie. Built to last.",
-    details: [
-      "60% cotton, 40% polyester",
-      "16oz heavyweight fleece",
-      "Kangaroo pocket",
-      "Ribbed cuffs and hem",
+    rating: 4.7,
+    photos: [],
+    variants: [
+      { id: "v4-1", productId: "4", colorName: "Black",    colorValue: "#1e1e1e", size: "S",  sku: "HOOD-BLK-S",  stock: 5,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v4-2", productId: "4", colorName: "Black",    colorValue: "#1e1e1e", size: "M",  sku: "HOOD-BLK-M",  stock: 8,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v4-3", productId: "4", colorName: "Black",    colorValue: "#1e1e1e", size: "L",  sku: "HOOD-BLK-L",  stock: 6,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v4-4", productId: "4", colorName: "Black",    colorValue: "#1e1e1e", size: "XL", sku: "HOOD-BLK-XL", stock: 4,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v4-5", productId: "4", colorName: "Black",    colorValue: "#1e1e1e", size: "2XL",sku: "HOOD-BLK-2XL",stock: 2,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v4-6", productId: "4", colorName: "Charcoal", colorValue: "#616161", size: "S",  sku: "HOOD-CHR-S",  stock: 3,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v4-7", productId: "4", colorName: "Charcoal", colorValue: "#616161", size: "M",  sku: "HOOD-CHR-M",  stock: 7,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v4-8", productId: "4", colorName: "Charcoal", colorValue: "#616161", size: "L",  sku: "HOOD-CHR-L",  stock: 5,  available: true, inventoryPolicy: "deny", quantityRule: 1 },
     ],
   },
   {
     id: "5",
-    slug: "canvas-bucket-hat",
-    title: "Canvas Bucket Hat",
-    type: "Hat",
-    price: 38,
-    colors: [
-      { name: "Tan", hex: "#d2b48c", available: true },
-      { name: "Black", hex: "#1e1e1e", available: true },
+    name: "canvas_bucket_hat",
+    displayName: "Canvas Bucket Hat",
+    basePrice: 38,
+    currency: "USD",
+    available: true,
+    priceMin: 38,
+    priceMax: 38,
+    priceVaries: false,
+    tags: [],
+    description: [
+      { type: "text", content: "Washed canvas bucket hat with tonal stitching." },
+      { type: "points", content: ["100% canvas", "Washed finish", "Embroidered logo", "Fully lined"] },
     ],
-    sizes: [
-      { label: "S/M", available: true },
-      { label: "L/XL", available: true },
-    ],
-    images: [],
-    description: "Washed canvas bucket hat with tonal stitching.",
-    details: [
-      "100% canvas",
-      "Washed finish",
-      "Embroidered logo",
-      "Fully lined",
+    rating: 4.2,
+    photos: [],
+    variants: [
+      { id: "v5-1", productId: "5", colorName: "Tan",   colorValue: "#d2b48c", size: "S/M",  sku: "BUCKET-TAN-SM",  stock: 8, available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v5-2", productId: "5", colorName: "Tan",   colorValue: "#d2b48c", size: "L/XL", sku: "BUCKET-TAN-LXL", stock: 6, available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v5-3", productId: "5", colorName: "Black", colorValue: "#1e1e1e", size: "S/M",  sku: "BUCKET-BLK-SM",  stock: 5, available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v5-4", productId: "5", colorName: "Black", colorValue: "#1e1e1e", size: "L/XL", sku: "BUCKET-BLK-LXL", stock: 4, available: true, inventoryPolicy: "deny", quantityRule: 1 },
     ],
   },
   {
     id: "6",
-    slug: "ribbed-beanie",
-    title: "Fine Ribbed Beanie",
-    type: "Beanie",
-    price: 22,
-    originalPrice: 28,
-    badge: "sale",
-    colors: [
-      { name: "Brown", hex: "#795548", available: true },
-      { name: "Cream", hex: "#f5f5dc", available: true },
+    name: "ribbed_beanie",
+    displayName: "Fine Ribbed Beanie",
+    basePrice: 22,
+    compareAtPrice: 28,
+    currency: "USD",
+    available: true,
+    priceMin: 22,
+    priceMax: 22,
+    priceVaries: false,
+    tags: [],
+    description: [
+      { type: "text", content: "Fine-gauge ribbed beanie with subtle logo detail." },
+      { type: "points", content: ["80% merino wool, 20% nylon", "Fine-gauge knit", "One size", "Dry clean only"] },
     ],
-    sizes: [],
-    images: [],
-    description: "Fine-gauge ribbed beanie with subtle logo detail.",
-    details: [
-      "80% merino wool, 20% nylon",
-      "Fine-gauge knit",
-      "One size",
-      "Dry clean only",
+    rating: 4.0,
+    photos: [],
+    variants: [
+      { id: "v6-1", productId: "6", colorName: "Brown", colorValue: "#795548", size: "One Size", sku: "BEANIE-BRN-OS", stock: 6, available: true, inventoryPolicy: "deny", quantityRule: 1, compareAtPrice: 28 },
+      { id: "v6-2", productId: "6", colorName: "Cream", colorValue: "#f5f5dc", size: "One Size", sku: "BEANIE-CRM-OS", stock: 4, available: true, inventoryPolicy: "deny", quantityRule: 1, compareAtPrice: 28 },
     ],
   },
   {
     id: "7",
-    slug: "washed-dad-cap",
-    title: "Washed Dad Cap",
-    type: "Hat",
-    price: 32,
-    colors: [
-      { name: "Olive", hex: "#6b6b2c", available: true },
-      { name: "Black", hex: "#1e1e1e", available: true },
+    name: "washed_dad_cap",
+    displayName: "Washed Dad Cap",
+    basePrice: 32,
+    currency: "USD",
+    available: true,
+    priceMin: 32,
+    priceMax: 32,
+    priceVaries: false,
+    tags: [],
+    description: [
+      { type: "text", content: "Garment-washed soft-structured dad cap." },
+      { type: "points", content: ["100% chino cotton", "Garment washed", "Unstructured", "Brass buckle closure"] },
     ],
-    sizes: [],
-    images: [],
-    description: "Garment-washed soft-structured dad cap.",
-    details: [
-      "100% chino cotton",
-      "Garment washed",
-      "Unstructured",
-      "Brass buckle closure",
+    rating: 4.1,
+    photos: [],
+    variants: [
+      { id: "v7-1", productId: "7", colorName: "Olive", colorValue: "#6b6b2c", size: "One Size", sku: "CAP-OLV-OS", stock: 9, available: true, inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v7-2", productId: "7", colorName: "Black", colorValue: "#1e1e1e", size: "One Size", sku: "CAP-BLK-OS", stock: 7, available: true, inventoryPolicy: "deny", quantityRule: 1 },
     ],
   },
   {
     id: "8",
-    slug: "archive-long-sleeve",
-    title: "Archive Graphic Long Sleeve",
-    type: "Long Sleeve",
-    price: 45,
-    colors: [
-      { name: "White", hex: "#f5f5f5", available: true },
+    name: "archive_long_sleeve",
+    displayName: "Archive Graphic Long Sleeve",
+    basePrice: 45,
+    currency: "USD",
+    available: true,
+    priceMin: 45,
+    priceMax: 45,
+    priceVaries: false,
+    tags: [],
+    description: [
+      { type: "text", content: "Archive graphic print on a heavyweight long sleeve tee." },
+      { type: "points", content: ["100% heavyweight cotton", "Relaxed fit", "Water-based ink print", "Woven label"] },
     ],
-    sizes: [
-      { label: "S", available: true },
-      { label: "M", available: true },
-      { label: "L", available: true },
-      { label: "XL", available: false },
-    ],
-    images: [],
-    description:
-      "Archive graphic print on a heavyweight long sleeve tee.",
-    details: [
-      "100% heavyweight cotton",
-      "Relaxed fit",
-      "Water-based ink print",
-      "Woven label",
+    rating: 4.5,
+    photos: [],
+    variants: [
+      { id: "v8-1", productId: "8", colorName: "White", colorValue: "#f5f5f5", size: "S",  sku: "LS-WHT-S",  stock: 5,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v8-2", productId: "8", colorName: "White", colorValue: "#f5f5f5", size: "M",  sku: "LS-WHT-M",  stock: 8,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v8-3", productId: "8", colorName: "White", colorValue: "#f5f5f5", size: "L",  sku: "LS-WHT-L",  stock: 6,  available: true,  inventoryPolicy: "deny", quantityRule: 1 },
+      { id: "v8-4", productId: "8", colorName: "White", colorValue: "#f5f5f5", size: "XL", sku: "LS-WHT-XL", stock: 0,  available: false, inventoryPolicy: "deny", quantityRule: 1 },
     ],
   },
 ];
 
 // ─── Reviews ──────────────────────────────────────────────────────────────────
 
+// Ratings on 1–10 scale (API). Normalise to 0–5 for StarRating: rating / 2.
 export const MOCK_REVIEWS: Review[] = [
   {
     id: "r1",
-    author: "Alex T.",
-    rating: 5,
-    date: "2025-03-12",
-    text: "Exactly what I was looking for. Quality is solid and it shipped fast. The fit is true to size and the material feels premium.",
+    productId: "1",
+    displayName: "Alex T.",
+    rating: 10,
+    content: "Exactly what I was looking for. Quality is solid and it shipped fast. The fit is true to size and the material feels premium.",
+    photoUrls: [],
+    createdAt: "2025-03-12T00:00:00.000Z",
   },
   {
     id: "r2",
-    author: "Jordan M.",
-    rating: 4,
-    date: "2025-02-28",
-    text: "Love the design. Went with black and it goes with everything. Knocked one star because delivery took a bit longer than expected.",
+    productId: "1",
+    displayName: "Jordan M.",
+    rating: 8,
+    content: "Love the design. Went with black and it goes with everything. Knocked one star because delivery took a bit longer than expected.",
+    photoUrls: [],
+    createdAt: "2025-02-28T00:00:00.000Z",
   },
   {
     id: "r3",
-    author: "Sam K.",
-    rating: 5,
-    date: "2025-02-14",
-    text: "Third time buying from O2Shop. Never disappoints. The ribbed texture is super clean and the fit is perfect.",
+    productId: "1",
+    displayName: "Sam K.",
+    rating: 10,
+    content: "Third time buying from O2Shop. Never disappoints. The ribbed texture is super clean and the fit is perfect.",
+    photoUrls: [],
+    createdAt: "2025-02-14T00:00:00.000Z",
   },
   {
     id: "r4",
-    author: "Riley P.",
-    rating: 4,
-    date: "2025-01-30",
-    text: "Great quality for the price. Looks even better in person than in the photos.",
+    productId: "1",
+    displayName: "Riley P.",
+    rating: 8,
+    content: "Great quality for the price. Looks even better in person than in the photos.",
+    photoUrls: [],
+    createdAt: "2025-01-30T00:00:00.000Z",
   },
   {
     id: "r5",
-    author: "Casey W.",
-    rating: 3,
-    date: "2025-01-15",
-    text: "Decent product but ran slightly smaller than I expected. I'd recommend sizing up. Customer service was helpful though.",
+    productId: "1",
+    displayName: "Casey W.",
+    rating: 6,
+    content: "Decent product but ran slightly smaller than I expected. I'd recommend sizing up. Customer service was helpful though.",
+    photoUrls: [],
+    createdAt: "2025-01-15T00:00:00.000Z",
   },
 ];
 
 // ─── Addresses ────────────────────────────────────────────────────────────────
 
-const ADDRESS_HOME: Address = {
-  id: "addr1",
-  label: "Home",
+const ADDR_HOME_SHIPPING: AddressDto = {
   firstName: "Alex",
   lastName: "Turner",
-  line1: "123 Main Street",
-  line2: "Apt 4B",
+  address1: "123 Main Street",
+  address2: "Apt 4B",
   city: "New York",
-  state: "NY",
-  zip: "10001",
-  country: "United States",
+  province: "NY",
+  postalCode: "10001",
+  country: "US",
 };
 
-const ADDRESS_WORK: Address = {
-  id: "addr2",
-  label: "Work",
+const ADDR_WORK_SHIPPING: AddressDto = {
   firstName: "Alex",
   lastName: "Turner",
-  line1: "456 Broadway",
+  address1: "456 Broadway",
   city: "New York",
-  state: "NY",
-  zip: "10013",
-  country: "United States",
+  province: "NY",
+  postalCode: "10013",
+  country: "US",
 };
 
-export const MOCK_ADDRESSES: Address[] = [ADDRESS_HOME, ADDRESS_WORK];
+export const MOCK_ADDRESSES: SavedAddress[] = [
+  {
+    id: "addr1",
+    name: "Home",
+    shippingAddress: ADDR_HOME_SHIPPING,
+    billingAddress: ADDR_HOME_SHIPPING,
+    billingIsSameAsShipping: true,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "addr2",
+    name: "Work",
+    shippingAddress: ADDR_WORK_SHIPPING,
+    billingAddress: ADDR_HOME_SHIPPING,
+    billingIsSameAsShipping: false,
+    createdAt: "2025-01-15T00:00:00.000Z",
+    updatedAt: "2025-01-15T00:00:00.000Z",
+  },
+];
 
 // ─── Orders ───────────────────────────────────────────────────────────────────
 
 export const MOCK_ORDERS: Order[] = [
   {
     id: "ord1",
-    number: "COOL72871",
-    date: "2025-03-15",
+    orderNumber: "COOL72871",
     paymentStatus: "paid",
-    fulfillmentStatus: "delivered",
+    fulfillmentStatus: "fulfilled",
+    totalAmount: 91,
+    totalCurrency: "USD",
+    shippingMethodName: "Standard Shipping",
+    shippingPrice: 0,
+    shippingCurrency: "USD",
+    shippingAddress: ADDR_HOME_SHIPPING,
+    billingAddress: ADDR_HOME_SHIPPING,
+    createdAt: "2025-03-15T00:00:00.000Z",
     items: [
       {
         id: "oi1",
-        name: "The Play Cool Beanie",
-        sku: "BEANIE-BLK-OS",
-        color: "Black",
-        size: "One Size",
-        unitPrice: 35,
+        productId: "1",
+        productName: "The Play Cool Beanie",
+        productSku: "BEANIE-BLK-OS",
+        productPrice: 35,
+        productCurrency: "USD",
         quantity: 1,
+        total: 35,
       },
       {
         id: "oi2",
-        name: "OG Logo T-Shirt",
-        sku: "TEE-WHT-M",
-        color: "White",
-        size: "M",
-        unitPrice: 28,
+        productId: "3",
+        productName: "OG Logo T-Shirt",
+        productSku: "TEE-WHT-M",
+        productPrice: 28,
+        productCurrency: "USD",
         quantity: 2,
+        total: 56,
       },
     ],
-    subtotal: 91,
-    shipping: 0,
-    total: 91,
-    shippingAddress: ADDRESS_HOME,
-    billingAddress: ADDRESS_HOME,
   },
   {
     id: "ord2",
-    number: "COOL71203",
-    date: "2025-02-20",
+    orderNumber: "COOL71203",
     paymentStatus: "paid",
-    fulfillmentStatus: "shipped",
+    fulfillmentStatus: "partially_fulfilled",
+    totalAmount: 73,
+    totalCurrency: "USD",
+    shippingMethodName: "Standard Shipping",
+    shippingPrice: 8,
+    shippingCurrency: "USD",
+    shippingAddress: ADDR_WORK_SHIPPING,
+    billingAddress: ADDR_HOME_SHIPPING,
+    createdAt: "2025-02-20T00:00:00.000Z",
     items: [
       {
         id: "oi3",
-        name: "Heavyweight Hoodie",
-        sku: "HOOD-BLK-L",
-        color: "Black",
-        size: "L",
-        unitPrice: 65,
+        productId: "4",
+        productName: "Heavyweight Hoodie",
+        productSku: "HOOD-BLK-L",
+        productPrice: 65,
+        productCurrency: "USD",
         quantity: 1,
+        total: 65,
       },
     ],
-    subtotal: 65,
-    shipping: 8,
-    total: 73,
-    shippingAddress: ADDRESS_WORK,
-    billingAddress: ADDRESS_HOME,
   },
   {
     id: "ord3",
-    number: "COOL69487",
-    date: "2025-01-05",
+    orderNumber: "COOL69487",
     paymentStatus: "refunded",
     fulfillmentStatus: "cancelled",
+    totalAmount: 30,
+    totalCurrency: "USD",
+    shippingMethodName: "Standard Shipping",
+    shippingPrice: 8,
+    shippingCurrency: "USD",
+    shippingAddress: ADDR_HOME_SHIPPING,
+    billingAddress: ADDR_HOME_SHIPPING,
+    createdAt: "2025-01-05T00:00:00.000Z",
     items: [
       {
         id: "oi4",
-        name: "Fine Ribbed Beanie",
-        sku: "BEANIE-CRM-OS",
-        color: "Cream",
-        size: "One Size",
-        unitPrice: 22,
+        productId: "6",
+        productName: "Fine Ribbed Beanie",
+        productSku: "BEANIE-CRM-OS",
+        productPrice: 22,
+        productCurrency: "USD",
         quantity: 1,
+        total: 22,
       },
     ],
-    subtotal: 22,
-    shipping: 8,
-    total: 30,
-    shippingAddress: ADDRESS_HOME,
-    billingAddress: ADDRESS_HOME,
   },
 ];

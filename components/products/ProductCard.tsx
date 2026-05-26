@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { Product } from "@/lib/mock-data";
+import type { Product } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 
 interface ProductCardProps {
@@ -18,11 +18,19 @@ const PLACEHOLDER_COLORS = [
 export default function ProductCard({ product }: ProductCardProps) {
   const [activeZone, setActiveZone] = useState<"left" | "right" | null>(null);
 
-  const mainBg = product.colors[0]?.hex ?? "#e8e8e8";
-  const hoverBg = product.colors[1]?.hex ?? PLACEHOLDER_COLORS[1];
+  const mainBg  = product.variants[0]?.colorValue ?? PLACEHOLDER_COLORS[0];
+  const hoverBg = product.variants[1]?.colorValue ?? PLACEHOLDER_COLORS[1];
+
+  const badge: "sale" | "new" | "sold-out" | undefined = !product.available
+    ? "sold-out"
+    : product.compareAtPrice && product.compareAtPrice > product.basePrice
+    ? "sale"
+    : product.tags.includes("new")
+    ? "new"
+    : undefined;
 
   return (
-    <Link href={`/products/${product.slug}`} className="block group">
+    <Link href={`/products/${product.name}`} className="block group">
       {/* Image wrapper — 4:5 ratio */}
       <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
         {/* Main image placeholder */}
@@ -35,7 +43,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="font-sans text-[11px] uppercase tracking-widest opacity-30"
             style={{ color: "var(--color-foreground)" }}
           >
-            {product.type}
+            {product.currency}
           </span>
         </div>
 
@@ -50,9 +58,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         />
 
         {/* Badge */}
-        {product.badge && (
+        {badge && (
           <div className="absolute top-3 left-3 z-10">
-            <Badge variant={product.badge} />
+            <Badge variant={badge} />
           </div>
         )}
 
@@ -83,7 +91,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               transition: "var(--transition-slow)",
             }}
           >
-            {product.title}
+            {product.displayName}
           </h3>
           <span
             className="font-sans text-[16px] font-medium uppercase tracking-[0.3px] whitespace-nowrap"
@@ -92,12 +100,12 @@ export default function ProductCard({ product }: ProductCardProps) {
               transition: "var(--transition-slow)",
             }}
           >
-            {product.originalPrice && (
-              <span className="line-through opacity-50 mr-1.5 text-[14px]">
-                ${product.originalPrice}
+            {product.compareAtPrice && (
+              <span className="line-through opacity-50 mr-1.5">
+                ${product.compareAtPrice}
               </span>
             )}
-            ${product.price}
+            ${product.basePrice}
           </span>
         </div>
 
@@ -110,7 +118,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               color: "var(--color-foreground-subtle)",
             }}
           >
-            {product.type}
+            {product.variants.length} variant{product.variants.length !== 1 ? "s" : ""}
           </span>
           <span
             className="text-[12px] tracking-[0.3px]"
@@ -119,7 +127,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               color: "var(--color-foreground-subtle)",
             }}
           >
-            USD
+            {product.currency}
           </span>
         </div>
       </div>

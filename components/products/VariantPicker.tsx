@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProductColor, ProductSize } from "@/lib/mock-data";
+import type { ProductColor, ProductSize } from "@/lib/types";
 
 interface VariantPickerProps {
   colors: ProductColor[];

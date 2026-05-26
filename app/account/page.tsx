@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MOCK_ORDERS, MOCK_ADDRESSES } from "@/lib/mock-data";
 import OrderStatusBadge from "@/components/account/OrderStatusBadge";
+import PaymentStatusBadge from "@/components/account/PaymentStatusBadge";
 import AddressCard from "@/components/account/AddressCard";
 
 function formatDate(dateStr: string) {
@@ -87,7 +88,7 @@ export default function AccountPage() {
                         className="font-sans text-[14px] uppercase tracking-widest"
                         style={{ color: "var(--color-foreground-dark)" }}
                       >
-                        #{order.number}
+                        #{order.orderNumber}
                       </span>
                     </td>
                     <td className="py-4">
@@ -98,29 +99,11 @@ export default function AccountPage() {
                           color: "var(--color-foreground-muted)",
                         }}
                       >
-                        {formatDate(order.date)}
+                        {formatDate(order.createdAt)}
                       </span>
                     </td>
                     <td className="py-4">
-                      <span
-                        className="font-sans text-[12px] uppercase tracking-widest px-2 py-0.5"
-                        style={{
-                          color:
-                            order.paymentStatus === "paid"
-                              ? "#155724"
-                              : order.paymentStatus === "refunded"
-                              ? "var(--color-destructive)"
-                              : "var(--color-foreground-muted)",
-                          backgroundColor:
-                            order.paymentStatus === "paid"
-                              ? "#d4edda"
-                              : order.paymentStatus === "refunded"
-                              ? "#ffd9d9"
-                              : "var(--color-muted-2)",
-                        }}
-                      >
-                        {order.paymentStatus}
-                      </span>
+                      <PaymentStatusBadge status={order.paymentStatus} />
                     </td>
                     <td className="py-4">
                       <OrderStatusBadge status={order.fulfillmentStatus} />
@@ -130,7 +113,7 @@ export default function AccountPage() {
                         className="font-sans text-[14px] tracking-widest"
                         style={{ color: "var(--color-foreground-dark)" }}
                       >
-                        ${order.total}
+                        ${order.totalAmount}
                       </span>
                     </td>
                     <td className="py-4">
@@ -175,7 +158,7 @@ export default function AccountPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
             {MOCK_ADDRESSES.map((addr) => (
-              <AddressCard key={addr.id} address={addr} heading={addr.label} />
+              <AddressCard key={addr.id} address={addr.shippingAddress} heading={addr.name} editable={true} />
             ))}
           </div>
         </section>

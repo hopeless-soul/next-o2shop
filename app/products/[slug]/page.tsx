@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { MOCK_PRODUCTS, MOCK_REVIEWS } from "@/lib/mock-data";
+import type { ProductColor, ProductSize } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import VariantPicker from "@/components/products/VariantPicker";
@@ -13,22 +14,65 @@ import Skeleton from "@/components/ui/Skeleton";
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
-  const product = MOCK_PRODUCTS.find((p) => p.slug === slug) ?? MOCK_PRODUCTS[0];
+  const product = MOCK_PRODUCTS.find((p) => p.name === slug) ?? MOCK_PRODUCTS[0];
+
+  // Derive unique colors from variants (deduplicated by colorName)
+  const uniqueColors: ProductColor[] = product.variants.reduce<ProductColor[]>(
+    (acc, v) => {
+      if (!acc.find((c) => c.name === v.colorName)) {
+        acc.push({ name: v.colorName, hex: v.colorValue, available: v.available });
+      }
+      return acc;
+    },
+    []
+  );
 
   const [selectedColor, setSelectedColor] = useState<string | null>(
-    product.colors[0]?.name ?? null
+    uniqueColors[0]?.name ?? null
   );
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading] = useState(false);
 
+  // Derive sizes for the selected color
+  const uniqueSizes: ProductSize[] = selectedColor
+    ? product.variants
+        .filter((v) => v.colorName === selectedColor)
+        .reduce<ProductSize[]>((acc, v) => {
+          if (!acc.find((s) => s.label === v.size)) {
+            acc.push({ label: v.size, available: v.available });
+          }
+          return acc;
+        }, [])
+    : product.variants.reduce<ProductSize[]>((acc, v) => {
+        if (!acc.find((s) => s.label === v.size)) {
+          acc.push({ label: v.size, available: v.available });
+        }
+        return acc;
+      }, []);
+
+  // Ratings are 1–10 in API; normalise to 0–5 for StarRating
   const avgRating =
-    MOCK_REVIEWS.reduce((acc, r) => acc + r.rating, 0) / MOCK_REVIEWS.length;
+    MOCK_REVIEWS.reduce((acc, r) => acc + r.rating, 0) / MOCK_REVIEWS.length / 2;
 
   const mainBg =
-    product.colors.find((c) => c.name === selectedColor)?.hex ??
-    product.colors[0]?.hex ??
+    product.variants.find((v) => v.colorName === selectedColor)?.colorValue ??
+    product.variants[0]?.colorValue ??
     "#e8e8e8";
+
+  const badge =
+    !product.available
+      ? ("sold-out" as const)
+      : product.compareAtPrice && product.compareAtPrice > product.basePrice
+      ? ("sale" as const)
+      : product.tags.includes("new")
+      ? ("new" as const)
+      : undefined;
+
+  const textBlock = product.description.find((b) => b.type === "text");
+  const pointsBlock = product.description.find((b) => b.type === "points");
+  const detailItems =
+    pointsBlock?.type === "points" ? pointsBlock.content : [];
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)" }}>
@@ -61,10 +105,10 @@ export default function ProductPage() {
             className="hover:opacity-70"
             style={{ transition: "var(--transition-nav)" }}
           >
-            {product.type}s
+            {product.subCategory?.displayName ?? "Products"}
           </Link>
           {" / "}
-          <span style={{ color: "var(--color-foreground-dark)" }}>{product.title}</span>
+          <span style={{ color: "var(--color-foreground-dark)" }}>{product.displayName}</span>
         </p>
       </div>
 
@@ -100,7 +144,7 @@ export default function ProductPage() {
                   position: "absolute",
                 }}
               >
-                {product.title}
+                {product.displayName}
               </span>
             </div>
           )}
@@ -148,7 +192,7 @@ export default function ProductPage() {
           ) : (
             <>
               {/* Badge */}
-              {product.badge && <Badge variant={product.badge} />}
+              {badge && <Badge variant={badge} />}
 
               {/* Title */}
               <h1
@@ -160,25 +204,25 @@ export default function ProductPage() {
                   textTransform: "capitalize",
                 }}
               >
-                {product.title}
+                {product.displayName}
               </h1>
 
               {/* Price + rating */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {product.originalPrice && (
+                  {product.compareAtPrice && (
                     <span
                       className="font-sans text-[16px] line-through opacity-50"
                       style={{ color: "var(--color-foreground)" }}
                     >
-                      ${product.originalPrice}
+                      ${product.compareAtPrice}
                     </span>
                   )}
                   <span
                     className="font-sans text-[22px] tracking-[0.44px]"
                     style={{ color: "var(--color-foreground-dark)" }}
                   >
-                    ${product.price}
+                    ${product.basePrice}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -197,8 +241,8 @@ export default function ProductPage() {
 
               {/* Variants */}
               <VariantPicker
-                colors={product.colors}
-                sizes={product.sizes}
+                colors={uniqueColors}
+                sizes={uniqueSizes}
                 selectedColor={selectedColor}
                 selectedSize={selectedSize}
                 onColorChange={setSelectedColor}
@@ -227,20 +271,22 @@ export default function ProductPage() {
               </button>
 
               {/* Description */}
-              <p
-                className="text-sm leading-6"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground)",
-                }}
-              >
-                {product.description}
-              </p>
+              {textBlock?.type === "text" && (
+                <p
+                  className="text-sm leading-6"
+                  style={{
+                    fontFamily: "var(--font-secondary)",
+                    color: "var(--color-foreground)",
+                  }}
+                >
+                  {textBlock.content}
+                </p>
+              )}
 
               {/* Details accordion */}
               <div className="border-t" style={{ borderColor: "var(--color-border)" }}>
                 {[
-                  { label: "Product Details", items: product.details },
+                  { label: "Product Details", items: detailItems },
                   { label: "Shipping & Returns", items: ["Free shipping on orders over $75", "Free 30-day returns"] },
                   { label: "Care Instructions", items: ["Machine wash cold", "Tumble dry low", "Do not iron print"] },
                 ].map((section) => (
