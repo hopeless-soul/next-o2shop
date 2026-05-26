@@ -2,14 +2,61 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Search, User, ShoppingBag, Menu, X } from "lucide-react";
 import { MOCK_CATEGORIES } from "@/lib/mock-data";
 
-export default function Navbar() {
+interface NavbarProps {
+  background?: string;
+  textColor?: string;
+  scrolledBackground?: string;
+  scrolledColor?: string;
+}
+
+export default function Navbar({
+  background,
+  textColor,
+  scrolledBackground,
+  scrolledColor,
+}: NavbarProps) {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const routeConfig: NavbarProps = pathname === "/"
+    ? {
+        background: "var(--color-foreground-dark)",
+        textColor: "var(--color-on-dark)",
+        scrolledBackground: "var(--color-foreground-dark)",
+        scrolledColor: "var(--color-on-dark)",
+      }
+    : pathname.startsWith("/products")
+    ? {
+        background: "transparent",
+        textColor: "var(--color-foreground-dark)",
+        scrolledBackground: "var(--color-foreground-dark)",
+        scrolledColor: "var(--color-on-dark)",
+      }
+    : {
+        background: "var(--color-foreground-dark)",
+        textColor: "var(--color-on-dark)",
+        scrolledBackground: "var(--color-foreground-dark)",
+        scrolledColor: "var(--color-on-dark)",
+      };
+
+  const resolvedBg = background ?? routeConfig.background!;
+  const resolvedText = textColor ?? routeConfig.textColor!;
+  const resolvedScrolledBg = scrolledBackground ?? routeConfig.scrolledBackground!;
+  const resolvedScrolledColor = scrolledColor ?? routeConfig.scrolledColor!;
+
+  const currentColor = scrolled ? resolvedScrolledColor : resolvedText;
+  const logoFilter =
+    currentColor === "var(--color-on-dark)"
+      ? "brightness(0) invert(1)"
+      : "brightness(0)";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -35,45 +82,57 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ── Main header ── */}
+      {/* ── Main header — logo + icons row only ── */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 flex flex-col"
+        className="fixed top-0 left-0 right-0 z-50"
         style={{
-          height: "var(--header-height-desktop)",
-          backgroundColor: scrolled
-            ? "var(--color-foreground-strong)"
-            : "transparent",
-          boxShadow: scrolled ? "var(--shadow-3)" : "none",
-          transition: "background-color var(--transition-nav), box-shadow var(--transition-nav)",
+          backgroundColor: scrolled ? resolvedScrolledBg : resolvedBg,
+          transition: "background-color var(--transition-nav)",
         }}
       >
-        {/* Logo + icons row */}
+        {/* Logo + icons row — owns the full header height */}
         <div
-          className="flex items-center justify-between"
+          className="grid grid-cols-3 items-center"
           style={{
-            flex: "0 0 52px",
+            height: "var(--header-height-desktop)",
             paddingLeft: "var(--header-px-desktop)",
             paddingRight: "var(--header-px-desktop)",
           }}
         >
-          <Link
-            href="/"
-            className="font-sans text-[22px] tracking-[0.15em] uppercase"
-            style={{
-              color: "var(--color-on-dark)",
-              transition: "var(--transition-nav)",
-            }}
-          >
-            O2SHOP
-          </Link>
+          {/* Col 1: mobile hamburger (left) */}
+          <div className="flex items-center">
+            <button
+              className="md:hidden opacity-80 hover:opacity-100"
+              style={{ color: currentColor, transition: "var(--transition-nav)" }}
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={22} strokeWidth={1.75} />
+            </button>
+          </div>
 
-          <div className="flex items-center gap-5">
+          {/* Col 2: logo (center) */}
+          <div className="flex justify-center">
+            <Link href="/" aria-label="O2Shop home">
+              <Image
+                src="/logo.svg"
+                alt="O2Shop"
+                width={32}
+                height={80}
+                priority
+                style={{
+                  filter: logoFilter,
+                  transition: "filter var(--transition-nav)",
+                }}
+              />
+            </Link>
+          </div>
+
+          {/* Col 3: icons (right) */}
+          <div className="flex items-center justify-end gap-5">
             <button
               className="opacity-80 hover:opacity-100"
-              style={{
-                color: "var(--color-on-dark)",
-                transition: "var(--transition-nav)",
-              }}
+              style={{ color: currentColor, transition: "var(--transition-nav)" }}
               aria-label="Search"
             >
               <Search size={19} strokeWidth={1.75} />
@@ -81,20 +140,14 @@ export default function Navbar() {
             <Link
               href="/account"
               className="opacity-80 hover:opacity-100"
-              style={{
-                color: "var(--color-on-dark)",
-                transition: "var(--transition-nav)",
-              }}
+              style={{ color: currentColor, transition: "var(--transition-nav)" }}
               aria-label="Account"
             >
               <User size={19} strokeWidth={1.75} />
             </Link>
             <button
               className="relative opacity-80 hover:opacity-100"
-              style={{
-                color: "var(--color-on-dark)",
-                transition: "var(--transition-nav)",
-              }}
+              style={{ color: currentColor, transition: "var(--transition-nav)" }}
               aria-label="Cart (3 items)"
             >
               <ShoppingBag size={19} strokeWidth={1.75} />
@@ -110,26 +163,22 @@ export default function Navbar() {
                 3
               </span>
             </button>
-            {/* Mobile hamburger */}
-            <button
-              className="md:hidden opacity-80 hover:opacity-100"
-              style={{
-                color: "var(--color-on-dark)",
-                transition: "var(--transition-nav)",
-              }}
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-            >
-              <Menu size={22} strokeWidth={1.75} />
-            </button>
           </div>
         </div>
 
-        {/* Category nav row — desktop only */}
-        <nav
-          className="hidden md:flex items-center justify-center"
-          style={{ flex: "0 0 40px" }}
-        >
+      </header>
+
+      {/* ── Category nav — fixed sibling, sits directly below header ── */}
+      <nav
+        className="hidden md:flex items-center justify-center fixed left-0 right-0 z-50"
+        style={{
+          top: "var(--header-height-desktop)",
+          height: "40px",
+          backgroundColor: scrolled ? resolvedScrolledBg : resolvedBg,
+          boxShadow: scrolled ? "var(--shadow-3)" : "none",
+          transition: "background-color var(--transition-nav), box-shadow var(--transition-nav)",
+        }}
+      >
           {MOCK_CATEGORIES.map((cat) => (
             <div
               key={cat.slug}
@@ -141,7 +190,7 @@ export default function Navbar() {
                 href={`/products?category=${cat.slug}`}
                 className="block px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
                 style={{
-                  color: "var(--color-on-dark)",
+                  color: currentColor,
                   lineHeight: "40px",
                   transition: "var(--transition-nav)",
                 }}
@@ -177,8 +226,7 @@ export default function Navbar() {
               )}
             </div>
           ))}
-        </nav>
-      </header>
+      </nav>
 
       {/* ── Mobile drawer overlay ── */}
       <div

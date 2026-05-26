@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const FOOTER_LINKS = [
@@ -49,12 +50,14 @@ export default function Footer() {
         <div className="flex flex-col-reverse gap-10 md:flex-row md:gap-8">
           {/* Brand column */}
           <div className="md:w-[28%]">
-            <Link
-              href="/"
-              className="font-sans text-[22px] tracking-[0.15em] uppercase"
-              style={{ color: "var(--color-foreground-dark)" }}
-            >
-              O2SHOP
+            <Link href="/">
+              <Image
+                src="/logo.svg"
+                alt="O2Shop"
+                width={92}
+                height={120}
+                className="h-[120px] w-auto"
+              />
             </Link>
             <p
               className="mt-3 text-sm leading-relaxed"

@@ -41,11 +41,12 @@ yarn-error.log*
 next-env.d.ts
 
 # Claude
-# CLAUDE*
-# .claude*
-# .agent*
-# .agents*
-# .playwright-mcp
-# /specs/reference/
-# /specs/research/
-# /specs/screenshots/
+CLAUDE*
+.claude*
+.agent*
+.agents*
+.playwright-mcp
+/specs/reference/
+/specs/research/
+/specs/screenshots/
+!/specs/*.md
