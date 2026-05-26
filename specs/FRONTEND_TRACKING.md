@@ -33,7 +33,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 | `/account/orders/[id]` | route | ⬜ todo | — | — |
 | `CartDrawer` | component | ⬜ todo | — | — |
 | `SearchOverlay` | component | ⬜ todo | — | — |
-| `Navbar` | component | ✅ done | session-3 | 2026-05-25 |
+| `Navbar` | component | ✅ done | session-5 | 2026-05-26 |
 | `Footer` | component | 🔒 stable | session-4 | 2026-05-25 |
 | `Skeleton` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `Badge` | component | 🔒 stable | session-2 | 2026-05-25 |
@@ -443,6 +443,7 @@ Fixed header with route-based theming via `usePathname()`. Logo is centered (3-c
 | 2026-05-25 | session-2 | Initial build — transparent/scroll header, category dropdowns, mobile drawer, lucide-react icons, cart badge |
 | 2026-05-25 | session-3 | SVG logo centered (3-col grid), NavbarProps (background/textColor/scrolledBackground/scrolledColor), route-based theming via usePathname for `/` and `/products*` |
 | 2026-05-25 | session-3 | Extracted `<nav>` from `<header>`; logo row owns `height: var(--header-height-desktop)`; category nav is fixed sibling at `top: var(--header-height-desktop)`, height 40px, with shadow |
+| 2026-05-26 | session-5 | Made `Category.items` optional in `lib/mock-data.ts`; added `ChevronDown` (lucide-react) to expandable category labels; desktop + mobile drawer render plain links for categories with no items |
 
 ---
 

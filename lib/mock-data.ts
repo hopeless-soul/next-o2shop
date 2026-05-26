@@ -1,7 +1,7 @@
 export type Category = {
   name: string;
   slug: string;
-  items: { name: string; slug: string }[];
+  items?: { name: string; slug: string }[];
 };
 
 export type ProductColor = {
@@ -120,11 +120,6 @@ export const MOCK_CATEGORIES: Category[] = [
   {
     name: "Sale",
     slug: "sale",
-    items: [
-      { name: "Hats on Sale", slug: "sale-hats" },
-      { name: "Shirts on Sale", slug: "sale-shirts" },
-      { name: "All Sale", slug: "sale-all" },
-    ],
   },
 ];
 

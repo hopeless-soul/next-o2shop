@@ -49,4 +49,5 @@ CLAUDE*
 /specs/reference/
 /specs/research/
 /specs/screenshots/
+/specs/*
 !/specs/*.md

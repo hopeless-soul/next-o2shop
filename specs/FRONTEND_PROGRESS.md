@@ -1,6 +1,6 @@
 # Frontend Progress — o2shop
 
-> Last updated: 2026-05-25
+> Last updated: 2026-05-26
 
 ---
 
@@ -92,6 +92,24 @@ Route (app)
 ```
 
 All routes compile with zero TypeScript errors and zero ESLint warnings.
+
+---
+
+## Session 5 — Navbar Category Nav: ChevronDown + Optional Items
+
+**Files changed:** `components/layout/Navbar.tsx`, `lib/mock-data.ts`
+
+### Changes
+
+- Made `Category.items` optional (`items?`) in `lib/mock-data.ts` — allows leaf/single categories with no sub-items
+- Added `ChevronDown` (12px, lucide-react, static) inline after the label on expandable categories in the desktop nav
+- Desktop nav: expandable categories (have `items`) keep the existing hover dropdown; leaf categories (no `items`) render as plain `<Link>` with no icon and no dropdown
+- Mobile drawer: expandable categories keep the existing section header + sub-item list; leaf categories render as a plain `<Link>` row directly in the nav
+
+### Build verified
+
+- `npm run lint` — clean (0 errors, 0 warnings)
+- Dev server at `http://localhost:3000` — 0 console errors; all 4 category nav items visible with chevron icons
 
 ---
 

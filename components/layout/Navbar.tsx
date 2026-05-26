@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Search, User, ShoppingBag, Menu, X } from "lucide-react";
+import { Search, User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
 import { MOCK_CATEGORIES } from "@/lib/mock-data";
 
 interface NavbarProps {
@@ -179,14 +179,57 @@ export default function Navbar({
           transition: "background-color var(--transition-nav), box-shadow var(--transition-nav)",
         }}
       >
-          {MOCK_CATEGORIES.map((cat) => (
-            <div
-              key={cat.slug}
-              className="relative"
-              onMouseEnter={() => openDropdown(cat.slug)}
-              onMouseLeave={closeDropdown}
-            >
+          {MOCK_CATEGORIES.map((cat) =>
+            cat.items?.length ? (
+              <div
+                key={cat.slug}
+                className="relative"
+                onMouseEnter={() => openDropdown(cat.slug)}
+                onMouseLeave={closeDropdown}
+              >
+                <Link
+                  href={`/products?category=${cat.slug}`}
+                  className="flex items-center px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
+                  style={{
+                    color: currentColor,
+                    lineHeight: "40px",
+                    transition: "var(--transition-nav)",
+                  }}
+                >
+                  {cat.name}
+                  <ChevronDown size={12} strokeWidth={2} className="ml-1" />
+                </Link>
+
+                {/* Dropdown panel */}
+                {activeDropdown === cat.slug && (
+                  <div
+                    className="absolute top-full left-0 min-w-[190px] py-3"
+                    style={{
+                      backgroundColor: "var(--color-foreground-strong)",
+                      boxShadow: "var(--shadow-4)",
+                    }}
+                    onMouseEnter={() => openDropdown(cat.slug)}
+                    onMouseLeave={closeDropdown}
+                  >
+                    {cat.items.map((item) => (
+                      <Link
+                        key={item.slug}
+                        href={`/products?category=${item.slug}`}
+                        className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100"
+                        style={{
+                          color: "var(--color-on-dark)",
+                          transition: "var(--transition-nav)",
+                        }}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
               <Link
+                key={cat.slug}
                 href={`/products?category=${cat.slug}`}
                 className="block px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
                 style={{
@@ -197,35 +240,8 @@ export default function Navbar({
               >
                 {cat.name}
               </Link>
-
-              {/* Dropdown panel */}
-              {activeDropdown === cat.slug && (
-                <div
-                  className="absolute top-full left-0 min-w-[190px] py-3"
-                  style={{
-                    backgroundColor: "var(--color-foreground-strong)",
-                    boxShadow: "var(--shadow-4)",
-                  }}
-                  onMouseEnter={() => openDropdown(cat.slug)}
-                  onMouseLeave={closeDropdown}
-                >
-                  {cat.items.map((item) => (
-                    <Link
-                      key={item.slug}
-                      href={`/products?category=${item.slug}`}
-                      className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100"
-                      style={{
-                        color: "var(--color-on-dark)",
-                        transition: "var(--transition-nav)",
-                      }}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            )
+          )}
       </nav>
 
       {/* ── Mobile drawer overlay ── */}
@@ -265,30 +281,45 @@ export default function Navbar({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-5 py-6">
-          {MOCK_CATEGORIES.map((cat) => (
-            <div key={cat.slug} className="mb-7">
-              <p
-                className="font-sans text-[11px] uppercase tracking-widest mb-3"
-                style={{ color: "var(--color-on-dark)", opacity: 0.4 }}
+          {MOCK_CATEGORIES.map((cat) =>
+            cat.items?.length ? (
+              <div key={cat.slug} className="mb-7">
+                <p
+                  className="font-sans text-[11px] uppercase tracking-widest mb-3"
+                  style={{ color: "var(--color-on-dark)", opacity: 0.4 }}
+                >
+                  {cat.name}
+                </p>
+                {cat.items.map((item) => (
+                  <Link
+                    key={item.slug}
+                    href={`/products?category=${item.slug}`}
+                    className="block py-2 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
+                    style={{
+                      color: "var(--color-on-dark)",
+                      transition: "var(--transition-nav)",
+                    }}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <Link
+                key={cat.slug}
+                href={`/products?category=${cat.slug}`}
+                className="block py-2 mb-4 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
+                style={{
+                  color: "var(--color-on-dark)",
+                  transition: "var(--transition-nav)",
+                }}
+                onClick={() => setMobileOpen(false)}
               >
                 {cat.name}
-              </p>
-              {cat.items.map((item) => (
-                <Link
-                  key={item.slug}
-                  href={`/products?category=${item.slug}`}
-                  className="block py-2 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
-                  style={{
-                    color: "var(--color-on-dark)",
-                    transition: "var(--transition-nav)",
-                  }}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          ))}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="px-5 py-6 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
