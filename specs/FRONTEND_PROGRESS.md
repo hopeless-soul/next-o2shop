@@ -539,3 +539,47 @@ Harvested computed styles directly from live reference using Playwright `evaluat
 ### Build verified (session 17)
 - `npm run lint` — clean (0 errors, 0 warnings)
 - Dev server confirmed at `/products/oversized_hoodie` — vertical thumbnail strip on right, all review typography matches reference measurements
+
+---
+
+## Session 18 — Product Images & Hover Zones
+
+Replaced all color-tinted div placeholders with real `next/image` elements on both the products list and the product detail page.
+
+### Goals
+
+- Wire `product.photos` (already typed as `ProductPhoto[]` with `sortOrder`) into the UI
+- Implement the dual hover-zone image-swap mechanic on `ProductCard` (design spec §9)
+- Build the thumbnail strip + main image swap on the detail page
+- Surface the `sortOrder:-1` accent photo in the detail page header
+
+### sortOrder convention
+
+| sortOrder | Role |
+|---|---|
+| `0` | Main image — always present |
+| `1` | Left hover zone on list cards (optional; no overlay rendered if absent) |
+| `2` | Right hover zone on list cards (optional; no overlay rendered if absent) |
+| `-1` | 64×80px accent photo beside product title in detail header (hidden if absent) |
+
+### Changes
+
+**`next.config.ts`**
+- Added `images.remotePatterns` derived at build time from `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:3001`). Parses protocol + hostname + port so no port is hardcoded.
+
+**`components/products/ProductCard.tsx`**
+- Derive `mainPhoto` (sortOrder:0), `hoverPhoto1` (sortOrder:1), `hoverPhoto2` (sortOrder:2) from `product.photos`
+- `mainPhoto` present → `<Image fill object-cover>` as base layer; `hoverPhoto1/2` present → independent `<Image fill>` overlays with `opacity: 0 / 1` keyed to `activeZone === "left" / "right"` and `transition: var(--transition-nav)`
+- `mainPhoto` absent → retain existing color-tinted div fallback (zero regression for products without photos)
+- Props interface unchanged: `product: Product`
+- Status updated from `🔒 stable` → `✅ done`
+
+**`app/products/[slug]/ProductDetailClient.tsx`**
+- `thumbnailPhotos` = `product.photos.filter(p => p.sortOrder !== -1).sort((a,b) => a.sortOrder - b.sortOrder)`
+- Thumbnail strip: iterates `thumbnailPhotos` → `<Image fill object-cover sizes="80px">` in existing `aspect-[4/5]` buttons; fallback to 5 color-div buttons when array is empty
+- Main image: `displayedPhoto = thumbnailPhotos[selectedImage]` → `<Image fill object-cover priority>`; removed `opacity: 0.45` from container (was leaking onto real images); fallback text placeholder retained
+- `accentPhoto` (sortOrder:-1): rendered as `<div 64×80px relative><Image fill object-cover></div>` next to the title block; renders nothing when absent (flex item collapses)
+- Fixed pre-existing `react/jsx-key` lint errors in `descBlocks.map()`
+
+### Build verified (session 18)
+- `npm run lint` — clean (0 errors, 0 warnings)

@@ -65,6 +65,16 @@ export type ProductPhoto = {
   variantIds: string[];
 };
 
+// Lightweight photo shape returned by the list endpoint (no sortOrder)
+export type ProductPhotoSummary = {
+  id: string;
+  url: string;
+  altText?: string;
+  width?: number;
+  height?: number;
+  aspectRatio?: number;
+};
+
 export type ProductVariant = {
   id: string;
   productId: string;
@@ -106,7 +116,8 @@ export type Product = {
   tags?: string[];
   description?: { blocks: ProductDescriptionBlock[] };
   rating: number;
-  photos: ProductPhoto[];
+  primaryPhoto?: ProductPhotoSummary;
+  photos?: ProductPhoto[];
   variants: ProductVariant[];
   collection?: Collection;
   category?: Category;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { Product, Review, ProductColor, ProductSize } from "@/lib/types";
 import VariantPicker from "@/components/products/VariantPicker";
 import StarRating from "@/components/ui/StarRating";
@@ -57,10 +58,16 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
     product.variants[0]?.colorValue ??
     "#e8e8e8";
 
+  // Photos: thumbnail strip excludes sortOrder -1; sorted ascending
+  const photos = product.photos ?? product.primaryPhoto ? [{ ...product.primaryPhoto!, sortOrder: 0, width: product.primaryPhoto?.width ?? 0, height: product.primaryPhoto?.height ?? 0, aspectRatio: product.primaryPhoto?.aspectRatio ?? 0.8, variantIds: [] }] : [];
+  const thumbnailPhotos = photos
+    .filter(p => p.sortOrder !== -1)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const accentPhoto = photos.find(p => p.sortOrder === -1) ?? null;
+  const displayedPhoto = thumbnailPhotos[selectedImage] ?? null;
+
   const descBlocks = product.description?.blocks ?? [];
-  const textBlock = descBlocks.find((b) => b.type === "text");
-  const pointsBlock = descBlocks.find((b) => b.type === "points");
-  const detailItems = pointsBlock?.type === "points" ? pointsBlock.items : [];
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)", marginTop: 8 }}>
@@ -81,35 +88,72 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               className="order-2 md:order-1 grid grid-cols-3 md:grid-cols-1 auto-rows-max gap-2 md:gap-1 md:w-[17%] md:min-h-0 md:overflow-y-auto md:pl-2"
               style={{ scrollbarWidth: "none" }}
             >
-              {[mainBg, "#d0d0d0", "#b8b8b8", "#b8b8b8", "#b8b8b8", "#b8b8b8", "#b8b8b8", "#b8b8b8"].map((bg, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedImage(i)}
-                  className="w-full aspect-[4/5]"
-                  style={{
-                    backgroundColor: bg,
-                    opacity: selectedImage === i ? 1 : 0.5,
-                    border: selectedImage === i
-                      ? "2px solid var(--color-foreground-dark)"
-                      : "2px solid transparent",
-                    transition: "var(--transition-base)",
-                    cursor: "pointer",
-                  }}
-                />
-              ))}
+              {thumbnailPhotos.length > 0 ? (
+                thumbnailPhotos.map((photo, i) => (
+                  <button
+                    key={photo.id}
+                    onClick={() => setSelectedImage(i)}
+                    className="w-full aspect-[4/5] relative overflow-hidden"
+                    style={{
+                      border: selectedImage === i
+                        ? "2px solid var(--color-foreground-dark)"
+                        : "2px solid transparent",
+                      transition: "var(--transition-base)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Image
+                      src={photo.url}
+                      alt={photo.altText ?? product.displayName}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  </button>
+                ))
+              ) : (
+                // Color fallback when no photos
+                [mainBg, "#d0d0d0", "#b8b8b8", "#b8b8b8", "#b8b8b8"].map((bg, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className="w-full aspect-[4/5]"
+                    style={{
+                      backgroundColor: bg,
+                      opacity: selectedImage === i ? 1 : 0.5,
+                      border: selectedImage === i
+                        ? "2px solid var(--color-foreground-dark)"
+                        : "2px solid transparent",
+                      transition: "var(--transition-base)",
+                      cursor: "pointer",
+                    }}
+                  />
+                ))
+              )}
             </div>
 
             {/* Main image — aspect ratio on mobile, fills container height on desktop */}
             <div
               className="order-1 md:order-2 flex-1 aspect-[4/5] md:aspect-auto md:h-full relative flex items-center justify-center"
-              style={{ backgroundColor: mainBg, opacity: 0.45 }}
+              style={{ backgroundColor: mainBg }}
             >
-              <span
-                className="font-sans text-[13px] uppercase tracking-widest opacity-50 absolute"
-                style={{ color: "var(--color-foreground)" }}
-              >
-                {product.displayName}
-              </span>
+              {displayedPhoto ? (
+                <Image
+                  src={displayedPhoto.url}
+                  alt={displayedPhoto.altText ?? product.displayName}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              ) : (
+                <span
+                  className="font-sans text-[13px] uppercase tracking-widest opacity-50 absolute"
+                  style={{ color: "var(--color-foreground)" }}
+                >
+                  {product.displayName}
+                </span>
+              )}
             </div>
 
           </div>
@@ -146,7 +190,17 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                 {product.displayName}
               </h1>
             </div>
-            <div className="flex-grow">IMG</div>
+            {accentPhoto && (
+              <div className="relative flex-shrink-0" style={{ width: 64, height: 80 }}>
+                <Image
+                  src={accentPhoto.url}
+                  alt={accentPhoto.altText ?? product.displayName}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                />
+              </div>
+            )}
           </div>
 
           {/* Header Reviews */}
@@ -170,10 +224,11 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           )}
 
           <div className="flex flex-col gap-3">
-            {descBlocks.map((desc) => {
+            {descBlocks.map((desc, i) => {
               if (desc.type === "text") {
                 return (
                   <p
+                    key={i}
                     className="text-xs leading-6"
                     style={{
                       fontFamily: "var(--font-secondary)",
@@ -187,6 +242,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
 
               if (desc.type === "points") {
                 return <ul
+                  key={i}
                   className="flex flex-col gap-2"
                   style={{
                     listStyle: 'none',
@@ -262,48 +318,6 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               >${product.compareAtPrice}</span>
             </span>
           </button>
-
-          {/* <div className="border-t" style={{ borderColor: "var(--color-border)" }}>
-            {[
-              { label: "Product Details", items: detailItems },
-              {
-                label: "Shipping & Returns",
-                items: ["Free shipping on orders over $75", "Free 30-day returns"],
-              },
-              {
-                label: "Care Instructions",
-                items: ["Machine wash cold", "Tumble dry low", "Do not iron print"],
-              },
-            ].map((section) => (
-              <details
-                key={section.label}
-                className="border-b"
-                style={{ borderColor: "var(--color-border)" }}
-              >
-                <summary
-                  className="flex items-center justify-between py-4 cursor-pointer font-sans text-[13px] uppercase tracking-widest list-none"
-                  style={{ color: "var(--color-foreground-dark)" }}
-                >
-                  {section.label}
-                  <span className="text-lg opacity-50">+</span>
-                </summary>
-                <ul className="pb-4 pl-1 flex flex-col gap-1">
-                  {section.items.map((item) => (
-                    <li
-                      key={item}
-                      className="text-sm"
-                      style={{
-                        fontFamily: "var(--font-secondary)",
-                        color: "var(--color-foreground-muted)",
-                      }}
-                    >
-                      — {item}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            ))}
-          </div> */}
 
           {/* ── Reviews ── */}
           <div id="reviewBlock"></div>

@@ -1,7 +1,7 @@
 # Frontend Tracking — o2shop
 
 > Pair file: `specs/FRONTEND_PROGRESS.md` (completed work history) · `specs/DESIGN_SYSTEM.md` (visual spec)
-> Last updated: 2026-05-27 (session-15)
+> Last updated: 2026-05-27 (session-18)
 
 ---
 
@@ -40,7 +40,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 | `Badge` | component | 🔒 stable | session-7 | 2026-05-26 |
 | `Button` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `StarRating` | component | 🔒 stable | session-15 | 2026-05-27 |
-| `ProductCard` | component | 🔒 stable | session-9 | 2026-05-26 |
+| `ProductCard` | component | ✅ done | session-18 | 2026-05-27 |
 | `ProductCardSkeleton` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `VariantPicker` | component | 🔒 stable | session-9 | 2026-05-26 |
 | `ReviewItem` | component | 🔒 stable | session-15 | 2026-05-27 |
@@ -178,6 +178,7 @@ Currently `"use client"` because of `useParams()` + variant state. If migrating 
 | 2026-05-26 | session-12 | Move reviews section from full-width sibling into right column (40%), below description accordion; remove avatar from `ReviewItem` |
 | 2026-05-27 | session-13 | Extract `ReviewsBlock` component; add rating histogram (computed from loaded reviews), inline write-review form (open to all, no auth gate), Load More pagination, Verified badge on each review card; `ReviewItem` layout reordered (stars+date top, author+badge second); `page.tsx` passes `totalReviews` |
 | 2026-05-27 | session-17 | Gallery: thumbnails moved from horizontal-below to vertical-right strip — gallery section changed to `flex-row` with `flex-1` main image + `flex-col gap-2` 80×100px thumbnail column on the right |
+| 2026-05-27 | session-18 | Replace hardcoded thumbnail + main image placeholders with real `<Image fill>` from `product.photos`; sortOrder:-1 renders as 64×80px accent photo beside title (hidden if absent); color fallback retained when photos absent |
 
 ---
 
@@ -582,18 +583,19 @@ SVG path stars (Feather-style) with linear-gradient partial fill for fractional 
 
 ### `ProductCard`
 
-**Status:** `🔒 stable`
+**Status:** `✅ done`
+**Owner:** session-18
 **Files:** `components/products/ProductCard.tsx`
 
 **Props interface**
 ```ts
 interface ProductCardProps {
-  product: Product; // from lib/mock-data.ts
+  product: Product;
 }
 ```
 
 **Notes**
-Client component (hover zone state). Left/right hover zones → opacity fade on second color placeholder. No real `<img>` tags yet — uses color-tinted divs as placeholders. **When real product images exist:** replace color divs with `<Image>` from `next/image`; add `images` array to the `Product` type (already exists as `string[]`, just needs real URLs). Badge rendered automatically if `product.badge` is set.
+Client component (hover zone state). Left zone → `sortOrder:1` image overlay; right zone → `sortOrder:2` image overlay. Both zones use independent `<Image fill>` overlays with `transition: var(--transition-nav)` opacity. Falls back to color-tinted divs when `product.photos` is empty. `next/image` remotePatterns wired in `next.config.ts` from `NEXT_PUBLIC_API_URL`.
 
 **Change Log**
 
@@ -601,6 +603,7 @@ Client component (hover zone state). Left/right hover zones → opacity fade on 
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — left/right hover zones, color-tinted placeholder divs, 4:5 ratio, badge overlay |
 | 2026-05-26 | session-9 | Schema alignment: `product.colors→variants`, derive `mainBg`/`hoverBg` from `variants[].colorValue`; `title→displayName`, `price→basePrice`, `originalPrice→compareAtPrice`; badge derived from `available`/`compareAtPrice`/`tags`; href uses `product.name` |
+| 2026-05-27 | session-18 | Replace color-div placeholders with real `<Image fill>` (sortOrder:0 main; sortOrder:1/2 independent hover overlays); color fallback retained when photos absent |
 
 ---
 
