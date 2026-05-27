@@ -25,28 +25,34 @@ export default function StarRating({
         const percent = Math.round(fill * 100);
         const gradId = `sg-${i}-${String(rating).replace(".", "_")}`;
 
+        const fillColor =
+          fill >= 1 ? color : isPartial ? `url(#${gradId})` : "var(--color-border-light)";
+        const strokeColor = fill >= 1 ? color : "var(--color-border-light)";
+
         return (
-          <svg key={i} width={size} height={size} viewBox="0 0 24 24">
+          <svg
+            key={i}
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             {isPartial && (
               <defs>
                 <linearGradient id={gradId}>
-                  <stop
-                    offset={`${percent}%`}
-                    stopColor={color}
-                  />
+                  <stop offset={`${percent}%`} stopColor={color} />
                   <stop offset={`${percent}%`} stopColor="var(--color-border-light)" />
                 </linearGradient>
               </defs>
             )}
-            <path
-              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-              fill={
-                fill >= 1
-                  ? color
-                  : isPartial
-                  ? `url(#${gradId})`
-                  : "var(--color-border-light)"
-              }
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 20.07 12 17 5.82 20.07 7 14.14 2 9.27 8.91 8.26 12 2"
+              fill={fillColor}
+              stroke={strokeColor}
             />
           </svg>
         );
