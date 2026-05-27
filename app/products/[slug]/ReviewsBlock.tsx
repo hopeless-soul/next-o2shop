@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, type FormEvent } from "react";
+import { Star } from "lucide-react";
 import type { Review } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import ReviewItem from "@/components/products/ReviewItem";
@@ -19,16 +20,12 @@ interface ReviewsBlockProps {
 
 function StarIcon({ filled }: { filled: boolean }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width={24}
-      height={24}
-      fill={filled ? "var(--color-primary)" : "var(--color-border)"}
+    <Star
+      size={24}
       aria-hidden="true"
-    >
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
+      fill={filled ? "var(--color-primary)" : "var(--color-border)"}
+      stroke={filled ? "var(--color-primary)" : "var(--color-border)"}
+    />
   );
 }
 
@@ -158,16 +155,13 @@ export default function ReviewsBlock({
         {displayedReviews.length > 0 && (
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
-              <svg
+              <Star
                 key={n}
-                width={13}
-                height={13}
-                viewBox="0 0 24 24"
+                size={13}
                 aria-hidden="true"
                 fill="var(--color-primary)"
-              >
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
+                stroke="var(--color-primary)"
+              />
             ))}
             <svg
               width={14}
@@ -188,19 +182,13 @@ export default function ReviewsBlock({
 
       {/* Summary row: star + score + count inline, Write a review button right */}
       <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <svg
-            width={24}
-            height={24}
-            viewBox="0 0 24 24"
+        <div className="flex items-center gap-2" style={{ fontSize: "32px" }}>
+          <Star
             aria-hidden="true"
-            style={{ flexShrink: 0 }}
-          >
-            <path
-              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-              fill="var(--color-star)"
-            />
-          </svg>
+            style={{ flexShrink: 0, width: "1em", height: "1em" }}
+            fill="var(--color-star)"
+            stroke="var(--color-star)"
+          />
           {displayedReviews.length > 0 ? (
             <>
               <span
