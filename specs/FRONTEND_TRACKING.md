@@ -1,7 +1,7 @@
 # Frontend Tracking — o2shop
 
 > Pair file: `specs/FRONTEND_PROGRESS.md` (completed work history) · `specs/DESIGN_SYSTEM.md` (visual spec)
-> Last updated: 2026-05-26
+> Last updated: 2026-05-27 (session-15)
 
 ---
 
@@ -26,7 +26,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 |---|---|---|---|---|
 | `/` home hero | route | ✅ done | session-2 | 2026-05-25 |
 | `/products` list | route | ✅ done | session-10 | 2026-05-26 |
-| `/products/[slug]` detail | route | ✅ done | session-10 | 2026-05-26 |
+| `/products/[slug]` detail | route | ✅ done | session-13 | 2026-05-27 |
 | `/login` | route | ⬜ todo | — | — |
 | `/register` | route | ⬜ todo | — | — |
 | `/account` dashboard | route | ✅ done | session-10 | 2026-05-26 |
@@ -39,11 +39,12 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🔒 stable` (bui
 | `Skeleton` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `Badge` | component | 🔒 stable | session-7 | 2026-05-26 |
 | `Button` | component | 🔒 stable | session-2 | 2026-05-25 |
-| `StarRating` | component | 🔒 stable | session-2 | 2026-05-25 |
+| `StarRating` | component | 🔒 stable | session-15 | 2026-05-27 |
 | `ProductCard` | component | 🔒 stable | session-9 | 2026-05-26 |
 | `ProductCardSkeleton` | component | 🔒 stable | session-2 | 2026-05-25 |
 | `VariantPicker` | component | 🔒 stable | session-9 | 2026-05-26 |
-| `ReviewItem` | component | 🔒 stable | session-9 | 2026-05-26 |
+| `ReviewItem` | component | 🔒 stable | session-15 | 2026-05-27 |
+| `ReviewsBlock` | component | 🔒 stable | session-15 | 2026-05-27 |
 | `OrderStatusBadge` | component | 🔒 stable | session-9 | 2026-05-26 |
 | `AddressCard` | component | 🔒 stable | session-9 | 2026-05-26 |
 | `PaymentStatusBadge` | component | 🔒 stable | session-9 | 2026-05-26 |
@@ -175,6 +176,8 @@ Currently `"use client"` because of `useParams()` + variant state. If migrating 
 | 2026-05-26 | session-10 | Split into RSC wrapper (`page.tsx`) + client island (`ProductDetailClient.tsx`); wired `getProductBySlug()` + `listReviewsByProduct(product.id)`; `notFound()` on 404; removed skeleton toggle and mock imports |
 | 2026-05-26 | session-11 | Fixed `description` shape (`{ blocks: [] }` not flat array); fixed points block field (`items` not `content`); fixed badge `self-start` to prevent full-width stretch in flex-col; verified 0 console errors against live API |
 | 2026-05-26 | session-12 | Move reviews section from full-width sibling into right column (40%), below description accordion; remove avatar from `ReviewItem` |
+| 2026-05-27 | session-13 | Extract `ReviewsBlock` component; add rating histogram (computed from loaded reviews), inline write-review form (open to all, no auth gate), Load More pagination, Verified badge on each review card; `ReviewItem` layout reordered (stars+date top, author+badge second); `page.tsx` passes `totalReviews` |
+| 2026-05-27 | session-17 | Gallery: thumbnails moved from horizontal-below to vertical-right strip — gallery section changed to `flex-row` with `flex-1` main image + `flex-col gap-2` 80×100px thumbnail column on the right |
 
 ---
 
@@ -565,13 +568,15 @@ interface StarRatingProps {
 ```
 
 **Notes**
-SVG polygon stars with linear-gradient partial fill for fractional ratings. Color: `var(--color-accent)` filled, `#e0e0e0` empty.
+SVG path stars (Feather-style) with linear-gradient partial fill for fractional ratings. `color?: string` prop (default `var(--color-star)`). Empty star fill: `var(--color-border-light)`. `--color-star` token is `var(--color-foreground-subtle)` (#8c8c8c) — grey by default, overridable per context.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
 | 2026-05-25 | session-2 | Initial build — SVG stars, linear-gradient partial fill for decimal ratings |
+| 2026-05-27 | session-14 | Add `color?: string` prop (default `var(--color-accent)`); replace hardcoded `#e0e0e0` with `var(--color-border-light)` for empty stars |
+| 2026-05-27 | session-15 | Switch star shape to path (rounder Feather-style); change default color to `var(--color-star)`; add `--color-star` token to globals.css |
 
 ---
 
@@ -662,7 +667,7 @@ interface ReviewItemProps {
 ```
 
 **Notes**
-Initials avatar circle (`var(--color-foreground-mid)` bg), author name Fjalla One 14px uppercase, date Montserrat 12px right-aligned, `StarRating` below name, review text Montserrat 14px.
+Three-row layout: Row 1 = `StarRating` (rating/2, 13px) + date (Montserrat 12px, right-aligned). Row 2 = author name (Fjalla One 13px uppercase) + "Verified" badge (Montserrat 11px, border `var(--color-border)`, text `var(--color-foreground-subtle)`). Row 3 = review body (Montserrat 14px). Date format: MM/DD/YYYY. Verified badge shown on all reviews (no field on API — applied unconditionally).
 
 **Change Log**
 
@@ -671,6 +676,40 @@ Initials avatar circle (`var(--color-foreground-mid)` bg), author name Fjalla On
 | 2026-05-25 | session-2 | Initial build — initials avatar, star rating, Montserrat body copy |
 | 2026-05-26 | session-9 | Schema alignment: `author→displayName`, `text→content`, `date→createdAt`; normalise `rating/2` for StarRating (API is 1–10) |
 | 2026-05-26 | session-12 | Remove initials avatar and `getInitials` function; flatten layout to direct content render |
+| 2026-05-27 | session-13 | Reorder layout: stars+date top row, author+Verified badge second row, content below; Verified badge shown unconditionally; date format changed to MM/DD/YYYY |
+| 2026-05-27 | session-14 | Pass `color="var(--color-foreground-dark)"` to StarRating — review stars now dark instead of red/accent |
+| 2026-05-27 | session-15 | Remove explicit `color` prop — stars now use `var(--color-star)` default (grey) |
+| 2026-05-27 | session-16 | Swap divider: `border-b` → `border-t` to match reference `jdgm-divider-top` style |
+| 2026-05-27 | session-17 | Author: Montserrat 16px weight-600 no-uppercase (was Fjalla One 13px uppercase); Verified badge: gray-filled white-text 9px (was bordered empty); body: weight-500 `rgb(115,115,115)` (was weight-400 dark); card: `borderTop: 0.667px solid rgba(0,0,0,0.1)` + `py-4` (was `border-t border-light + py-5`) |
+
+---
+
+### `ReviewsBlock`
+
+**Status:** `🔒 stable`
+**Files:** `app/products/[slug]/ReviewsBlock.tsx`
+
+**Props interface**
+```ts
+interface ReviewsBlockProps {
+  productId: string;
+  initialReviews: Review[];   // server-fetched first page
+  totalReviews: number;       // total count from API (for Load More gate)
+}
+```
+
+**Notes**
+Client Component. Manages all review-related state: loaded reviews, current page, load-more loading state, write-review form visibility and fields. Renders: "Reviews" section heading; summary row (single gray star + bold score + "Based on N reviews" all inline, "Write a review" / "Cancel" button right-aligned); inline write-review form (star picker, content textarea, display name, email, submit); review list via `ReviewItem`; "Load More" button. Form uses `createReview()` from `lib/api/reviews-client.ts` — on success shows pending-approval message (reviews enter moderation; not prepended to list). Load More uses `listReviewsByProductClient()`. Star picker: 5 SVG buttons, fill toggles on hover/click. Star color driven by `var(--color-star)` token.
+
+**Change Log**
+
+| Date | Agent | Change |
+|---|---|---|
+| 2026-05-27 | session-13 | Initial build — histogram, inline write-review form, load more pagination, Verified badge via ReviewItem |
+| 2026-05-27 | session-14 | Summary: replace 5-star row with single large gray star + bold score + sub-line count; Load More: `variant="secondary"` → `variant="primary"` (was red); remove unused StarRating import |
+| 2026-05-27 | session-15 | Summary row: make all inline (star + score + "Based on N reviews"); move "Write a review" button to summary row right; heading changed to "Reviews"; star shape updated to rounder path; color uses `var(--color-star)` |
+| 2026-05-27 | session-16 | Header row: add 5 filled stars + chevron on right (reference match); sort dropdown added (Most Recent / Highest / Lowest, client-side useMemo sort); Load More changed to centered auto-width; known gap: no review title (API `Review` type has no `title` field) |
+| 2026-05-27 | session-17 | Summary avg: Fjalla One 32px weight-600 `var(--color-foreground-strong)` margin-left 8px (was Montserrat 16px bold); summary text: Fjalla One 12px `rgb(156,156,156)` (was Montserrat); Write-review button: Fjalla One 14px bold `padding: 8px 32px` 2px border (was Montserrat 12px uppercase); sort dropdown: Fjalla One 14px `borderBottom: 0.667px solid rgba(0,0,0,0.1)` padding `4px 20px 4px 0` |
 
 ---
 

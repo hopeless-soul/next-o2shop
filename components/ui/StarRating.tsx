@@ -3,6 +3,7 @@ interface StarRatingProps {
   max?: number;
   size?: number;
   className?: string;
+  color?: string;
 }
 
 export default function StarRating({
@@ -10,6 +11,7 @@ export default function StarRating({
   max = 5,
   size = 14,
   className = "",
+  color = "var(--color-star)",
 }: StarRatingProps) {
   return (
     <div
@@ -24,26 +26,26 @@ export default function StarRating({
         const gradId = `sg-${i}-${String(rating).replace(".", "_")}`;
 
         return (
-          <svg key={i} width={size} height={size} viewBox="0 0 20 20">
+          <svg key={i} width={size} height={size} viewBox="0 0 24 24">
             {isPartial && (
               <defs>
                 <linearGradient id={gradId}>
                   <stop
                     offset={`${percent}%`}
-                    stopColor="var(--color-accent)"
+                    stopColor={color}
                   />
-                  <stop offset={`${percent}%`} stopColor="#e0e0e0" />
+                  <stop offset={`${percent}%`} stopColor="var(--color-border-light)" />
                 </linearGradient>
               </defs>
             )}
-            <polygon
-              points="10,1 12.9,7 19.5,7.6 14.5,12 16.2,18.5 10,15 3.8,18.5 5.5,12 0.5,7.6 7.1,7"
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
               fill={
                 fill >= 1
-                  ? "var(--color-accent)"
+                  ? color
                   : isPartial
                   ? `url(#${gradId})`
-                  : "#e0e0e0"
+                  : "var(--color-border-light)"
               }
             />
           </svg>

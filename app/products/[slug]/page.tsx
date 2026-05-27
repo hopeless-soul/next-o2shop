@@ -21,5 +21,11 @@ export default async function ProductPage({
 
   const reviewsResult = await listReviewsByProduct(product.id, { limit: 20 });
 
-  return <ProductDetailClient product={product} reviews={reviewsResult.data} />;
+  return (
+    <ProductDetailClient
+      product={product}
+      reviews={reviewsResult.data}
+      totalReviews={reviewsResult.total}
+    />
+  );
 }

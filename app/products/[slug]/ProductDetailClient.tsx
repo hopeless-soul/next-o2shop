@@ -4,17 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Product, Review, ProductColor, ProductSize } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
 import VariantPicker from "@/components/products/VariantPicker";
-import ReviewItem from "@/components/products/ReviewItem";
 import StarRating from "@/components/ui/StarRating";
+import ReviewsBlock from "./ReviewsBlock";
 
 interface Props {
   product: Product;
   reviews: Review[];
+  totalReviews: number;
 }
 
-export default function ProductDetailClient({ product, reviews }: Props) {
+export default function ProductDetailClient({ product, reviews, totalReviews }: Props) {
   const uniqueColors: ProductColor[] = product.variants.reduce<ProductColor[]>(
     (acc, v) => {
       if (!acc.find((c) => c.name === v.colorName)) {
@@ -116,30 +116,13 @@ export default function ProductDetailClient({ product, reviews }: Props) {
         }}
       >
         {/* ── Left: image gallery (60%) ── */}
-        <div className="md:w-[60%] md:pr-10 flex flex-col gap-3">
-          <div
-            className="w-full flex items-center justify-center"
-            style={{
-              aspectRatio: "4/5",
-              backgroundColor: mainBg,
-              opacity: 0.45,
-              position: "relative",
-            }}
-          >
-            <span
-              className="font-sans text-[13px] uppercase tracking-widest opacity-50"
-              style={{ color: "var(--color-foreground)", position: "absolute" }}
-            >
-              {product.displayName}
-            </span>
-          </div>
-
-          <div className="flex gap-2">
+        <div className="md:w-[60%] md:pr-10 flex gap-3">
+          {/* Thumbnails — vertical strip on the left */}
+          <div className="flex flex-col gap-2 flex-shrink-0">
             {[mainBg, "#d0d0d0", "#b8b8b8"].map((bg, i) => (
               <button
                 key={i}
                 onClick={() => setSelectedImage(i)}
-                className="flex-shrink-0"
                 style={{
                   width: "80px",
                   height: "100px",
@@ -150,10 +133,34 @@ export default function ProductDetailClient({ product, reviews }: Props) {
                       ? "2px solid var(--color-foreground-dark)"
                       : "2px solid transparent",
                   transition: "var(--transition-base)",
+                  flexShrink: 0,
+                  cursor: "pointer",
                 }}
               />
             ))}
           </div>
+
+          {/* Main image */}
+          <div className="flex-1 min-w-0">
+            <div
+              className="w-full flex items-center justify-center"
+              style={{
+                aspectRatio: "4/5",
+                backgroundColor: mainBg,
+                opacity: 0.45,
+                position: "relative",
+              }}
+            >
+              <span
+                className="font-sans text-[13px] uppercase tracking-widest opacity-50"
+                style={{ color: "var(--color-foreground)", position: "absolute" }}
+              >
+                {product.displayName}
+              </span>
+            </div>
+          </div>
+
+          
         </div>
 
         {/* ── Right: product info (40%) ── */}
@@ -289,40 +296,11 @@ export default function ProductDetailClient({ product, reviews }: Props) {
           </div>
 
           {/* ── Reviews ── */}
-          <div className="mt-6 border-t pt-6" style={{ borderColor: "var(--color-border)" }}>
-            <div className="flex items-center justify-between mb-6">
-              <h2
-                className="font-sans text-[18px] uppercase tracking-[0.36px]"
-                style={{ color: "var(--color-foreground-dark)" }}
-              >
-                Reviews
-              </h2>
-              {reviews.length > 0 && (
-                <div className="flex items-center gap-3">
-                  <StarRating rating={avgRating} size={16} />
-                  <span
-                    className="text-[14px]"
-                    style={{
-                      fontFamily: "var(--font-secondary)",
-                      color: "var(--color-foreground-subtle)",
-                    }}
-                  >
-                    {avgRating.toFixed(1)} / 5 &nbsp;·&nbsp; {reviews.length} reviews
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div>
-              {reviews.map((review) => (
-                <ReviewItem key={review.id} review={review} />
-              ))}
-            </div>
-
-            <Button variant="ghost" size="base" className="mt-8">
-              Write a Review
-            </Button>
-          </div>
+          <ReviewsBlock
+            productId={product.id}
+            initialReviews={reviews}
+            totalReviews={totalReviews}
+          />
         </div>
       </div>
     </div>

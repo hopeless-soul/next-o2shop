@@ -1,6 +1,6 @@
 # Frontend Progress — o2shop
 
-> Last updated: 2026-05-26
+> Last updated: 2026-05-27
 
 ---
 
@@ -361,3 +361,181 @@ Only warning present: pre-existing Next.js logo SVG aspect-ratio notice in Navba
 
 ### Build verified (session 12)
 - `npm run lint` — clean (0 errors, 0 warnings)
+
+---
+
+## Session 13 — Product Page: Reviews & Rating Block Redesign
+
+**Date:** 2026-05-27
+**Files created:** `app/products/[slug]/ReviewsBlock.tsx`
+**Files modified:** `components/products/ReviewItem.tsx`, `app/products/[slug]/ProductDetailClient.tsx`, `app/products/[slug]/page.tsx`, `specs/FRONTEND_TRACKING.md`
+
+### Changes
+
+**New `ReviewsBlock` component (`app/products/[slug]/ReviewsBlock.tsx`)**
+
+Client Component owning all review-related state. Replaces the inline reviews block that was embedded in `ProductDetailClient`. Features:
+
+- **Rating histogram** — 5 rows (5★ → 1★), each with a progress bar and count. Computed client-side via `Math.round(rating / 2)` bucketing from loaded reviews. Fill: `var(--color-primary)`; track: `var(--color-border)`.
+- **"Write a review" inline form** — toggle button in the header row (label switches to "Cancel" when open). Form fields: interactive 5-star SVG picker, content textarea, display name input, email input. Submit calls `createReview(productId, { rating: stars * 2, ... })` from `lib/api/reviews-client.ts`. On success: form closes and a "pending approval" message is shown (reviews enter moderation server-side; not prepended to list).
+- **Load More** — "Load More" button appears when `displayedReviews.length < total`. Calls `listReviewsByProductClient(productId, { page: n+1, limit: 20 })` and appends results. Button hides when all reviews are loaded.
+- **Open to all** — no auth gate; anyone can submit a review (matches API: `POST /products/{productId}/reviews` requires no auth).
+
+**`ReviewItem.tsx` — layout reorder + Verified badge**
+- New row order: Row 1 = `StarRating` + date (right-aligned). Row 2 = author name + "Verified" badge. Row 3 = review body.
+- Verified badge: Montserrat 11px, `border: 1px solid var(--color-border)`, `color: var(--color-foreground-subtle)`.
+- Verified shown unconditionally on all reviews (no `verified` field on `Review` type from API).
+- Date format changed to MM/DD/YYYY (`month: "2-digit", day: "2-digit"`) to match reference.
+
+**`ProductDetailClient.tsx`**
+- Removed inline reviews block (avgRating calc, `ReviewItem` map, "Write a Review" ghost button).
+- Added `totalReviews: number` to props interface.
+- Removed unused `Button` and `ReviewItem` imports.
+- Renders `<ReviewsBlock productId={product.id} initialReviews={reviews} totalReviews={totalReviews} />`.
+
+**`page.tsx`**
+- Now passes `totalReviews={reviewsResult.total}` in addition to `reviews={reviewsResult.data}`.
+
+### Known limitation
+The histogram is computed from the currently loaded reviews (first 20 from server + any Load More pages fetched). For products with > 20 reviews, the histogram is approximate until all pages are loaded. The API does not return pre-aggregated star distributions.
+
+### Build verified (session 13)
+- `npm run lint` — clean (0 errors, 0 warnings)
+- `npm run dev` (port 3000) — `/products/oversized_hoodie` renders with 0 console errors
+- Histogram bars, rating summary, and "Write a review" button all visible on page load
+- "Write a review" button toggles inline form open/closed; star picker interactive on hover and click
+
+---
+
+## Session 14 — Reviews Block: Visual Alignment with Reference
+
+**Date:** 2026-05-27
+**Files modified:** `components/ui/StarRating.tsx`, `components/products/ReviewItem.tsx`, `app/products/[slug]/ReviewsBlock.tsx`, `specs/FRONTEND_TRACKING.md`
+
+### Context
+
+Compared `review-block-check.png` (session-13 output) against `review-block-reference.png` and identified three mismatches:
+
+1. Star color — current: red/accent (`var(--color-accent)` = #e55151); reference: dark/gray stars
+2. Summary row — current: row of 5 small colored stars + inline text; reference: single large gray star icon + bold score + sub-line count
+3. Load More button — current: `variant="secondary"` which maps to `bg-accent` (red) in Button.tsx; reference: solid dark/black
+
+### Changes
+
+**`StarRating.tsx` — `color` prop + token fix**
+- Added `color?: string` prop (default `"var(--color-accent)"`) — backward compatible; all existing call sites unchanged
+- Replaced hardcoded `#e0e0e0` with `var(--color-border-light)` for empty star fill (token constraint fix)
+- Replaced hardcoded `"var(--color-accent)"` in gradient `stopColor` with the `color` prop
+
+**`ReviewItem.tsx`**
+- Pass `color="var(--color-foreground-dark)"` to `StarRating` — review card stars are now dark, matching the reference
+
+**`ReviewsBlock.tsx`**
+- Summary section: replaced `<StarRating rating={avgRating} size={15} />` row with a custom single SVG star (28×28px, fill `var(--color-foreground-subtle)`) + bold score ("4.0 / 5") + sub-line count ("Based on N reviews"). Matches the reference's single large gray star + score layout.
+- Load More button: `variant="secondary"` → `variant="primary"` — now renders as solid black matching reference
+- Removed unused `StarRating` import (no longer used in this file)
+
+### Regression check
+Stars in the product price row (uses `<StarRating>` without `color` prop) remain red/accent — default unchanged.
+
+### Build verified (session 14)
+- `npm run lint` — clean (0 errors, 0 warnings)
+- `npm run dev` (port 3000) — `/products/oversized_hoodie` renders with 0 console errors
+- Review card stars are dark gray; summary shows single large gray star + bold score; price-row stars remain red
+
+---
+
+## Session 15 — Reviews Block Visual Alignment (continued)
+
+### Goal
+Bring reviews block closer to reference: inline summary row, rounded star shape, semantic star color token, heading update.
+
+### Changes
+
+**`app/globals.css`**
+- Added `--color-star: var(--color-foreground-subtle)` to `:root` and `@theme inline` — semantic token for star color (grey by default, overridable per theme)
+
+**`components/ui/StarRating.tsx`**
+- Changed star shape from polygon to path (`d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"`, Feather-style, rounder look); updated viewBox to `0 0 24 24`
+- Changed default `color` prop from `var(--color-accent)` to `var(--color-star)` — stars now grey by default everywhere
+
+**`components/products/ReviewItem.tsx`**
+- Removed explicit `color="var(--color-foreground-dark)"` — review item stars now use the global `var(--color-star)` default
+
+**`app/products/[slug]/ReviewsBlock.tsx`**
+- Section heading: "Customer Reviews" → "Reviews" (smaller, `text-[13px]`, matches reference section label style)
+- Summary row: all content now inline — single star SVG + bold score + "Based on N reviews" (smaller grey) all on one row
+- "Write a review" / "Cancel" button moved from the heading row to the right side of the summary row
+- No-reviews empty state shows "No reviews yet" inline with the star
+- Star SVG in summary updated to rounder path, fill uses `var(--color-star)`
+
+### Build verified (session 15)
+- `npm run lint` — clean (0 errors, 0 warnings)
+
+---
+
+## Session 16 — Reviews Block Reference Match
+
+### Goal
+Bring `ReviewsBlock` and `ReviewItem` as close as possible to the reference screenshot (`review-block-reference.png`) from the Cool Shirtz Shopify store.
+
+### Changes
+
+**`app/products/[slug]/ReviewsBlock.tsx`**
+- Header row: added 5 small filled black stars + chevron SVG on the right of the "REVIEWS" heading — matches reference aggregate stars row
+- Added `sortOrder` state (`most-recent` | `highest` | `lowest`) and `sortedReviews` via `useMemo` — client-side sort of displayed reviews
+- Sort dropdown ("Most Recent ∨") rendered below the summary row, styled with border-bottom only and custom chevron arrow
+- Render `sortedReviews` (not `displayedReviews`) in the review list
+- Load More: removed `fullWidth`, wrapped in `flex justify-center` — matches reference auto-width centered button
+
+**`components/products/ReviewItem.tsx`**
+- Divider changed from `border-b` to `border-t` — matches reference `jdgm-divider-top` pattern (separator above each review, not below)
+
+### Known gap
+- Reference shows a bold review title (e.g. "The Reaper Ring") above each review body. This cannot be added: the O2Shop `Review` type (`lib/types.ts`) has no `title` field and the API does not return one.
+
+### Build verified (session 16)
+- `npm run lint` — clean (0 errors, 0 warnings)
+- Dev server confirmed rendering at `/products/oversized_hoodie` — header stars, sort dropdown, top-border dividers, centered Load More all present with no console errors
+
+---
+
+## Session 17 — Reviews Deep Style Alignment + Gallery Thumbnail Reposition
+
+### Goal
+1. Deep-match review block styles to live reference (https://shirtz.cool/products/the-reaper-ring) using harvested computed styles
+2. Move product photo thumbnails from horizontal-below to vertical-right strip (matching reference gallery layout)
+
+### Research
+Harvested computed styles directly from live reference using Playwright `evaluate()`. Key measurements:
+- Summary avg: Fjalla One 32px weight-600 `rgb(35,31,32)` margin-left 8px
+- Summary text: Fjalla One 12px `rgb(156,156,156)`
+- Write-review button: Fjalla One 14px bold, `padding: 8px 32px`, `2px solid`
+- Sort dropdown: Fjalla One 14px, `borderBottom: 0.667px solid rgba(0,0,0,0.1)`, `padding: 4px 16px 4px 0`
+- Review card: `borderTop: 0.667px solid rgba(0,0,0,0.1)`, `padding: 16px 0`
+- Author name: Montserrat 16px weight-600 non-uppercase `rgb(36,36,36)`
+- Verified badge: Montserrat 9px weight-600, white text, `bg: rgb(156,156,156)`, `padding: 3px 6px`
+- Review body: Montserrat 14px weight-500 `rgb(115,115,115)`
+- Gallery thumbnails: vertical 116px strip to the LEFT of main image on reference
+
+### Changes
+
+**`components/products/ReviewItem.tsx`**
+- Card: `borderTop: "0.667px solid rgba(0,0,0,0.1)"` inline + `py-4` (16px) instead of `border-t border-light py-5`
+- Author: Montserrat 16px weight-600 no-uppercase `var(--color-foreground-strong)` (was Fjalla One 13px uppercase dark)
+- Verified badge: gray-filled (`rgb(156,156,156)`) white text 9px weight-600 `padding: 3px 6px` no border (was bordered empty box)
+- Body: weight-500 `rgb(115,115,115)` lineHeight 19.6px (was weight-400 `var(--color-foreground)` = #333333)
+- Date: `rgb(123,123,123)` letterSpacing 0.3px (was `var(--color-foreground-subtle)`)
+
+**`app/products/[slug]/ReviewsBlock.tsx`**
+- Summary avg: Fjalla One 32px weight-600 `var(--color-foreground-strong)` marginLeft 8px (was Montserrat 16px bold)
+- Summary text: Fjalla One 12px `rgb(156,156,156)` (was Montserrat)
+- Write-review button: Fjalla One 14px bold `padding: 8px 32px` `border: 2px solid` (was Montserrat 12px uppercase `px-3 py-2`)
+- Sort dropdown: Fjalla One 14px, borderBottom `0.667px solid rgba(0,0,0,0.1)`, padding `4px 20px 4px 0` (was Montserrat 13px)
+
+**`app/products/[slug]/ProductDetailClient.tsx`**
+- Gallery section: changed from `flex-col` (main image above, thumbnails below horizontal) to `flex-row` (main image `flex-1`, thumbnails `flex-col gap-2` 80×100px vertical strip on the RIGHT)
+
+### Build verified (session 17)
+- `npm run lint` — clean (0 errors, 0 warnings)
+- Dev server confirmed at `/products/oversized_hoodie` — vertical thumbnail strip on right, all review typography matches reference measurements
