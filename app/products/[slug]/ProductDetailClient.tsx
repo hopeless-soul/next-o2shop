@@ -5,6 +5,7 @@ import type { Product, Review, ProductColor, ProductSize } from "@/lib/types";
 import VariantPicker from "@/components/products/VariantPicker";
 import StarRating from "@/components/ui/StarRating";
 import ReviewsBlock from "./ReviewsBlock";
+import { Star } from "lucide-react";
 
 interface Props {
   product: Product;
@@ -63,38 +64,6 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)", marginTop: 8 }}>
-      {/* Breadcrumbs - Depricated*/}
-      {/* <div
-        className="py-4 border-b"
-        style={{
-          paddingLeft: "var(--header-px-desktop)",
-          paddingRight: "var(--header-px-desktop)",
-          borderColor: "var(--color-border-light)",
-        }}
-      >
-        <p
-          className="text-[12px] uppercase tracking-widest"
-          style={{
-            fontFamily: "var(--font-secondary)",
-            color: "var(--color-foreground-subtle)",
-          }}
-        >
-          <Link href="/" className="hover:opacity-70" style={{ transition: "var(--transition-nav)" }}>
-            Home
-          </Link>
-          {" / "}
-          <Link
-            href="/products"
-            className="hover:opacity-70"
-            style={{ transition: "var(--transition-nav)" }}
-          >
-            {product.subCategory?.displayName ?? "Products"}
-          </Link>
-          {" / "}
-          <span style={{ color: "var(--color-foreground-dark)" }}>{product.displayName}</span>
-        </p>
-      </div> */}
-
       {/* Main layout */}
       <div
         className="flex flex-col md:flex-row"
@@ -148,56 +117,108 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
 
         {/* ── Right: product info (50%) ── */}
         <div
-          className="md:w-1/2 flex flex-col gap-5 mt-8 md:mt-0 md:pr-10"
-          style={{ paddingLeft: "var(--space-10)" }}
+          className="md:w-1/2 flex flex-col gap-5 mt-8 md:mt-10 md:pl-10 md:pr-10"
         >
           {/* {badge && <Badge variant={badge} className="self-start" />} */}
-          <p>{product.type ?? 'Nice Hoodie'}</p>
-          <h1
-            className="font-sans uppercase leading-tight"
-            style={{
-              fontSize: "clamp(1.5rem, 3vw, 2.6rem)",
-              letterSpacing: "0.84px",
-              color: "var(--color-foreground-strong)",
-              textTransform: "capitalize",
-              WebkitTextStroke: '1.4px var(--color-foreground-strong)'
-            }}
-          >
-            {product.displayName}
-          </h1>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {product.compareAtPrice && (
-                <span
-                  className="font-sans text-[16px] line-through opacity-50"
-                  style={{ color: "var(--color-foreground)" }}
-                >
-                  ${product.compareAtPrice}
-                </span>
-              )}
-              <span
-                className="font-sans text-[22px] tracking-[0.44px]"
-                style={{ color: "var(--color-foreground-dark)" }}
+          <div className="flex gap-2">
+            <div>
+              <p
+                style={{
+                  fontSize: "16px",
+                  fontWeight: '600',
+                  lineHeight: '24px',
+                  color: '#9c9c9c',
+                  fontFamily: 'Montserrat',
+                }}
               >
-                ${product.basePrice}
-              </span>
+                {product.type ?? 'Nice Hoodie'}
+              </p>
+              <h1
+                className="font-sans uppercase leading-tight"
+                style={{
+                  fontSize: "clamp(1.5rem, 3vw, 2.6rem)",
+                  letterSpacing: "0.84px",
+                  color: "var(--color-foreground-strong)",
+                  textTransform: "capitalize",
+                  WebkitTextStroke: '1.4px var(--color-foreground-strong)'
+                }}
+              >
+                {product.displayName}
+              </h1>
             </div>
-            {/* Header Reviews are depricated */}
-            {/* {reviews.length > 0 && (
-              <div className="flex items-center gap-2">
-                <StarRating rating={avgRating} size={14} />
-                <span
-                  className="text-[12px]"
+            <div className="flex-grow">IMG</div>
+          </div>
+
+          {/* Header Reviews */}
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-2">
+              <StarRating rating={avgRating} size={18} />
+              <a
+                href='#reviewBlock'
+                className="text-[14px] underline"
+                style={{
+                  lineHeight: '16px',
+                  fontWeight: '500',
+                  textUnderlineOffset: '3px',
+                  fontFamily: "var(--font-secondary)",
+                  color: "var(--color-foreground-subtle)",
+                }}
+              >
+                {reviews.length} reviews
+              </a>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            {descBlocks.map((desc) => {
+              if (desc.type === "text") {
+                return (
+                  <p
+                    className="text-xs leading-6"
+                    style={{
+                      fontFamily: "var(--font-secondary)",
+                      color: "var(--color-foreground)",
+                    }}
+                  >
+                    {desc.content}
+                  </p>
+                );
+              }
+
+              if (desc.type === "points") {
+                return <ul
+                  className="flex flex-col gap-2"
                   style={{
-                    fontFamily: "var(--font-secondary)",
-                    color: "var(--color-foreground-subtle)",
+                    listStyle: 'none',
+                    paddingLeft: '10px',
                   }}
                 >
-                  ({reviews.length})
-                </span>
-              </div>
-            )} */}
+                  {
+                    desc.items.map((point) => (
+                      <li
+                        key={point}
+                        className="text-sm flex gap-4"
+                        style={{
+                          fontFamily: "var(--font-secondary)",
+                          color: "var(--color-foreground-muted)",
+                        }}
+                      >
+                        <Star
+                          aria-hidden="true"
+                          style={{ flexShrink: 0, width: "1.2em", height: "1.2em" }}
+                          fill="var(--color-star)"
+                          stroke="var(--color-star)"
+                        />
+                        <span>
+                          {point}
+                        </span>
+                      </li>
+                    ))
+                  }
+                </ul>
+              }
+              return null;
+            })}
           </div>
 
           <VariantPicker
@@ -210,14 +231,17 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           />
 
           <button
-            className="w-full font-sans text-[13px] uppercase tracking-widest text-primary-foreground flex items-center justify-center"
+            className="w-full font-sans text-[24px] uppercase tracking-widest text-primary-foreground flex items-center"
             style={{
+              justifyContent: 'space-between',
               height: "var(--atc-height)",
               backgroundColor: "var(--color-primary)",
               borderRadius: "var(--radius-base)",
               transition: "var(--transition-base)",
               border: "none",
               cursor: "pointer",
+              WebkitTextStroke: '0.6px white',
+              padding: '20px'
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.opacity = "0.88";
@@ -226,22 +250,20 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               (e.currentTarget as HTMLButtonElement).style.opacity = "1";
             }}
           >
-            Add to Cart
+            <span className="tracking-[0.44px]">
+              Add to Cart
+            </span>
+            <span className="flex gap-2">
+              <span
+                className="font-sans text-[24px] tracking-[0.44px]"
+              >${product.basePrice}</span>
+              <span
+                className="font-sans text-[24px] tracking-[0.44px] line-through opacity-50"
+              >${product.compareAtPrice}</span>
+            </span>
           </button>
 
-          {textBlock?.type === "text" && (
-            <p
-              className="text-sm leading-6"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground)",
-              }}
-            >
-              {textBlock.content}
-            </p>
-          )}
-
-          <div className="border-t" style={{ borderColor: "var(--color-border)" }}>
+          {/* <div className="border-t" style={{ borderColor: "var(--color-border)" }}>
             {[
               { label: "Product Details", items: detailItems },
               {
@@ -281,9 +303,10 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                 </ul>
               </details>
             ))}
-          </div>
+          </div> */}
 
           {/* ── Reviews ── */}
+          <div id="reviewBlock"></div>
           <ReviewsBlock
             productId={product.id}
             initialReviews={reviews}

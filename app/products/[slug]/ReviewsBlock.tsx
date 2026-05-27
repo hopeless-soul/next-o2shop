@@ -9,6 +9,7 @@ import {
   listReviewsByProductClient,
   createReview,
 } from "@/lib/api/reviews-client";
+import StarRating from "@/components/ui/StarRating";
 
 type SortOrder = "most-recent" | "highest" | "lowest";
 
@@ -54,8 +55,8 @@ export default function ReviewsBlock({
   const avgRating =
     displayedReviews.length > 0
       ? displayedReviews.reduce((s, r) => s + r.rating, 0) /
-        displayedReviews.length /
-        2
+      displayedReviews.length /
+      2
       : 0;
 
   const sortedReviews = useMemo(() => {
@@ -153,16 +154,8 @@ export default function ReviewsBlock({
           Reviews
         </h2>
         {displayedReviews.length > 0 && (
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <Star
-                key={n}
-                size={13}
-                aria-hidden="true"
-                fill="var(--color-primary)"
-                stroke="var(--color-primary)"
-              />
-            ))}
+          <div className="flex items-center gap-2">
+            <StarRating rating={avgRating} size={14} />
             <svg
               width={14}
               height={14}
@@ -239,6 +232,7 @@ export default function ReviewsBlock({
             backgroundColor: "var(--color-primary)",
             color: "#ffffff",
             border: "2px solid var(--color-primary)",
+            borderRadius: "4px",
             padding: "8px 32px",
             cursor: "pointer",
             transition: "var(--transition-base)",
@@ -252,13 +246,13 @@ export default function ReviewsBlock({
             (e.currentTarget as HTMLButtonElement).style.opacity = "1";
           }}
         >
-          {formOpen ? "Cancel" : "Write a review"}
+          {formOpen ? "Cancel review" : "Write a review"}
         </button>
       </div>
 
       {/* Sort dropdown */}
       {displayedReviews.length > 0 && (
-        <div className="flex items-center gap-1 mb-4">
+        <div className="flex items-center gap-1 mb-2 pt-2 border-t" style={{ borderColor: "var(--color-border)" }}>
           <div className="relative inline-flex items-center">
             <select
               value={sortOrder}
@@ -270,7 +264,6 @@ export default function ReviewsBlock({
                 color: "rgb(0,0,0)",
                 background: "transparent",
                 border: "none",
-                borderBottom: "0.667px solid rgba(0,0,0,0.1)",
                 outline: "none",
                 cursor: "pointer",
                 padding: "4px 20px 4px 0px",
@@ -320,7 +313,7 @@ export default function ReviewsBlock({
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-4 mb-6 pt-4 border-t"
-          style={{ borderColor: "var(--color-border-light)" }}
+          style={{ borderColor: "var(--color-border-light)", borderRadius: '24px' }}
         >
           <p
             className="text-[14px] uppercase tracking-[0.3px] font-sans"
