@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { Product, Review, ProductColor, ProductSize } from "@/lib/types";
-import Badge from "@/components/ui/Badge";
 import VariantPicker from "@/components/products/VariantPicker";
 import StarRating from "@/components/ui/StarRating";
 import ReviewsBlock from "./ReviewsBlock";
@@ -33,19 +31,19 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
 
   const uniqueSizes: ProductSize[] = selectedColor
     ? product.variants
-        .filter((v) => v.colorName === selectedColor)
-        .reduce<ProductSize[]>((acc, v) => {
-          if (!acc.find((s) => s.label === v.size)) {
-            acc.push({ label: v.size, available: v.available });
-          }
-          return acc;
-        }, [])
-    : product.variants.reduce<ProductSize[]>((acc, v) => {
+      .filter((v) => v.colorName === selectedColor)
+      .reduce<ProductSize[]>((acc, v) => {
         if (!acc.find((s) => s.label === v.size)) {
           acc.push({ label: v.size, available: v.available });
         }
         return acc;
-      }, []);
+      }, [])
+    : product.variants.reduce<ProductSize[]>((acc, v) => {
+      if (!acc.find((s) => s.label === v.size)) {
+        acc.push({ label: v.size, available: v.available });
+      }
+      return acc;
+    }, []);
 
   // ratings are 1–10 in API; normalise to 0–5 for StarRating
   const avgRating =
@@ -58,23 +56,15 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
     product.variants[0]?.colorValue ??
     "#e8e8e8";
 
-  const badge = !product.available
-    ? ("sold-out" as const)
-    : product.compareAtPrice && product.compareAtPrice > product.basePrice
-      ? ("sale" as const)
-      : product.tags.includes("new")
-        ? ("new" as const)
-        : undefined;
-
   const descBlocks = product.description?.blocks ?? [];
   const textBlock = descBlocks.find((b) => b.type === "text");
   const pointsBlock = descBlocks.find((b) => b.type === "points");
   const detailItems = pointsBlock?.type === "points" ? pointsBlock.items : [];
 
   return (
-    <div style={{ paddingTop: "var(--header-height-desktop)" }}>
-      {/* Breadcrumbs */}
-      <div
+    <div style={{ paddingTop: "var(--header-height-desktop)", marginTop: 8 }}>
+      {/* Breadcrumbs - Depricated*/}
+      {/* <div
         className="py-4 border-b"
         style={{
           paddingLeft: "var(--header-px-desktop)",
@@ -103,70 +93,66 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           {" / "}
           <span style={{ color: "var(--color-foreground-dark)" }}>{product.displayName}</span>
         </p>
-      </div>
+      </div> */}
 
       {/* Main layout */}
       <div
-        className="flex flex-col md:flex-row gap-0"
+        className="flex flex-col md:flex-row"
         style={{
-          paddingLeft: "var(--header-px-desktop)",
-          paddingRight: "var(--header-px-desktop)",
           paddingTop: "var(--space-10)",
           paddingBottom: "var(--space-10)",
         }}
       >
-        {/* ── Left: image gallery (60%) ── */}
-        <div className="md:w-[60%] md:pr-10 flex gap-3">
-          {/* Thumbnails — vertical strip on the left */}
-          <div className="flex flex-col gap-2 flex-shrink-0">
-            {[mainBg, "#d0d0d0", "#b8b8b8"].map((bg, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedImage(i)}
-                style={{
-                  width: "80px",
-                  height: "100px",
-                  backgroundColor: bg,
-                  opacity: selectedImage === i ? 1 : 0.5,
-                  border:
-                    selectedImage === i
+        {/* ── Left: image gallery (50%) ── */}
+        <div className="md:w-1/2 md:h-screen">
+          <div className="flex flex-col md:flex-row md:h-full gap-2 md:gap-1">
+
+            {/* Thumbnails — 3-col grid on mobile, scrollable vertical strip on desktop */}
+            <div
+              className="order-2 md:order-1 grid grid-cols-3 md:grid-cols-1 auto-rows-max gap-2 md:gap-1 md:w-[17%] md:min-h-0 md:overflow-y-auto md:pl-2"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {[mainBg, "#d0d0d0", "#b8b8b8", "#b8b8b8", "#b8b8b8", "#b8b8b8", "#b8b8b8", "#b8b8b8"].map((bg, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedImage(i)}
+                  className="w-full aspect-[4/5]"
+                  style={{
+                    backgroundColor: bg,
+                    opacity: selectedImage === i ? 1 : 0.5,
+                    border: selectedImage === i
                       ? "2px solid var(--color-foreground-dark)"
                       : "2px solid transparent",
-                  transition: "var(--transition-base)",
-                  flexShrink: 0,
-                  cursor: "pointer",
-                }}
-              />
-            ))}
-          </div>
+                    transition: "var(--transition-base)",
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
+            </div>
 
-          {/* Main image */}
-          <div className="flex-1 min-w-0">
+            {/* Main image — aspect ratio on mobile, fills container height on desktop */}
             <div
-              className="w-full flex items-center justify-center"
-              style={{
-                aspectRatio: "4/5",
-                backgroundColor: mainBg,
-                opacity: 0.45,
-                position: "relative",
-              }}
+              className="order-1 md:order-2 flex-1 aspect-[4/5] md:aspect-auto md:h-full relative flex items-center justify-center"
+              style={{ backgroundColor: mainBg, opacity: 0.45 }}
             >
               <span
-                className="font-sans text-[13px] uppercase tracking-widest opacity-50"
-                style={{ color: "var(--color-foreground)", position: "absolute" }}
+                className="font-sans text-[13px] uppercase tracking-widest opacity-50 absolute"
+                style={{ color: "var(--color-foreground)" }}
               >
                 {product.displayName}
               </span>
             </div>
-          </div>
 
-          
+          </div>
         </div>
 
-        {/* ── Right: product info (40%) ── */}
-        <div className="md:w-[40%] flex flex-col gap-5 md:pl-4">
-          {badge && <Badge variant={badge} className="self-start" />}
-
+        {/* ── Right: product info (50%) ── */}
+        <div
+          className="md:w-1/2 flex flex-col gap-5 mt-8 md:mt-0 md:pr-10"
+          style={{ paddingLeft: "var(--space-10)" }}
+        >
+          {/* {badge && <Badge variant={badge} className="self-start" />} */}
+          <p>{product.type ?? 'Nice Hoodie'}</p>
           <h1
             className="font-sans uppercase leading-tight"
             style={{
@@ -174,6 +160,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               letterSpacing: "0.84px",
               color: "var(--color-foreground-strong)",
               textTransform: "capitalize",
+              WebkitTextStroke: '1.4px var(--color-foreground-strong)'
             }}
           >
             {product.displayName}
@@ -196,7 +183,8 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                 ${product.basePrice}
               </span>
             </div>
-            {reviews.length > 0 && (
+            {/* Header Reviews are depricated */}
+            {/* {reviews.length > 0 && (
               <div className="flex items-center gap-2">
                 <StarRating rating={avgRating} size={14} />
                 <span
@@ -209,7 +197,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                   ({reviews.length})
                 </span>
               </div>
-            )}
+            )} */}
           </div>
 
           <VariantPicker

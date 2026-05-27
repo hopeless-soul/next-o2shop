@@ -111,6 +111,7 @@ export type Product = {
   collection?: Collection;
   category?: Category;
   subCategory?: SubCategory;
+  type?: string
 };
 
 // ── Review ────────────────────────────────────────────────────────────────────
