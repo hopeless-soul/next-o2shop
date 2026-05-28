@@ -27,12 +27,12 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | Admin CSS tokens (`--admin-*`) in globals.css | infra | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `AdminLayout` (app/admin/layout.tsx) | shell | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `AdminSidebar` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
-| `AdminPageHeader` | component | ⬜ todo | — | — |
-| `DataTable` | component | ⬜ todo | — | — |
-| `FilterBar` | component | ⬜ todo | — | — |
-| `AdminPagination` | component | ⬜ todo | — | — |
-| `AdminBadge` | component | ⬜ todo | — | — |
-| `ConfirmDialog` | component | ⬜ todo | — | — |
+| `AdminPageHeader` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
+| `DataTable` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
+| `FilterBar` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
+| `AdminPagination` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
+| `AdminBadge` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
+| `ConfirmDialog` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `FormCard` | component | ⬜ todo | — | — |
 | `/admin` dashboard | route | ✅ done (placeholder) | session-21 | 2026-05-27 |
 | `/admin/products` list | route | ⬜ todo | — | — |
@@ -40,7 +40,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | `/admin/products/[id]` edit | route | ⬜ todo | — | — |
 | `/admin/orders` list | route | ⬜ todo | — | — |
 | `/admin/orders/[id]` edit | route | ⬜ todo | — | — |
-| `/admin/users` list | route | ⬜ todo | — | — |
+| `/admin/users` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `/admin/users/[id]` edit | route | ⬜ todo | — | — |
 | `/admin/users/new` create | route | 🚫 blocked | — | — |
 | `/admin/categories` list | route | ⬜ todo | — | — |
@@ -51,7 +51,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | `/admin/collections/[id]` edit | route | ⬜ todo | — | — |
 | `/admin/reviews` list | route | ⬜ todo | — | — |
 | `/admin/shipping` list + CRUD | route | ⬜ todo | — | — |
-| `lib/api/admin-*.ts` service files | infra | ⬜ todo | — | — |
+| `lib/api/admin-*.ts` service files | infra | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 
 ---
 
@@ -140,7 +140,7 @@ Add this block to `app/globals.css` after the shadcn-generated `:root {}` block:
 
 ### Admin API Service Files
 
-**Status:** `⬜ todo` | **Files:** `lib/api/admin-*.ts`
+**Status:** `✅ done` | **Files:** `lib/api/admin-*.ts`
 
 Create one file per admin resource. All admin mutations use `lib/api/client.ts`. All RSC reads use `lib/api/server.ts`. **Re-read `openapi.json` fresh when implementing each file.**
 
@@ -158,6 +158,7 @@ Create one file per admin resource. All admin mutations use `lib/api/client.ts`.
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created all 7 admin service files with TypeScript types from openapi.json; server reads via server.ts, mutations via client.ts |
 
 ---
 
@@ -229,7 +230,7 @@ const NAV_ITEMS = [
 
 ### `AdminPageHeader`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/AdminPageHeader.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/AdminPageHeader.tsx`
 
 ```ts
 interface AdminPageHeaderProps {
@@ -247,6 +248,7 @@ interface AdminPageHeaderProps {
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created server component; flex row with breadcrumb nav, h1, and right action slot |
 
 ---
 
@@ -256,7 +258,7 @@ interface AdminPageHeaderProps {
 
 ### `DataTable`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/DataTable.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/DataTable.tsx`
 
 ```ts
 import { ColumnDef } from '@tanstack/react-table'
@@ -271,6 +273,10 @@ interface DataTableProps<T> {
   onLimitChange?: (limit: number) => void;
   isLoading?: boolean;
   emptyMessage?: string;
+  // URL-driven sort (optional)
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
 }
 ```
 
@@ -280,12 +286,13 @@ Built on shadcn `<Table>` + `useReactTable`. Visual spec: `ADMIN_DESIGN_SYSTEM.m
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created with TanStack Table (manualSorting/Pagination), URL-driven sort props, 6-row skeleton, PackageOpen empty state |
 
 ---
 
 ### `FilterBar`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/FilterBar.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/FilterBar.tsx`
 
 ```ts
 interface FilterOption {
@@ -314,12 +321,13 @@ interface FilterBarProps {
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created client component; 300ms debounced search, inline filter selects, clear link; URL routing via parent callbacks |
 
 ---
 
 ### `AdminPagination`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/AdminPagination.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/AdminPagination.tsx`
 
 ```ts
 interface AdminPaginationProps {
@@ -338,12 +346,13 @@ Visual spec: `ADMIN_DESIGN_SYSTEM.md §10c`.
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created client component; X–Y of Z label, limit select, ellipsis page numbers (max 7), prev/next buttons |
 
 ---
 
 ### `AdminBadge`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/AdminBadge.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/AdminBadge.tsx`
 
 ```ts
 type AdminBadgeVariant = 'success' | 'warning' | 'error' | 'neutral' | 'info';
@@ -381,12 +390,13 @@ Color map: `ADMIN_DESIGN_SYSTEM.md §10d`.
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created server component; 5 variants using --admin-status-* tokens; all 4 convenience maps exported |
 
 ---
 
 ### `ConfirmDialog`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/ConfirmDialog.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/ConfirmDialog.tsx`
 
 ```ts
 interface ConfirmDialogProps {
@@ -406,6 +416,7 @@ Wraps shadcn `<Dialog>`. Confirm button: spinner + disabled while in-flight. On 
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created client component; Loader2 spinner during in-flight, inline error on failure, closes on success; no toast library installed yet |
 
 ---
 
@@ -612,7 +623,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 ### `/admin/users` — Users List
 
-**Status:** `⬜ todo` | **Files:** `app/admin/users/page.tsx`
+**Status:** `✅ done` | **Files:** `app/admin/users/page.tsx`, `app/admin/users/UsersContent.tsx`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/users` — params: `page`, `limit`, `search`, `role` (regular|admin), `isDeleted`, `userId`, `createdAfter`, `createdBefore`
@@ -639,6 +650,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | RSC page reads async searchParams, fetches via getAdminUsers, passes Server Action for delete; UsersContent client island owns filter/pagination URL routing + delete dialog |
 
 ---
 
