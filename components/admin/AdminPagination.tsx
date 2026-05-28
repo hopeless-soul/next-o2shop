@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/admin/ui/select'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface AdminPaginationProps {

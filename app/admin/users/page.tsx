@@ -1,6 +1,5 @@
-import { revalidatePath } from 'next/cache'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminUsers, deleteAdminUser } from '@/lib/api/admin-users'
+import { getAdminUsers } from '@/lib/api/admin-users'
 import UsersContent from './UsersContent'
 
 interface UsersPageProps {
@@ -28,12 +27,6 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     // render empty state on error
   }
 
-  async function handleDelete(id: string) {
-    'use server'
-    await deleteAdminUser(id)
-    revalidatePath('/admin/users')
-  }
-
   return (
     <>
       <AdminPageHeader
@@ -48,7 +41,6 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         search={search}
         role={role ?? ''}
         isActive={isActive}
-        onDelete={handleDelete}
       />
     </>
   )

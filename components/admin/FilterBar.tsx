@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/admin/ui/select'
 
 export interface FilterOption {
   key: string
@@ -25,6 +25,7 @@ interface FilterBarProps {
   searchValue: string
   onSearchChange: (value: string) => void
   filters?: FilterOption[]
+  onApply?: (search: string, filterValues: Record<string, string>) => void
   className?: string
 }
 
@@ -33,6 +34,7 @@ export default function FilterBar({
   searchValue,
   onSearchChange,
   filters,
+  onApply,
   className,
 }: FilterBarProps) {
   const buildDrafts = (fs: FilterOption[] | undefined) =>
@@ -61,10 +63,14 @@ export default function FilterBar({
     setFilterDrafts(next)
   }
 
-  function handleSubmit(e?: React.FormEvent | React.MouseEvent) {
+  function handleSubmit(e?: React.SyntheticEvent) {
     e?.preventDefault()
-    onSearchChange(inputValue)
-    filters?.forEach((f) => f.onChange(filterDrafts[f.key] ?? ''))
+    if (onApply) {
+      onApply(inputValue, Object.fromEntries(filters?.map((f) => [f.key, filterDrafts[f.key] ?? '']) ?? []))
+    } else {
+      onSearchChange(inputValue)
+      filters?.forEach((f) => f.onChange(filterDrafts[f.key] ?? ''))
+    }
   }
 
   function handleClearSearch() {
@@ -121,14 +127,14 @@ export default function FilterBar({
                 value={draftValue || undefined}
                 onValueChange={(v) => setFilterDraft(filter.key, v ?? '')}
               >
-                <SelectTrigger className="w-full h-9 text-[14px] border-[var(--admin-border-input)] rounded-[4px] focus:ring-[var(--admin-ring)]">
-                  <SelectValue>
+                <SelectTrigger className="w-full">
+                  <SelectValue className={draftValue ? 'text-admin-text-primary' : 'text-admin-text-muted'}>
                     {draftValue
                       ? (filter.options.find((o) => o.value === draftValue)?.label ?? draftValue)
                       : filter.label}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="rounded-[6px]">
+                <SelectContent>
                   {filter.options.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}

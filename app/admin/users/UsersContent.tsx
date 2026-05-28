@@ -1,16 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Trash2 } from 'lucide-react'
 import DataTable from '@/components/admin/DataTable'
 import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge, { roleVariant } from '@/components/admin/AdminBadge'
-import ConfirmDialog from '@/components/admin/ConfirmDialog'
 import type { AdminUser } from '@/lib/api/admin-users'
 
 interface UsersContentProps {
@@ -21,7 +18,6 @@ interface UsersContentProps {
   search: string
   role: string
   isActive?: boolean
-  onDelete: (id: string) => Promise<void>
 }
 
 function formatDate(iso: string) {
@@ -40,12 +36,9 @@ export default function UsersContent({
   search,
   role,
   isActive,
-  onDelete,
 }: UsersContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null)
 
   function updateParams(updates: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString())
@@ -132,27 +125,6 @@ export default function UsersContent({
         </span>
       ),
     },
-    {
-      id: 'actions',
-      header: '',
-      size: 60,
-      minSize: 60,
-      enableResizing: false,
-      cell: ({ row }) => {
-        const u = row.original
-        return (
-          <div className="flex items-center gap-1 justify-end">
-            <button
-              type="button"
-              onClick={() => setDeleteTarget(u)}
-              className="flex items-center gap-1 px-2.5 py-1 text-[13px] font-medium rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors duration-100"
-            >
-              <Trash2 className="size-3.5" />
-            </button>
-          </div>
-        )
-      },
-    },
   ]
 
   const isActiveFilterValue =
@@ -163,6 +135,7 @@ export default function UsersContent({
       <FilterBar
         searchValue={search}
         onSearchChange={(v) => updateParams({ search: v })}
+        onApply={(s, fv) => updateParams({ search: s, ...fv })}
         filters={[
           {
             key: 'role',
@@ -204,20 +177,6 @@ export default function UsersContent({
         limit={limit}
         onPageChange={(p) => updateParams({ page: String(p) })}
         onLimitChange={(l) => updateParams({ limit: String(l), page: '1' })}
-      />
-
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
-        title="Delete user"
-        description={`Are you sure you want to delete ${deleteTarget?.email ?? 'this user'}? This action soft-deletes the account.`}
-        confirmLabel="Delete"
-        destructive
-        onConfirm={async () => {
-          if (!deleteTarget) return
-          await onDelete(deleteTarget.id)
-          setDeleteTarget(null)
-        }}
       />
     </>
   )
