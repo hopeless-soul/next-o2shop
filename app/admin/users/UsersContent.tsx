@@ -135,6 +135,9 @@ export default function UsersContent({
     {
       id: 'actions',
       header: '',
+      size: 60,
+      minSize: 60,
+      enableResizing: false,
       cell: ({ row }) => {
         const u = row.original
         return (

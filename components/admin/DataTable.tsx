@@ -74,15 +74,17 @@ export default function DataTable<T>({
               className="border-b border-[var(--admin-border)] hover:bg-transparent"
               style={{ background: 'var(--admin-bg)' }}
             >
-              {hg.headers.map((header) => {
+              {hg.headers.map((header, index) => {
                 const canSort = header.column.getCanSort() && !!onSortChange
                 const isSorted = header.column.id === sortBy
+                const isLast = index === hg.headers.length - 1
                 return (
                   <TableHead
                     key={header.id}
                     className="px-4 py-3 text-[12px] font-semibold tracking-[0.04em] uppercase text-[var(--admin-text-secondary)] relative"
                     style={{
-                      width: header.getSize(),
+                      width: isLast ? undefined : header.getSize(),
+                      minWidth: isLast ? 60 : undefined,
                       cursor: canSort ? 'pointer' : undefined,
                       userSelect: canSort ? 'none' : undefined,
                     }}
@@ -102,7 +104,7 @@ export default function DataTable<T>({
                         )
                       )}
                     </span>
-                    {header.column.getCanResize() && (
+                    {!isLast && header.column.getCanResize() && (
                       <div
                         onMouseDown={header.getResizeHandler()}
                         onTouchStart={header.getResizeHandler()}
@@ -150,15 +152,21 @@ export default function DataTable<T>({
                 className="border-b border-[var(--admin-border)] transition-colors duration-100"
                 style={{ minHeight: 'var(--admin-table-row-h)' }}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]"
-                    style={{ width: cell.column.getSize() }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell, index) => {
+                  const isLast = index === row.getVisibleCells().length - 1
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]"
+                      style={{
+                        width: isLast ? undefined : cell.column.getSize(),
+                        minWidth: isLast ? 60 : undefined,
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           )}
