@@ -3,7 +3,6 @@ import { Fjalla_One, Montserrat } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { listCategories } from "@/lib/api/categories";
 
 const fjallaOne = Fjalla_One({
   weight: "400",
@@ -24,26 +23,18 @@ export const metadata: Metadata = {
   description: "Premium streetwear and accessories",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let categories: Awaited<ReturnType<typeof listCategories>>["data"] = [];
-  try {
-    const result = await listCategories({ limit: 100 });
-    categories = result.data;
-  } catch {
-    // backend unreachable — render empty nav rather than crash
-  }
-
   return (
     <html
       lang="en"
       className={`${fjallaOne.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar categories={categories} />
+        <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

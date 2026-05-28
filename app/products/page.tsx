@@ -69,8 +69,8 @@ export default async function ProductsPage({
         </span>
       </div>
 
-      {/* Filter strip placeholder */}
-      <div
+      {/* Filter strip placeholder - Depriicated */}
+      {/* <div
         className="flex items-center gap-3 py-4 border-b overflow-x-auto"
         style={{
           paddingLeft: "var(--header-px-desktop)",
@@ -102,7 +102,7 @@ export default async function ProductsPage({
             </Link>
           );
         })}
-      </div>
+      </div> */}
 
       {/* Product grid */}
       <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: "2px", padding: "2px" }}>

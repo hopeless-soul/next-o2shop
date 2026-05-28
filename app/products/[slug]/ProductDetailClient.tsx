@@ -59,7 +59,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
     "#e8e8e8";
 
   // Photos: thumbnail strip excludes sortOrder -1; sorted ascending
-  const photos = product.photos ?? product.primaryPhoto ? [{ ...product.primaryPhoto!, sortOrder: 0, width: product.primaryPhoto?.width ?? 0, height: product.primaryPhoto?.height ?? 0, aspectRatio: product.primaryPhoto?.aspectRatio ?? 0.8, variantIds: [] }] : [];
+  const photos = product.photos ?? (product.primaryPhoto ? [{ ...product.primaryPhoto!, sortOrder: 0, width: product.primaryPhoto?.width ?? 0, height: product.primaryPhoto?.height ?? 0, aspectRatio: product.primaryPhoto?.aspectRatio ?? 0.8, variantIds: [] }] : []);
   const thumbnailPhotos = photos
     .filter(p => p.sortOrder !== -1)
     .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -68,6 +68,8 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
   const displayedPhoto = thumbnailPhotos[selectedImage] ?? null;
 
   const descBlocks = product.description?.blocks ?? [];
+
+  const productType = product.type ?? product.category;
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)", marginTop: 8 }}>
@@ -175,7 +177,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                   fontFamily: 'Montserrat',
                 }}
               >
-                {product.type ?? 'Nice Hoodie'}
+                {productType}
               </p>
               <h1
                 className="font-sans uppercase leading-tight"
@@ -191,15 +193,14 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               </h1>
             </div>
             {accentPhoto && (
-              <div className="relative flex-shrink-0" style={{ width: 64, height: 80 }}>
-                <Image
-                  src={accentPhoto.url}
-                  alt={accentPhoto.altText ?? product.displayName}
-                  fill
-                  className="object-cover"
-                  sizes="64px"
-                />
-              </div>
+              <Image
+                src={accentPhoto.url}
+                alt={accentPhoto.altText ?? product.displayName}
+                width={accentPhoto.width || 64}
+                height={accentPhoto.height || 80}
+                className="flex-shrink-0 object-cover"
+                style={{ height: 80, width: "auto" }}
+              />
             )}
           </div>
 

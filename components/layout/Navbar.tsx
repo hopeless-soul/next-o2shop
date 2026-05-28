@@ -6,10 +6,10 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Search, User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
 import SearchPopup from "@/components/layout/SearchPopup";
-import type { Category } from "@/lib/types";
+import BackButton from "@/components/ui/BackButton";
+import { NAV_CATEGORIES } from "@/lib/nav-config";
 
 interface NavbarProps {
-  categories?: Category[];
   background?: string;
   textColor?: string;
   scrolledBackground?: string;
@@ -17,7 +17,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({
-  categories = [],
   background,
   textColor,
   scrolledBackground,
@@ -95,6 +94,11 @@ export default function Navbar({
           transition: "background-color var(--transition-nav)",
         }}
       >
+        {pathname.startsWith("/products/") && (
+          <div className="absolute" style={{ top: 58, left: 40 }}>
+            <BackButton color={currentColor} />
+          </div>
+        )}
         {/* Logo + icons row — owns the full header height */}
         <div
           className="grid grid-cols-3 items-center"
@@ -185,7 +189,7 @@ export default function Navbar({
           transition: "background-color var(--transition-nav), box-shadow var(--transition-nav)",
         }}
       >
-        {categories.map((cat) =>
+        {NAV_CATEGORIES.map((cat) =>
           cat.subCategories.length ? (
             <div
               key={cat.slug}
@@ -194,7 +198,7 @@ export default function Navbar({
               onMouseLeave={closeDropdown}
             >
               <Link
-                href={`/products?category=${cat.slug}`}
+                href={cat.href}
                 className="flex items-center px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
                 style={{
                   color: currentColor,
@@ -220,7 +224,7 @@ export default function Navbar({
                   {cat.subCategories.map((subCat) => (
                     <Link
                       key={subCat.slug}
-                      href={`/products?category=${subCat.slug}`}
+                      href={subCat.href}
                       className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100"
                       style={{
                         color: "var(--color-on-dark)",
@@ -236,7 +240,7 @@ export default function Navbar({
           ) : (
             <Link
               key={cat.slug}
-              href={`/products?category=${cat.slug}`}
+              href={cat.href}
               className="block px-[15px] font-sans text-[14px] font-semibold uppercase tracking-[0.3px] opacity-90 hover:opacity-100"
               style={{
                 color: currentColor,
@@ -293,7 +297,7 @@ export default function Navbar({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-5 py-6">
-          {categories.map((cat) =>
+          {NAV_CATEGORIES.map((cat) =>
             cat.subCategories.length ? (
               <div key={cat.slug} className="mb-7">
                 <p
@@ -305,7 +309,7 @@ export default function Navbar({
                 {cat.subCategories.map((subCat) => (
                   <Link
                     key={subCat.slug}
-                    href={`/products?category=${subCat.slug}`}
+                    href={subCat.href}
                     className="block py-2 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
                     style={{
                       color: "var(--color-on-dark)",
@@ -320,7 +324,7 @@ export default function Navbar({
             ) : (
               <Link
                 key={cat.slug}
-                href={`/products?category=${cat.slug}`}
+                href={cat.href}
                 className="block py-2 mb-4 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
                 style={{
                   color: "var(--color-on-dark)",
