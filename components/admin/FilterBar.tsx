@@ -15,7 +15,7 @@ import {
 export interface FilterOption {
   key: string
   label: string
-  type?: 'select' | 'date'
+  type?: 'select' | 'date' | 'text'
   options?: { label: string; value: string }[]
   value: string
   onChange: (value: string) => void
@@ -144,6 +144,29 @@ export default function FilterBar({
                     </button>
                   )}
                 </div>
+              </div>
+            )
+          }
+          if (filter.type === 'text') {
+            return (
+              <div key={filter.key} className="relative w-[160px]">
+                <Input
+                  type="text"
+                  placeholder={filter.label}
+                  value={draftValue}
+                  onChange={(e) => setFilterDraft(filter.key, e.target.value)}
+                  className="h-9 text-[13px] border-[var(--admin-border-input)] rounded-[4px] pr-7 focus-visible:ring-[var(--admin-ring)]"
+                />
+                {draftValue !== '' && (
+                  <button
+                    type="button"
+                    onClick={() => setFilterDraft(filter.key, '')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--admin-text-muted)] hover:text-[var(--admin-text-secondary)] transition-colors duration-100"
+                    aria-label={`Clear ${filter.label} filter`}
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
               </div>
             )
           }
