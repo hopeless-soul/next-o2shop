@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import {
   type ColumnDef,
+  type Header,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -45,15 +47,19 @@ export default function DataTable<T>({
     ? [{ id: sortBy, desc: sortOrder === 'desc' }]
     : []
 
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>({})
+  // Refs to <th> elements so we can read actual rendered widths on first drag
+  const headRefs = useRef<(HTMLTableCellElement | null)[]>([])
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
-    state: { sorting },
+    state: { sorting, columnSizing },
+    onColumnSizingChange: setColumnSizing,
     manualSorting: true,
     manualPagination: true,
-    columnResizeMode: 'onChange',
-    enableColumnResizing: true,
+    getCoreRowModel: getCoreRowModel(),
     onSortingChange: (updater) => {
       if (!onSortChange) return
       const next =
@@ -61,8 +67,80 @@ export default function DataTable<T>({
       if (next.length === 0) return
       onSortChange(next[0].id, next[0].desc ? 'desc' : 'asc')
     },
-    getCoreRowModel: getCoreRowModel(),
   })
+
+  function makeResizeHandler(allHeaders: Header<T, unknown>[], colIndex: number) {
+    return (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      // Snapshot actual rendered widths so proportional math uses real px values,
+      // not TanStack defaults (which may not match the CSS-laid-out sizes yet)
+      const startSizes = allHeaders.map((h, i) => {
+        const el = headRefs.current[i]
+        return el ? el.getBoundingClientRect().width : h.getSize()
+      })
+      const startX = 'touches' in e ? e.touches[0].clientX : e.clientX
+
+      const rightIndices = Array.from(
+        { length: allHeaders.length - colIndex - 1 },
+        (_, i) => colIndex + 1 + i,
+      )
+      const totalRightSize = rightIndices.reduce((sum, i) => sum + startSizes[i], 0)
+
+      function applyDrag(clientX: number) {
+        const delta = clientX - startX
+        const minCol = allHeaders[colIndex].column.columnDef.minSize ?? 50
+
+        // Total capacity the right columns can absorb (shrink)
+        const maxAbsorb = rightIndices.reduce((sum, i) => {
+          return sum + Math.max(0, startSizes[i] - (allHeaders[i].column.columnDef.minSize ?? 50))
+        }, 0)
+
+        // Clamp: can't grow beyond right-side capacity; can't shrink below own minSize
+        const clampedDelta =
+          delta > 0
+            ? Math.min(delta, maxAbsorb)
+            : Math.max(delta, minCol - startSizes[colIndex])
+
+        const newSizing: Record<string, number> = {
+          [allHeaders[colIndex].column.id]: startSizes[colIndex] + clampedDelta,
+        }
+
+        // Distribute -clampedDelta proportionally across ALL right columns
+        if (rightIndices.length > 0 && clampedDelta !== 0) {
+          for (const i of rightIndices) {
+            const proportion =
+              totalRightSize > 0
+                ? startSizes[i] / totalRightSize
+                : 1 / rightIndices.length
+            const rightMin = allHeaders[i].column.columnDef.minSize ?? 50
+            newSizing[allHeaders[i].column.id] = Math.max(
+              rightMin,
+              startSizes[i] - clampedDelta * proportion,
+            )
+          }
+        }
+
+        setColumnSizing((prev) => ({ ...prev, ...newSizing }))
+      }
+
+      function onMouseMove(ev: MouseEvent) { applyDrag(ev.clientX) }
+      function onTouchMove(ev: TouchEvent) { applyDrag(ev.touches[0].clientX) }
+
+      function cleanup() {
+        window.removeEventListener('mousemove', onMouseMove)
+        window.removeEventListener('mouseup', cleanup)
+        window.removeEventListener('touchmove', onTouchMove)
+        window.removeEventListener('touchend', cleanup)
+      }
+
+      window.addEventListener('mousemove', onMouseMove)
+      window.addEventListener('mouseup', cleanup)
+      window.addEventListener('touchmove', onTouchMove)
+      window.addEventListener('touchend', cleanup)
+    }
+  }
 
   return (
     <div className="rounded-[6px] border border-[var(--admin-border)] bg-[var(--admin-surface)] overflow-hidden">
@@ -81,10 +159,10 @@ export default function DataTable<T>({
                 return (
                   <TableHead
                     key={header.id}
+                    ref={(el) => { headRefs.current[index] = el }}
                     className="px-4 py-3 text-[12px] font-semibold tracking-[0.04em] uppercase text-[var(--admin-text-secondary)] relative"
                     style={{
-                      width: isLast ? undefined : header.getSize(),
-                      minWidth: isLast ? 60 : undefined,
+                      width: header.getSize(),
                       cursor: canSort ? 'pointer' : undefined,
                       userSelect: canSort ? 'none' : undefined,
                     }}
@@ -104,13 +182,17 @@ export default function DataTable<T>({
                         )
                       )}
                     </span>
-                    {!isLast && header.column.getCanResize() && (
+
+                    {/* Resize handle — 12px hit area, thin visual, hidden on last column */}
+                    {!isLast && (
                       <div
-                        onMouseDown={header.getResizeHandler()}
-                        onTouchStart={header.getResizeHandler()}
-                        className="absolute top-0 right-0 h-full w-1 cursor-col-resize select-none touch-none opacity-0 hover:opacity-100 bg-[var(--admin-border-input)]"
+                        onMouseDown={makeResizeHandler(hg.headers, index)}
+                        onTouchStart={makeResizeHandler(hg.headers, index)}
+                        className="absolute top-0 right-0 h-full w-3 cursor-col-resize select-none touch-none group/resizer flex items-center justify-center"
                         onClick={(e) => e.stopPropagation()}
-                      />
+                      >
+                        <div className="h-4 w-0.5 rounded-full bg-[var(--admin-border-input)] opacity-0 group-hover/resizer:opacity-100 transition-opacity duration-100" />
+                      </div>
                     )}
                   </TableHead>
                 )
@@ -152,21 +234,15 @@ export default function DataTable<T>({
                 className="border-b border-[var(--admin-border)] transition-colors duration-100"
                 style={{ minHeight: 'var(--admin-table-row-h)' }}
               >
-                {row.getVisibleCells().map((cell, index) => {
-                  const isLast = index === row.getVisibleCells().length - 1
-                  return (
-                    <TableCell
-                      key={cell.id}
-                      className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]"
-                      style={{
-                        width: isLast ? undefined : cell.column.getSize(),
-                        minWidth: isLast ? 60 : undefined,
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  )
-                })}
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]"
+                    style={{ width: cell.column.getSize() }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
             ))
           )}
