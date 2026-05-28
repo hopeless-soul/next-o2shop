@@ -121,6 +121,51 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* ── Admin: Surface ── */
+  --admin-bg: #f9fafb;
+  --admin-surface: #ffffff;
+  --admin-sidebar-bg: #f3f4f6;
+  --admin-sidebar-border: #e5e7eb;
+  --admin-border: #e5e7eb;
+  --admin-border-input: #d1d5db;
+  --admin-ring: #111827;
+
+  /* ── Admin: Text ── */
+  --admin-text-primary: #111827;
+  --admin-text-secondary: #4b5563;
+  --admin-text-muted: #9ca3af;
+  --admin-text-on-dark: #ffffff;
+
+  /* ── Admin: Brand actions ── */
+  --admin-primary: #1e1e1e;
+  --admin-primary-hover: #333333;
+  --admin-destructive: #e55151;
+  --admin-destructive-hover: #d14343;
+
+  /* ── Admin: Status ── */
+  --admin-status-success-bg: #dcfce7;
+  --admin-status-success-fg: #16a34a;
+  --admin-status-warning-bg: #fef9c3;
+  --admin-status-warning-fg: #ca8a04;
+  --admin-status-error-bg: #fee2e2;
+  --admin-status-error-fg: #dc2626;
+  --admin-status-neutral-bg: #f3f4f6;
+  --admin-status-neutral-fg: #6b7280;
+  --admin-status-info-bg: #dbeafe;
+  --admin-status-info-fg: #2563eb;
+
+  /* ── Admin: Layout ── */
+  --admin-sidebar-width: 240px;
+  --admin-content-px: 24px;
+  --admin-content-py: 24px;
+  --admin-table-row-h: 48px;
+
+  /* ── Admin: Elevation ── */
+  --admin-shadow-0: none;
+  --admin-shadow-1: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --admin-shadow-2: 0 4px 12px rgba(0,0,0,0.10);
+  --admin-shadow-3: 0 8px 32px rgba(0,0,0,0.14);
 }
 
 @theme inline {
@@ -203,6 +248,45 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Admin: Surface */
+  --color-admin-bg: var(--admin-bg);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-sidebar-bg: var(--admin-sidebar-bg);
+  --color-admin-sidebar-border: var(--admin-sidebar-border);
+  --color-admin-border: var(--admin-border);
+  --color-admin-border-input: var(--admin-border-input);
+  --color-admin-ring: var(--admin-ring);
+
+  /* Admin: Text */
+  --color-admin-text-primary: var(--admin-text-primary);
+  --color-admin-text-secondary: var(--admin-text-secondary);
+  --color-admin-text-muted: var(--admin-text-muted);
+  --color-admin-text-on-dark: var(--admin-text-on-dark);
+
+  /* Admin: Brand actions */
+  --color-admin-primary: var(--admin-primary);
+  --color-admin-primary-hover: var(--admin-primary-hover);
+  --color-admin-destructive: var(--admin-destructive);
+  --color-admin-destructive-hover: var(--admin-destructive-hover);
+
+  /* Admin: Status */
+  --color-admin-status-success-bg: var(--admin-status-success-bg);
+  --color-admin-status-success-fg: var(--admin-status-success-fg);
+  --color-admin-status-warning-bg: var(--admin-status-warning-bg);
+  --color-admin-status-warning-fg: var(--admin-status-warning-fg);
+  --color-admin-status-error-bg: var(--admin-status-error-bg);
+  --color-admin-status-error-fg: var(--admin-status-error-fg);
+  --color-admin-status-neutral-bg: var(--admin-status-neutral-bg);
+  --color-admin-status-neutral-fg: var(--admin-status-neutral-fg);
+  --color-admin-status-info-bg: var(--admin-status-info-bg);
+  --color-admin-status-info-fg: var(--admin-status-info-fg);
+
+  /* Admin: Elevation */
+  --shadow-admin-0: var(--admin-shadow-0);
+  --shadow-admin-1: var(--admin-shadow-1);
+  --shadow-admin-2: var(--admin-shadow-2);
+  --shadow-admin-3: var(--admin-shadow-3);
 }
 
 body {
