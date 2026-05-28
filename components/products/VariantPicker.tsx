@@ -79,6 +79,10 @@ export default function VariantPicker({
                     color.hex === "#f5f5f5" || color.hex === "#f5f5dc" || color.hex === "#d2b48c"
                       ? "var(--color-foreground)"
                       : "var(--color-on-dark)",
+                  fontWeight: '800',
+                  fontFamily: "var(--font-secondary)",
+                  fontSize: "10px",
+                  fontStyle: 'italic',
                 }}
                 aria-label={color.name}
                 disabled={!color.available}
@@ -94,7 +98,10 @@ export default function VariantPicker({
         <div>
           <p
             className="mb-2 text-[12px] uppercase tracking-widest font-bold"
-            style={{ fontFamily: "var(--font-secondary)", color: "var(--color-foreground)" }}
+            style={{ 
+              fontFamily: "var(--font-secondary)", 
+              color: "var(--color-foreground)",
+            }}
           >
             Size
             {selectedSize && (
@@ -142,6 +149,8 @@ export default function VariantPicker({
                     opacity: size.available ? 1 : 0.65,
                     cursor: size.available ? "pointer" : "no-drop",
                     transition: "var(--transition-base)",
+                    fontWeight: '800',
+                    fontStyle: 'italic',
                   }}
                   disabled={!size.available}
                 >

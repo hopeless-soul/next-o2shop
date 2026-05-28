@@ -192,7 +192,7 @@ body {
   background-size: 26px 3px, 3px 26px, 26px 3px, 3px 26px;
   background-position: 0 0, 100% 0, 0 100%, 0 0;
   background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
-  animation: march 1s infinite linear;
+  animation: march 1s linear 2 forwards;
 }
 
 @keyframes shimmer {
