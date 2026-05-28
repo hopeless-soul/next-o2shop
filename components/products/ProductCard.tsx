@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/lib/types";
-import Badge from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/Badge";
 
 interface ProductCardProps {
   product: Product;

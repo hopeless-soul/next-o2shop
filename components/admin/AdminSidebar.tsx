@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { logout } from '@/lib/api/auth'
+import { logout } from '@/lib/api/auth-client'
 
 interface NavItem {
   label: string

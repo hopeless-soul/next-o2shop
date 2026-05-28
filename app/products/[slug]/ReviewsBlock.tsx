@@ -3,7 +3,7 @@
 import { useState, useMemo, type FormEvent } from "react";
 import { Star } from "lucide-react";
 import type { Review } from "@/lib/types";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import ReviewItem from "@/components/products/ReviewItem";
 import {
   listReviewsByProductClient,
