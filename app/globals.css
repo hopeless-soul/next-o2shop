@@ -183,6 +183,18 @@ body {
   opacity: 0.5;
 }
 
+.color-swatch-selected {
+  background-image:
+    repeating-linear-gradient(90deg,  #ffffff 0, #ffffff 14px, transparent 0, transparent 26px),
+    repeating-linear-gradient(180deg, #ffffff 0, #ffffff 14px, transparent 0, transparent 26px),
+    repeating-linear-gradient(90deg,  #ffffff 0, #ffffff 14px, transparent 0, transparent 26px),
+    repeating-linear-gradient(180deg, #ffffff 0, #ffffff 14px, transparent 0, transparent 26px);
+  background-size: 26px 3px, 3px 26px, 26px 3px, 3px 26px;
+  background-position: 0 0, 100% 0, 0 100%, 0 0;
+  background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
+  animation: march 1s infinite linear;
+}
+
 @keyframes shimmer {
   0%   { background-position: -800px 0; }
   100% { background-position: 800px 0; }

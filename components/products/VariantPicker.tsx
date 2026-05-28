@@ -60,22 +60,18 @@ export default function VariantPicker({
               </span>
             )}
           </p>
-          <div className="flex flex-wrap gap-2" style={{ marginBottom: "var(--space-4)" }}>
+          <div className="flex items-center w-full" style={{ gap: "12px", marginBottom: "var(--space-4)" }}>
             {colors.map((color) => (
               <button
                 key={color.name}
                 onClick={() => color.available && onColorChange(color.name)}
                 title={color.name}
-                className="relative flex items-center justify-center font-sans text-[12px] uppercase tracking-widest"
+                className={`relative flex items-center justify-center font-sans text-[12px] uppercase tracking-widest${selectedColor === color.name ? " color-swatch-selected" : ""}`}
                 style={{
-                  width: "149px",
+                  flex: 1,
                   height: "30px",
                   borderRadius: "var(--radius-swatch)",
                   backgroundColor: color.hex,
-                  border:
-                    selectedColor === color.name
-                      ? "2px solid var(--color-foreground-dark)"
-                      : "2px solid var(--color-border)",
                   opacity: color.available ? 1 : 0.65,
                   cursor: color.available ? "pointer" : "no-drop",
                   transition: "var(--transition-base)",
@@ -169,7 +165,7 @@ export default function VariantPicker({
                         x2="0"
                         y2="100"
                         stroke="#2b272a"
-                        strokeWidth="1"
+                        strokeWidth="3"
                         vectorEffect="non-scaling-stroke"
                       />
                     </svg>
