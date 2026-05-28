@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { Fjalla_One, Montserrat } from "next/font/google";
+import { Fjalla_One, Montserrat, Geist } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const fjallaOne = Fjalla_One({
   weight: "400",
@@ -31,7 +34,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fjallaOne.variable} ${montserrat.variable} h-full antialiased`}
+      className={cn("h-full", "antialiased", fjallaOne.variable, montserrat.variable, "font-sans", geist.variable)}
     >
       <body className="min-h-full flex flex-col">
         <Navbar />
