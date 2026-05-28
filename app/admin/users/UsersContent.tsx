@@ -185,7 +185,6 @@ export default function UsersContent({
             ],
           },
         ]}
-        onClear={() => updateParams({ search: '', role: '', isActive: '' })}
       />
 
       <DataTable
