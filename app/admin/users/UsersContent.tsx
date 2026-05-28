@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import DataTable from '@/components/admin/DataTable'
 import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
@@ -20,7 +20,7 @@ interface UsersContentProps {
   limit: number
   search: string
   role: string
-  isDeleted: boolean
+  isActive?: boolean
   onDelete: (id: string) => Promise<void>
 }
 
@@ -39,7 +39,7 @@ export default function UsersContent({
   limit,
   search,
   role,
-  isDeleted,
+  isActive,
   onDelete,
 }: UsersContentProps) {
   const router = useRouter()
@@ -68,7 +68,10 @@ export default function UsersContent({
       cell: ({ row }) => {
         const u = row.original
         return (
-          <div className="flex items-center gap-2 min-w-0">
+          <Link
+            href={`/admin/users/${u.id}`}
+            className="flex items-center gap-2 min-w-0 group"
+          >
             <div className="size-7 rounded-full overflow-hidden shrink-0 bg-[var(--admin-border)] flex items-center justify-center">
               {u.avatarUrl ? (
                 <Image src={u.avatarUrl} alt={u.email} width={28} height={28} className="object-cover" />
@@ -78,8 +81,10 @@ export default function UsersContent({
                 </span>
               )}
             </div>
-            <span className="truncate max-w-[200px] text-[14px]">{u.email}</span>
-          </div>
+            <span className="truncate max-w-[200px] text-[14px] group-hover:underline">
+              {u.email}
+            </span>
+          </Link>
         )
       },
     },
@@ -134,13 +139,6 @@ export default function UsersContent({
         const u = row.original
         return (
           <div className="flex items-center gap-1 justify-end">
-            <Link
-              href={`/admin/users/${u.id}`}
-              className="flex items-center gap-1 px-2.5 py-1 text-[13px] font-medium rounded-[4px] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors duration-100"
-            >
-              <Pencil className="size-3.5" />
-              Edit
-            </Link>
             <button
               type="button"
               onClick={() => setDeleteTarget(u)}
@@ -154,10 +152,12 @@ export default function UsersContent({
     },
   ]
 
+  const isActiveFilterValue =
+    isActive === true ? 'true' : isActive === false ? 'false' : ''
+
   return (
     <>
       <FilterBar
-        searchPlaceholder="Search by email…"
         searchValue={search}
         onSearchChange={(v) => updateParams({ search: v })}
         filters={[
@@ -172,14 +172,17 @@ export default function UsersContent({
             ],
           },
           {
-            key: 'isDeleted',
+            key: 'isActive',
             label: 'All Status',
-            value: isDeleted ? 'true' : '',
-            onChange: (v) => updateParams({ isDeleted: v }),
-            options: [{ label: 'Deleted', value: 'true' }],
+            value: isActiveFilterValue,
+            onChange: (v) => updateParams({ isActive: v }),
+            options: [
+              { label: 'Active', value: 'true' },
+              { label: 'Inactive', value: 'false' },
+            ],
           },
         ]}
-        onClear={() => updateParams({ search: '', role: '', isDeleted: '' })}
+        onClear={() => updateParams({ search: '', role: '', isActive: '' })}
       />
 
       <DataTable

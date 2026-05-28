@@ -52,6 +52,8 @@ export default function DataTable<T>({
     state: { sorting },
     manualSorting: true,
     manualPagination: true,
+    columnResizeMode: 'onChange',
+    enableColumnResizing: true,
     onSortingChange: (updater) => {
       if (!onSortChange) return
       const next =
@@ -64,7 +66,7 @@ export default function DataTable<T>({
 
   return (
     <div className="rounded-[6px] border border-[var(--admin-border)] bg-[var(--admin-surface)] overflow-hidden">
-      <Table>
+      <Table style={{ tableLayout: 'fixed', width: '100%' }}>
         <TableHeader>
           {table.getHeaderGroups().map((hg) => (
             <TableRow
@@ -78,8 +80,12 @@ export default function DataTable<T>({
                 return (
                   <TableHead
                     key={header.id}
-                    className="px-4 py-3 text-[12px] font-semibold tracking-[0.04em] uppercase text-[var(--admin-text-secondary)]"
-                    style={{ cursor: canSort ? 'pointer' : undefined, userSelect: canSort ? 'none' : undefined }}
+                    className="px-4 py-3 text-[12px] font-semibold tracking-[0.04em] uppercase text-[var(--admin-text-secondary)] relative"
+                    style={{
+                      width: header.getSize(),
+                      cursor: canSort ? 'pointer' : undefined,
+                      userSelect: canSort ? 'none' : undefined,
+                    }}
                     onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                   >
                     <span className="flex items-center gap-1">
@@ -96,6 +102,14 @@ export default function DataTable<T>({
                         )
                       )}
                     </span>
+                    {header.column.getCanResize() && (
+                      <div
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        className="absolute top-0 right-0 h-full w-1 cursor-col-resize select-none touch-none opacity-0 hover:opacity-100 bg-[var(--admin-border-input)]"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    )}
                   </TableHead>
                 )
               })}
@@ -137,7 +151,11 @@ export default function DataTable<T>({
                 style={{ minHeight: 'var(--admin-table-row-h)' }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]">
+                  <TableCell
+                    key={cell.id}
+                    className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]"
+                    style={{ width: cell.column.getSize() }}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

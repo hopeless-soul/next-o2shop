@@ -13,7 +13,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
   const search = p.search ?? ''
   const role = (p.role === 'regular' || p.role === 'admin') ? p.role : undefined
-  const isDeleted = p.isDeleted === 'true'
+  const isActive = p.isActive === 'true' ? true : p.isActive === 'false' ? false : undefined
 
   let result = { total: 0, page, limit, data: [] as Awaited<ReturnType<typeof getAdminUsers>>['data'] }
   try {
@@ -22,7 +22,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
       limit,
       search: search || undefined,
       role,
-      isDeleted: isDeleted || undefined,
+      isActive,
     })
   } catch {
     // render empty state on error
@@ -47,7 +47,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         limit={limit}
         search={search}
         role={role ?? ''}
-        isDeleted={isDeleted}
+        isActive={isActive}
         onDelete={handleDelete}
       />
     </>
