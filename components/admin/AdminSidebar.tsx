@@ -85,14 +85,27 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
     <aside className="fixed top-0 left-0 h-screen w-[240px] bg-[var(--admin-sidebar-bg)] border-r border-[var(--admin-sidebar-border)] overflow-y-auto flex flex-col z-40">
       {/* Logo zone — 48px height */}
       <div className="flex items-center h-12 px-4 shrink-0">
-        <Link href="/admin">
+        <Link href="/admin" className="flex items-end gap-2 mt-4 hover:opacity-80 transition-opacity">
           <Image
             src="/logo.svg"
-            width={100}
-            height={36}
+            width={33}
+            height={44}
             alt="o2shop admin"
             priority
+            className="object-contain"
           />
+          <span 
+            className="font-sans uppercase leading-tight"
+                style={{
+                  fontSize: "2rem",
+                  letterSpacing: "0.84px",
+                  color: "var(--color-foreground-strong)",
+                  textTransform: "capitalize",
+                  WebkitTextStroke: '1.4px var(--color-foreground-strong)'
+                }}
+          >
+            Admin
+          </span>
         </Link>
       </div>
 
@@ -111,7 +124,7 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
                   key={item.href}
                   href={item.href}
                   className={[
-                    'flex items-center gap-3 mx-2 px-3 h-10 rounded-[4px] text-[14px] font-medium transition-colors duration-150 ease',
+                    'flex items-center gap-3 mx-2 px-3 h-8 rounded-[4px] text-[14px] font-medium transition-colors duration-150 ease mb-1',
                     active
                       ? 'bg-[var(--admin-primary)] text-white'
                       : 'text-[var(--admin-text-secondary)] hover:bg-[#e5e7eb]',
