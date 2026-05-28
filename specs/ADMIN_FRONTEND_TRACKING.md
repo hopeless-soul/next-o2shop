@@ -24,9 +24,9 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | Task | Type | Status | Owner | Updated |
 |---|---|---|---|---|
 | shadcn/ui + lucide-react install | infra | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
-| Admin CSS tokens (`--admin-*`) in globals.css | infra | ⬜ todo | — | — |
-| `AdminLayout` (app/admin/layout.tsx) | shell | ⬜ todo | — | — |
-| `AdminSidebar` | component | ⬜ todo | — | — |
+| Admin CSS tokens (`--admin-*`) in globals.css | infra | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
+| `AdminLayout` (app/admin/layout.tsx) | shell | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
+| `AdminSidebar` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `AdminPageHeader` | component | ⬜ todo | — | — |
 | `DataTable` | component | ⬜ todo | — | — |
 | `FilterBar` | component | ⬜ todo | — | — |
@@ -88,7 +88,7 @@ npm install lucide-react
 
 ### Admin CSS Tokens
 
-**Status:** `⬜ todo` | **Files:** `app/globals.css`
+**Status:** `✅ done` | **Files:** `app/globals.css`
 
 Add this block to `app/globals.css` after the shadcn-generated `:root {}` block:
 
@@ -167,48 +167,26 @@ Create one file per admin resource. All admin mutations use `lib/api/client.ts`.
 
 ### `AdminLayout` — Root Layout
 
-**Status:** `⬜ todo` | **Files:** `app/admin/layout.tsx`
+**Status:** `✅ done` | **Files:** `app/admin/layout.tsx`
 
 Replace the current lack of layout with a proper admin layout wrapping all `/admin/*` routes.
 
-```ts
-// app/admin/layout.tsx — RSC
-import { Plus_Jakarta_Sans } from 'next/font/google'
-import AdminSidebar from '@/components/admin/AdminSidebar'
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-admin',
-})
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={`${plusJakartaSans.variable} font-[var(--font-admin)] flex min-h-screen bg-[var(--admin-bg)]`}>
-      <AdminSidebar />
-      <main className="ml-[var(--admin-sidebar-width)] flex-1 min-h-screen p-[var(--admin-content-py)_var(--admin-content-px)]">
-        {children}
-      </main>
-    </div>
-  )
-}
-```
-
 - RSC — no `'use client'`
-- Middleware already guards `/admin/:path*` — no auth check here
-- `AdminSidebar` is a Client Component (needs `usePathname`)
+- Calls `getMe()` server-side; redirects to `/login` on failure; passes `user` as prop to `AdminSidebar`
+- Plus Jakarta Sans loaded via `next/font/google` with `variable: '--font-admin'`
 - Do NOT apply `--font-admin` to the root layout — storefront uses Fjalla One / Montserrat
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created RSC layout with Plus Jakarta Sans, sidebar + content area shell; fetches user server-side and passes to AdminSidebar |
 
 ---
 
 ### `AdminSidebar`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/AdminSidebar.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/AdminSidebar.tsx`
 
 ```ts
 'use client'
@@ -245,6 +223,7 @@ const NAV_ITEMS = [
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | Created Client Component with grouped nav (MANAGE/CATALOG/CONTENT), active state via `usePathname`, bottom user strip with Avatar + email + logout; accepts `user` prop from RSC layout |
 
 ---
 
