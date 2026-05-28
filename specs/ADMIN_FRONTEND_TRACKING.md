@@ -1,7 +1,7 @@
 # Admin Frontend Tracking — o2shop
 
 > Pair file: `specs/ADMIN_DESIGN_SYSTEM.md` (visual spec) · `specs/FRONTEND_TRACKING.md` (storefront)
-> Last updated: 2026-05-28 (session-22)
+> Last updated: 2026-05-28 (session-23)
 > All admin routes live under `/admin/*` — protected by `middleware.ts` RBAC (already in place).
 
 ---
@@ -38,7 +38,7 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | `/admin/products` list | route | ⬜ todo | — | — |
 | `/admin/products/new` | route | ⬜ todo | — | — |
 | `/admin/products/[id]` edit | route | ⬜ todo | — | — |
-| `/admin/orders` list | route | ⬜ todo | — | — |
+| `/admin/orders` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `/admin/orders/[id]` edit | route | ⬜ todo | — | — |
 | `/admin/users` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `/admin/users/[id]` edit | route | ⬜ todo | — | — |
@@ -569,7 +569,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 ### `/admin/orders` — Orders List
 
-**Status:** `⬜ todo` | **Files:** `app/admin/orders/page.tsx`
+**Status:** `✅ done` | **Files:** `app/admin/orders/page.tsx`, `app/admin/orders/OrdersContent.tsx`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/orders` — params: `page`, `limit` (check openapi.json for additional filters)
@@ -594,6 +594,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-28 | claude-sonnet-4-6 | RSC page reads async searchParams, fetches via getAdminOrders (page+limit only — no filter params in API); OrdersContent client island owns pagination URL routing; columns: Order #, Customer, Date, Fulfillment/Payment badges, Total, View link |
 
 ---
 

@@ -61,6 +61,11 @@ export type PaginatedAdminOrders = {
 export type GetAdminOrdersParams = {
   page?: number
   limit?: number
+  email?: string
+  paymentStatus?: PaymentStatus
+  fulfillmentStatus?: FulfillmentStatus
+  createdAfter?: string
+  createdBefore?: string
 }
 
 export type UpdateOrderStatusDto = {
