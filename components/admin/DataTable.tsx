@@ -103,23 +103,28 @@ export default function DataTable<T>({
             ? Math.min(delta, maxAbsorb)
             : Math.max(delta, minCol - startSizes[colIndex])
 
-        const newSizing: Record<string, number> = {
-          [allHeaders[colIndex].column.id]: startSizes[colIndex] + clampedDelta,
+        const newSizing: Record<string, number> = {}
+
+        // Anchor left columns to their DOM-measured widths so they don't snap
+        // to stale TanStack defaults when adjacent columns are written to state
+        for (let i = 0; i < colIndex; i++) {
+          newSizing[allHeaders[i].column.id] = startSizes[i]
         }
 
-        // Distribute -clampedDelta proportionally across ALL right columns
-        if (rightIndices.length > 0 && clampedDelta !== 0) {
-          for (const i of rightIndices) {
-            const proportion =
-              totalRightSize > 0
-                ? startSizes[i] / totalRightSize
-                : 1 / rightIndices.length
-            const rightMin = allHeaders[i].column.columnDef.minSize ?? 50
-            newSizing[allHeaders[i].column.id] = Math.max(
-              rightMin,
-              startSizes[i] - clampedDelta * proportion,
-            )
-          }
+        newSizing[allHeaders[colIndex].column.id] = startSizes[colIndex] + clampedDelta
+
+        // Distribute -clampedDelta proportionally across right columns (always
+        // written so they're anchored even when delta is zero)
+        for (const i of rightIndices) {
+          const proportion =
+            totalRightSize > 0
+              ? startSizes[i] / totalRightSize
+              : 1 / rightIndices.length
+          const rightMin = allHeaders[i].column.columnDef.minSize ?? 50
+          newSizing[allHeaders[i].column.id] = Math.max(
+            rightMin,
+            startSizes[i] - clampedDelta * proportion,
+          )
         }
 
         setColumnSizing((prev) => ({ ...prev, ...newSizing }))

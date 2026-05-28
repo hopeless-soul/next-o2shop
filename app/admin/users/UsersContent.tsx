@@ -18,6 +18,9 @@ interface UsersContentProps {
   search: string
   role: string
   isActive?: boolean
+  isDeleted?: boolean
+  createdAfter: string
+  createdBefore: string
 }
 
 function formatDate(iso: string) {
@@ -36,6 +39,9 @@ export default function UsersContent({
   search,
   role,
   isActive,
+  isDeleted,
+  createdAfter,
+  createdBefore,
 }: UsersContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -101,19 +107,13 @@ export default function UsersContent({
       ),
     },
     {
-      id: 'isActive',
+      id: 'isDeleted',
       header: 'Status',
       cell: ({ row }) => {
         const u = row.original
-        if (u.deletedAt) {
-          return <AdminBadge variant="error" label="Deleted" />
-        }
-        return (
-          <AdminBadge
-            variant={u.isActive ? 'success' : 'error'}
-            label={u.isActive ? 'Active' : 'Inactive'}
-          />
-        )
+        if (u.deletedAt) return <AdminBadge variant="error" label="Deleted" />
+        if (!u.isActive) return <AdminBadge variant="warning" label="Inactive" />
+        return <AdminBadge variant="success" label="Active" />
       },
     },
     {
@@ -126,9 +126,6 @@ export default function UsersContent({
       ),
     },
   ]
-
-  const isActiveFilterValue =
-    isActive === true ? 'true' : isActive === false ? 'false' : ''
 
   return (
     <>
@@ -149,13 +146,37 @@ export default function UsersContent({
           },
           {
             key: 'isActive',
-            label: 'All Status',
-            value: isActiveFilterValue,
+            label: 'All Active',
+            value: isActive === true ? 'true' : isActive === false ? 'false' : '',
             onChange: (v) => updateParams({ isActive: v }),
             options: [
               { label: 'Active', value: 'true' },
               { label: 'Inactive', value: 'false' },
             ],
+          },
+          {
+            key: 'isDeleted',
+            label: 'All Status',
+            value: isDeleted === true ? 'true' : isDeleted === false ? 'false' : '',
+            onChange: (v) => updateParams({ isDeleted: v }),
+            options: [
+              { label: 'Non deleted', value: 'false' },
+              { label: 'Deleted', value: 'true' },
+            ],
+          },
+          {
+            key: 'createdAfter',
+            label: 'From',
+            type: 'date',
+            value: createdAfter,
+            onChange: (v) => updateParams({ createdAfter: v }),
+          },
+          {
+            key: 'createdBefore',
+            label: 'To',
+            type: 'date',
+            value: createdBefore,
+            onChange: (v) => updateParams({ createdBefore: v }),
           },
         ]}
       />

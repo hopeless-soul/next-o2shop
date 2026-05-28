@@ -28,8 +28,8 @@ export type GetAdminUsersParams = {
   limit?: number
   search?: string
   role?: 'regular' | 'admin'
-  isDeleted?: boolean
   isActive?: boolean
+  isDeleted?: boolean
   userId?: string
   createdAfter?: string
   createdBefore?: string

@@ -15,7 +15,8 @@ import {
 export interface FilterOption {
   key: string
   label: string
-  options: { label: string; value: string }[]
+  type?: 'select' | 'date'
+  options?: { label: string; value: string }[]
   value: string
   onChange: (value: string) => void
 }
@@ -121,21 +122,46 @@ export default function FilterBar({
         {/* Filter selects */}
         {filters?.map((filter) => {
           const draftValue = filterDrafts[filter.key] ?? ''
+          if (filter.type === 'date') {
+            return (
+              <div key={filter.key} className="flex items-center gap-1.5">
+                <span className="text-[12px] text-[var(--admin-text-muted)] shrink-0">{filter.label}</span>
+                <div className="relative w-[130px]">
+                  <input
+                    type="date"
+                    value={draftValue}
+                    onChange={(e) => setFilterDraft(filter.key, e.target.value)}
+                    className="w-full h-9 text-[13px] border border-[var(--admin-border-input)] rounded-[4px] px-2 text-[var(--admin-text-secondary)] bg-transparent focus:outline-none focus:ring-1 focus:ring-[var(--admin-ring)]"
+                  />
+                  {draftValue !== '' && (
+                    <button
+                      type="button"
+                      onClick={() => setFilterDraft(filter.key, '')}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:text-[var(--admin-text-secondary)] transition-colors duration-100"
+                      aria-label={`Clear ${filter.label} filter`}
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          }
           return (
             <div key={filter.key} className="relative w-[160px]">
               <Select
-                value={draftValue || undefined}
+                value={draftValue}
                 onValueChange={(v) => setFilterDraft(filter.key, v ?? '')}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue className={draftValue ? 'text-admin-text-primary' : 'text-admin-text-muted'}>
                     {draftValue
-                      ? (filter.options.find((o) => o.value === draftValue)?.label ?? draftValue)
+                      ? (filter.options?.find((o) => o.value === draftValue)?.label ?? draftValue)
                       : filter.label}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {filter.options.map((opt) => (
+                  {filter.options?.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
