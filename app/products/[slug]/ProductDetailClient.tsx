@@ -288,23 +288,16 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           />
 
           <button
-            className="w-full font-sans text-[24px] uppercase tracking-widest text-primary-foreground flex items-center"
+            className="atc-button w-full font-sans text-[24px] uppercase tracking-widest text-primary-foreground flex items-center"
             style={{
               justifyContent: 'space-between',
               height: "var(--atc-height)",
-              backgroundColor: "var(--color-primary)",
               borderRadius: "var(--radius-base)",
               transition: "var(--transition-base)",
               border: "none",
               cursor: "pointer",
               WebkitTextStroke: '0.6px white',
               padding: '20px'
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.opacity = "0.88";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.opacity = "1";
             }}
           >
             <span className="tracking-[0.44px]">
@@ -314,9 +307,11 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               <span
                 className="font-sans text-[24px] tracking-[0.44px]"
               >${product.basePrice}</span>
-              <span
-                className="font-sans text-[24px] tracking-[0.44px] line-through opacity-50"
-              >${product.compareAtPrice}</span>
+              {product.compareAtPrice != null && (
+                <span
+                  className="atc-compare-price font-sans text-[24px] tracking-[0.44px] line-through opacity-50"
+                >${product.compareAtPrice}</span>
+              )}
             </span>
           </button>
 
