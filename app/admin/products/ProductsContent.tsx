@@ -79,17 +79,14 @@ export default function ProductsContent({
             className="flex items-center gap-3 group min-w-0"
           >
             <div className="size-10 rounded-[4px] shrink-0 overflow-hidden bg-[var(--admin-border)]">
-              {(() => {
-                const preview = p.photos.find((ph) => ph.sortOrder === 0)
-                return preview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={resolveUrl(preview.url)}
-                    alt={p.displayName}
-                    className="size-10 object-cover"
-                  />
-                ) : null
-              })()}
+              {p.primaryPhoto && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={resolveUrl(p.primaryPhoto.url)}
+                  alt={p.displayName}
+                  className="size-10 object-cover"
+                />
+              )}
             </div>
             <div className="min-w-0">
               <div className="text-[14px] font-medium group-hover:underline truncate max-w-[200px]">

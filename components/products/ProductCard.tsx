@@ -20,16 +20,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [activeZone, setActiveZone] = useState<"left" | "right" | null>(null);
 
   const photos      = product.photos ?? [];
-  // When photos array is populated, use sortOrder strictly (never fall back to primaryPhoto
-  // which could be the accent/sortOrder -1 photo). When photos is empty (list endpoint only
-  // provides primaryPhoto), use it as the only available image.
-  console.log(photos);
-  
-  const mainPhoto   = photos.length > 0
-    ? (photos.find(p => p.sortOrder === 1) ?? null)
-    : (product.primaryPhoto ?? null);
-  const hoverPhoto1 = photos.find(p => p.sortOrder === 2) ?? mainPhoto;
-  const hoverPhoto2 = photos.find(p => p.sortOrder === 3) ?? mainPhoto;
+  const mainPhoto   = product.primaryPhoto ?? null;
+  const hoverPhoto1 = photos.find(p => p.sortOrder === 1) ?? mainPhoto;
+  const hoverPhoto2 = photos.find(p => p.sortOrder === 2) ?? mainPhoto;
 
   // Color fallbacks — used only when mainPhoto is absent
   const mainBg  = product.variants[0]?.colorValue ?? PLACEHOLDER_COLORS[0];

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/admin/ui/select'
 import type { ProductVariant, CreateVariantDto } from '@/lib/api/admin-products'
-import { createVariant, updateVariant } from '@/lib/api/admin-products'
+import { createVariantAction, updateVariantAction } from './actions'
 
 interface VariantDialogProps {
   productId: string
@@ -121,8 +121,8 @@ function VariantForm({
         inventoryPolicy: form.inventoryPolicy,
       }
       const saved = variant
-        ? await updateVariant(productId, variant.id, dto)
-        : await createVariant(productId, dto)
+        ? await updateVariantAction(productId, variant.id, dto)
+        : await createVariantAction(productId, dto)
       onSaved(saved)
       onClose()
     } catch (err) {

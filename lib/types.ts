@@ -117,6 +117,7 @@ export type Product = {
   description?: { blocks: ProductDescriptionBlock[] };
   rating: number;
   primaryPhoto?: ProductPhotoSummary;
+  featuredPhoto?: ProductPhotoSummary | null;
   photos?: ProductPhoto[];
   variants: ProductVariant[];
   collection?: Collection;

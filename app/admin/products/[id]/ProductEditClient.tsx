@@ -17,14 +17,16 @@ import AdminBadge from '@/components/admin/AdminBadge'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
 import type { AdminProduct, ProductVariant, ProductPhoto } from '@/lib/api/admin-products'
 import {
-  updateProduct,
-  deleteVariant,
-  setDefaultVariant,
-  uploadProductPhoto,
-  deleteProductPhoto,
-  updatePhoto,
-  reorderPhotos,
-} from '@/lib/api/admin-products'
+  updateProductAction,
+  deleteVariantAction,
+  setDefaultVariantAction,
+  uploadPhotoAction,
+  deletePhotoAction,
+  updatePhotoAction,
+  reorderPhotosAction,
+  uploadFeaturedPhotoAction,
+  deleteFeaturedPhotoAction,
+} from './actions'
 import type { AdminCategory } from '@/lib/api/admin-categories'
 import type { AdminCollection } from '@/lib/api/admin-collections'
 import VariantDialog from './VariantDialog'
@@ -105,14 +107,147 @@ function TagInput({
 // Photos Tab
 // ────────────────────────────────────────────────────────────
 
+function FeaturedPhotoSection({
+  productId,
+  initialFeaturedPhoto,
+}: {
+  productId: string
+  initialFeaturedPhoto?: ProductPhoto | null
+}) {
+  const [featured, setFeatured] = useState<ProductPhoto | null>(initialFeaturedPhoto ?? null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setUploading(true)
+    setError(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const photo = await uploadFeaturedPhotoAction(productId, formData)
+      setFeatured(photo)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handleDelete() {
+    try {
+      await deleteFeaturedPhotoAction(productId)
+      setFeatured(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed.')
+    }
+  }
+
+  return (
+    <div className="space-y-3 pt-4">
+      {/* Divider */}
+      <div className="flex items-center gap-2">
+        <div className="h-px flex-1 bg-[var(--admin-border)]" />
+        <span className="text-[11px] font-semibold text-[var(--admin-text-secondary)] uppercase tracking-wider px-1">
+          Featured Photo
+        </span>
+        <div className="h-px flex-1 bg-[var(--admin-border)]" />
+      </div>
+
+      <p className="text-[12px] text-[var(--admin-text-muted)]">
+        Hero / brand image shown on collection and feature surfaces. Only one is allowed per product.
+      </p>
+
+      {featured ? (
+        <div className="flex items-center gap-3 p-3 bg-white border border-[var(--admin-border)] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <div className="relative w-20 h-20 rounded-[4px] overflow-hidden bg-[var(--admin-bg)] shrink-0 border border-[var(--admin-border)]">
+            <Image
+              src={featured.url}
+              alt={featured.altText ?? 'Featured photo'}
+              fill
+              className="object-cover"
+              sizes="80px"
+            />
+          </div>
+
+          <AdminBadge variant="info" label="Featured" />
+
+          <div className="flex-1 min-w-0" />
+
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] disabled:opacity-40 transition-colors"
+          >
+            {uploading ? <Loader2 className="size-3.5 animate-spin" /> : 'Replace'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setDeleteOpen(true)}
+            className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
+          >
+            <Trash2 className="size-4" />
+          </button>
+        </div>
+      ) : (
+        <div
+          className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[var(--admin-border-input)] rounded-[6px] p-8 cursor-pointer hover:border-[var(--admin-ring)] transition-colors duration-150"
+          onClick={() => !uploading && fileInputRef.current?.click()}
+        >
+          {uploading ? (
+            <Loader2 className="size-6 animate-spin text-[var(--admin-text-muted)]" />
+          ) : (
+            <>
+              <Plus className="size-6 text-[var(--admin-text-muted)]" />
+              <p className="text-[13px] text-[var(--admin-text-muted)]">
+                Upload Featured Photo — JPEG, PNG, WebP
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
+      {error && (
+        <p className="text-[13px] text-[var(--admin-destructive)]">{error}</p>
+      )}
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={open => { if (!open) setDeleteOpen(false) }}
+        title="Delete Featured Photo"
+        description="The featured photo will be permanently removed."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={handleDelete}
+      />
+    </div>
+  )
+}
+
 function PhotosTab({
   productId,
   initialPhotos,
   primaryPhotoId: initialPrimaryId,
+  initialFeaturedPhoto,
 }: {
   productId: string
   initialPhotos: ProductPhoto[]
   primaryPhotoId?: string | null
+  initialFeaturedPhoto?: ProductPhoto | null
 }) {
   const [photos, setPhotos] = useState(() =>
     [...initialPhotos].sort((a, b) => a.sortOrder - b.sortOrder)
@@ -137,7 +272,9 @@ function PhotosTab({
     setUploading(true)
     setUploadError(null)
     try {
-      const photo = await uploadProductPhoto(productId, file)
+      const formData = new FormData()
+      formData.append('file', file)
+      const photo = await uploadPhotoAction(productId, formData)
       setPhotos(prev => {
         const next = [...prev, { ...photo, sortOrder: prev.length }]
         return next
@@ -152,7 +289,7 @@ function PhotosTab({
   // ── Delete ───────────────────────────────────────────────
   async function handleDelete() {
     if (!deleteTarget) return
-    await deleteProductPhoto(productId, deleteTarget)
+    await deletePhotoAction(productId, deleteTarget)
     setPhotos(prev => {
       const filtered = prev.filter(p => p.id !== deleteTarget)
       return reassignOrders(filtered)
@@ -168,7 +305,7 @@ function PhotosTab({
   async function persistReorder(list: PhotoWithOrder[]) {
     setPhotos(list)
     try {
-      await reorderPhotos(productId, list.map(p => ({ id: p.id, sortOrder: p.sortOrder })))
+      await reorderPhotosAction(productId, list.map(p => ({ id: p.id, sortOrder: p.sortOrder })))
     } catch (err) {
       setErrors(e => ({ ...e, _reorder: err instanceof Error ? err.message : 'Reorder failed.' }))
     }
@@ -194,7 +331,7 @@ function PhotosTab({
     if (isNaN(n) || n === photo.sortOrder) return
     clearError(photo.id)
     try {
-      const updated = await updatePhoto(productId, photo.id, { sortOrder: n })
+      const updated = await updatePhotoAction(productId, photo.id, { sortOrder: n })
       setPhotos(prev =>
         [...prev.map(p => (p.id === photo.id ? { ...p, sortOrder: updated.sortOrder } : p))]
           .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -208,7 +345,7 @@ function PhotosTab({
   async function handleSetPrimary(photoId: string) {
     clearError(photoId)
     try {
-      await updateProduct(productId, { primaryPhotoId: photoId })
+      await updateProductAction(productId, { primaryPhotoId: photoId })
       setPrimaryId(photoId)
     } catch (err) {
       setErrors(e => ({ ...e, [photoId]: err instanceof Error ? err.message : 'Update failed.' }))
@@ -234,7 +371,7 @@ function PhotosTab({
   function handleDrop() {
     const list = reassignOrders(photos)
     setPhotos(list)
-    reorderPhotos(productId, list.map(p => ({ id: p.id, sortOrder: p.sortOrder }))).catch(err => {
+    reorderPhotosAction(productId, list.map(p => ({ id: p.id, sortOrder: p.sortOrder }))).catch(err => {
       setErrors(e => ({ ...e, _reorder: err instanceof Error ? err.message : 'Reorder failed.' }))
     })
     dragIndexRef.current = null
@@ -378,6 +515,11 @@ function PhotosTab({
         destructive
         onConfirm={handleDelete}
       />
+
+      <FeaturedPhotoSection
+        productId={productId}
+        initialFeaturedPhoto={initialFeaturedPhoto}
+      />
     </div>
   )
 }
@@ -448,7 +590,7 @@ export default function ProductEditClient({
     setSaveError(null)
     setSaveSuccess(false)
     try {
-      await updateProduct(product.id, {
+      await updateProductAction(product.id, {
         displayName,
         name,
         categoryId: categoryId || undefined,
@@ -490,14 +632,14 @@ export default function ProductEditClient({
 
   async function handleDeleteVariant() {
     if (!deleteVariantId) return
-    await deleteVariant(product.id, deleteVariantId)
+    await deleteVariantAction(product.id, deleteVariantId)
     setVariants(prev => prev.filter(v => v.id !== deleteVariantId))
     if (defaultVariantId === deleteVariantId) setDefaultVariantId(null)
   }
 
   async function handleSetDefault(variantId: string) {
     try {
-      const updated = await setDefaultVariant(product.id, variantId)
+      const updated = await setDefaultVariantAction(product.id, variantId)
       setDefaultVariantId(updated.defaultVariant?.id ?? null)
     } catch (err) {
       setVariantActionErrors(e => ({
@@ -837,6 +979,7 @@ export default function ProductEditClient({
           productId={product.id}
           initialPhotos={product.photos ?? []}
           primaryPhotoId={product.primaryPhoto?.id}
+          initialFeaturedPhoto={product.featuredPhoto}
         />
       </TabsContent>
     </Tabs>

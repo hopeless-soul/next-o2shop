@@ -64,7 +64,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
     .filter(p => p.sortOrder !== -1)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
-  const accentPhoto = photos.find(p => p.sortOrder === -1) ?? null;
+  const accentPhoto = product.featuredPhoto ?? null;
   const displayedPhoto = thumbnailPhotos[selectedImage] ?? null;
 
   const descBlocks = product.description?.blocks ?? [];

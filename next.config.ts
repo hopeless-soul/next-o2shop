@@ -4,6 +4,14 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const { protocol, hostname, port } = new URL(apiUrl);
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: `${apiUrl}/uploads/:path*`,
+      },
+    ]
+  },
   images: {
     dangerouslyAllowLocalIP: true,
     remotePatterns: [
