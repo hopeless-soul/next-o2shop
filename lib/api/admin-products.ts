@@ -1,4 +1,3 @@
-import serverApi from './server'
 import clientApi from './client'
 
 export type ProductPhoto = {
@@ -67,6 +66,7 @@ export type AdminProduct = {
   createdAt: string
   updatedAt: string
   primaryPhoto?: ProductPhoto | null
+  featuredPhoto?: ProductPhoto | null
   photos: ProductPhoto[]
   defaultVariant?: ProductVariant
   variants: ProductVariant[]
@@ -140,17 +140,12 @@ export type CreateVariantDto = {
 
 export type UpdateVariantDto = Partial<CreateVariantDto>
 
-// --- Server-side reads ---
-
-export async function getAdminProducts(params: GetAdminProductsParams = {}): Promise<PaginatedAdminProducts> {
-  const res = await serverApi.get<PaginatedAdminProducts>('/admin/products', { params })
-  return res.data
+export type UpdatePhotoDto = {
+  altText?: string
+  sortOrder?: number
 }
 
-export async function getAdminProduct(id: string): Promise<AdminProduct> {
-  const res = await serverApi.get<AdminProduct>(`/admin/products/${id}`)
-  return res.data
-}
+export type ReorderPhotoItem = { id: string; sortOrder: number }
 
 // --- Client-side mutations ---
 
@@ -203,4 +198,14 @@ export async function uploadProductPhoto(productId: string, file: File, altText?
 
 export async function deleteProductPhoto(productId: string, photoId: string): Promise<void> {
   await clientApi.delete(`/admin/products/${productId}/photos/${photoId}`)
+}
+
+export async function updatePhoto(productId: string, photoId: string, dto: UpdatePhotoDto): Promise<ProductPhoto> {
+  const res = await clientApi.patch<ProductPhoto>(`/admin/products/${productId}/photos/${photoId}`, dto)
+  return res.data
+}
+
+export async function reorderPhotos(productId: string, photos: ReorderPhotoItem[]): Promise<ProductPhoto[]> {
+  const res = await clientApi.patch<ProductPhoto[]>(`/admin/products/${productId}/photos/reorder`, { photos })
+  return res.data
 }

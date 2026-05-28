@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminProducts } from '@/lib/api/admin-products'
+import { getAdminProducts } from '@/lib/api/admin-products-server'
 import ProductsContent from './ProductsContent'
 
 interface ProductsPageProps {
