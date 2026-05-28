@@ -170,7 +170,7 @@
 
 @theme inline {
   /* Fonts */
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-primary);
   --font-mono: var(--font-geist-mono);
   --font-secondary: var(--font-secondary);
 
@@ -386,9 +386,6 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
     @apply bg-background text-foreground;
   }
