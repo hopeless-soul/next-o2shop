@@ -1,4 +1,3 @@
-import serverApi from './server'
 import clientApi from './client'
 
 export type AdminSubCategory = {
@@ -32,11 +31,6 @@ export type CreateCategoryDto = {
 export type CreateSubCategoryDto = {
   slug: string
   displayName: string
-}
-
-export async function getAdminCategories(params: { page?: number; limit?: number } = {}): Promise<PaginatedAdminCategories> {
-  const res = await serverApi.get<PaginatedAdminCategories>('/admin/categories', { params })
-  return res.data
 }
 
 export async function createCategory(dto: CreateCategoryDto): Promise<AdminCategory> {

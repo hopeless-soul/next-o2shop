@@ -6,6 +6,11 @@ const { protocol, hostname, port } = new URL(apiUrl);
 const nextConfig: NextConfig = {
   async rewrites() {
     return [
+      // Proxy client-side API calls through Next.js so cookies stay same-origin
+      {
+        source: '/api/:path*',
+        destination: `${apiUrl}/:path*`,
+      },
       {
         source: '/uploads/:path*',
         destination: `${apiUrl}/uploads/:path*`,

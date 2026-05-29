@@ -41,9 +41,9 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | `/admin/orders` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `/admin/orders/[id]` edit | route | ⬜ todo | — | — |
 | `/admin/users` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
-| `/admin/users/[id]` edit | route | ⬜ todo | — | — |
-| `/admin/users/new` create | route | 🚫 blocked | — | — |
-| `/admin/categories` list | route | ⬜ todo | — | — |
+| `/admin/users/[id]` edit | route | ✅ done | claude-sonnet-4-6 | 2026-05-29 |
+| `/admin/users/new` create | route | ✅ done | claude-sonnet-4-6 | 2026-05-29 |
+| `/admin/categories` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-29 |
 | `/admin/categories/new` | route | ⬜ todo | — | — |
 | `/admin/categories/[id]` edit | route | ⬜ todo | — | — |
 | `/admin/collections` list | route | ⬜ todo | — | — |
@@ -657,61 +657,59 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 ### `/admin/users/[id]` — Edit User
 
-**Status:** `⬜ todo` | **Files:** `app/admin/users/[id]/page.tsx`
+**Status:** `✅ done` | **Files:** `app/admin/users/[id]/page.tsx`, `app/admin/users/[id]/UserEditClient.tsx`, `app/admin/users/[id]/actions.ts`
 
-**API resources** *(re-read openapi.json)*
+**API resources**
 - `GET /admin/users/{id}` — `AdminUserResponseDto`
 - `PATCH /admin/users/{id}` — `UpdateAdminUserDto`: `role?`, `isActive?`, `resetTokenVersion?`
+- `DELETE /admin/users/{id}` — 204 soft delete
 
-**Form** (`<FormCard>`):
-
-| Field | Input | Notes |
-|---|---|---|
-| Email | read-only | Display only — not editable |
-| Display Name | read-only | No update endpoint |
-| Google linked | read-only badge | `googleLinked` boolean |
-| Role | select (regular / admin) | Editable |
-| Active | toggle switch | `isActive` |
-| Reset tokens | checkbox | `resetTokenVersion: true` invalidates all sessions |
-
-Save via `PATCH /admin/users/{id}`. Success toast "User updated." Error shown inline.
+Two FormCards: "Account Info" (read-only: email, displayName, member since, status + Google badge) and "Permissions" (editable: role select, isActive switch, invalidate-sessions checkbox). Danger Zone card with soft-delete hidden once user is already deleted.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-29 | claude-sonnet-4-6 | Initial implementation |
 
 ---
 
 ### `/admin/users/new` — Create User
 
-**Status:** `🚫 blocked` | **Blocked by:** `POST /admin/users` endpoint does not exist in the API
+**Status:** `✅ done`
 
-No create-user page until the backend adds this endpoint. When unblocked, re-read `openapi.json` for the new DTO shape.
+Three-section form (Account, Profile, Permissions) backed by `POST /admin/users`. On success redirects to `/admin/users`. Fields: `email` (required), `password` + confirm (required, min 8, client-only match check), `displayName`, `avatarUrl`, `role` select, `isActive` toggle.
+
+**Files:** `app/admin/users/new/page.tsx`, `app/admin/users/new/CreateUserClient.tsx`, `app/admin/users/new/actions.ts`
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-29 | claude-sonnet-4-6 | Initial implementation — endpoint confirmed in openapi.json |
 
 ---
 
 ### `/admin/categories` — Categories List
 
-**Status:** `⬜ todo` | **Files:** `app/admin/categories/page.tsx`
+**Status:** `✅ done` | **Files:** `app/admin/categories/page.tsx`, `app/admin/categories/CategoriesContent.tsx`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/categories` — `PaginatedCategoryResponseDto` (page, limit)
 - `DELETE /admin/categories/{id}` — 204
 
-**Columns:** Name | Slug | Subcategories (count from `subCategories.length`) | Created | Actions
+**Columns:** Name | Slug | Actions
 
-**Row actions:** Edit → `/admin/categories/[id]` | Delete → `<ConfirmDialog>`
+**Row actions (category):** Edit → `/admin/categories/[id]` | Delete → `<ConfirmDialog>`
+
+**Row actions (subcategory):** Inline edit (Name + Slug inputs in-row) | Delete → `<ConfirmDialog>` | "+" inline form row at bottom of expanded list → `createSubcategory()`
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-05-29 | claude-sonnet-4-6 | RSC page fetches via getAdminCategories; CategoriesContent client island owns pagination URL routing, expandable subcategory rows (local Set state), delete via ConfirmDialog + router.refresh(); no FilterBar (API has no filter params) |
+| 2026-05-29 | claude-sonnet-4-6 | Rewrote CategoriesContent as custom accordion table; category rows expand to subcategory rows (lighter/darker bg); subcategory rows have inline Edit/Delete; "+" row at bottom of each expanded list with slug auto-derive; dropped DataTable/TanStack; columns: Name, Slug, Actions only |
 
 ---
 
@@ -872,7 +870,7 @@ Re-read `CreateShippingMethodDto` in openapi.json for exact fields before buildi
 ## Key Decisions & Gotchas
 
 - **`GET /admin/orders/{id}` takes a UUID** — NOT the `orderNumber` display string. Use `order.id` for admin edit links, not `order.orderNumber`.
-- **No create-user endpoint** — `/admin/users/new` is blocked. Users self-register via `POST /auth/register`.
+- **`POST /admin/users` exists** — `/admin/users/new` is implemented. `CreateAdminUserDto` requires `email` + `password` (min 8); `displayName`, `avatarUrl`, `role`, `isActive` are optional.
 - **shadcn init modifies globals.css** — always add `--admin-*` tokens after the shadcn block or they will be overwritten.
 - **Plus Jakarta Sans scoped to admin layout** — load via `next/font/google` in `app/admin/layout.tsx` only. Do not apply to root layout.
 - **`ReviewStatus` enum** — re-read openapi.json for exact values before building review filter/badge maps.

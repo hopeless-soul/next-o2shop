@@ -1,4 +1,4 @@
-import clientApi from './client'
+import clientApi, { setClientToken, clearClientToken } from './client'
 import serverApi from './server'
 
 export type UserRole = 'regular' | 'admin'
@@ -18,7 +18,8 @@ export type LoginPayload = { email: string; password: string }
 export type RegisterPayload = { email: string; password: string }
 
 export async function login(payload: LoginPayload): Promise<void> {
-  await clientApi.post('/auth/login', payload)
+  const res = await clientApi.post<{ access_token: string }>('/auth/login', payload)
+  setClientToken(res.data.access_token)
 }
 
 export async function register(payload: RegisterPayload): Promise<User> {
@@ -27,6 +28,7 @@ export async function register(payload: RegisterPayload): Promise<User> {
 }
 
 export async function logout(): Promise<void> {
+  clearClientToken()
   await clientApi.delete('/auth/logout')
 }
 

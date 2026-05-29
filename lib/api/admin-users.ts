@@ -35,6 +35,15 @@ export type GetAdminUsersParams = {
   createdBefore?: string
 }
 
+export type CreateAdminUserDto = {
+  email: string
+  password: string
+  displayName?: string
+  avatarUrl?: string
+  role?: 'regular' | 'admin'
+  isActive?: boolean
+}
+
 export type UpdateAdminUserDto = {
   role?: 'regular' | 'admin'
   isActive?: boolean
