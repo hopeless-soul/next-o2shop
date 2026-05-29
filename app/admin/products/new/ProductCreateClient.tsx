@@ -146,7 +146,7 @@ export default function ProductCreateClient({ categories, collections }: Product
         name,
         displayName,
         categoryId,
-        subCategoryId,
+        subCategoryId: subCategoryId || undefined,
         basePrice: Number(basePrice),
         currency,
         collectionId: collectionId || undefined,
@@ -266,7 +266,7 @@ export default function ProductCreateClient({ categories, collections }: Product
                   <label className={labelCls}>Subcategory</label>
                   <Select
                     value={subCategoryId}
-                    disabled={!categoryId || subCategories.length === 0}
+                    disabled={!categoryId}
                     onValueChange={id => {
                       if (id === null) return
                       setSubCategoryId(id)
@@ -278,6 +278,7 @@ export default function ProductCreateClient({ categories, collections }: Product
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="">None</SelectItem>
                       {subCategories.map(s => (
                         <SelectItem key={s.id} value={s.id}>{s.displayName}</SelectItem>
                       ))}

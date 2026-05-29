@@ -627,7 +627,7 @@ export default function ProductEditClient({
         displayName,
         name,
         categoryId: categoryId || undefined,
-        subCategoryId: subCategoryId || undefined,
+        subCategoryId: subCategoryId || null,
         type: type || null,
         collectionId: collectionId || undefined,
         basePrice: Number(basePrice),
@@ -778,7 +778,7 @@ export default function ProductEditClient({
                 <Select
                   value={subCategoryId}
                   onValueChange={setSubCategoryId}
-                  disabled={!categoryId || subCategories.length === 0}
+                  disabled={!categoryId}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select subcategory">
@@ -786,6 +786,7 @@ export default function ProductEditClient({
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">None</SelectItem>
                     {subCategories.map(s => (
                       <SelectItem key={s.id} value={s.id}>
                         {s.displayName}

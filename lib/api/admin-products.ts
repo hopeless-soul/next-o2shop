@@ -106,7 +106,7 @@ export type CreateProductDto = {
   name: string
   displayName: string
   categoryId: string
-  subCategoryId: string
+  subCategoryId?: string
   basePrice: number
   currency: string
   collectionId?: string
@@ -119,6 +119,7 @@ export type CreateProductDto = {
 
 export type UpdateProductDto = Partial<CreateProductDto> & {
   primaryPhotoId?: string | null
+  subCategoryId?: string | null
 }
 
 export type CreateVariantDto = {
