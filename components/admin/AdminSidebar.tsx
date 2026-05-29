@@ -12,6 +12,7 @@ import {
   Layers,
   Star,
   Truck,
+  History,
   LogOut,
   type LucideIcon,
 } from 'lucide-react'
@@ -52,6 +53,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Reviews', href: '/admin/reviews', icon: Star },
       { label: 'Shipping', href: '/admin/shipping', icon: Truck },
+      { label: 'Changes', href: '/admin/changes', icon: History },
     ],
   },
 ]
