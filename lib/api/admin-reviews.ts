@@ -1,4 +1,3 @@
-import serverApi from './server'
 import clientApi from './client'
 
 export type ReviewStatus = 'pending' | 'approved' | 'rejected'
@@ -31,11 +30,6 @@ export type GetAdminReviewsParams = {
   status?: ReviewStatus
   userId?: string
   search?: string
-}
-
-export async function getAdminReviews(params: GetAdminReviewsParams = {}): Promise<PaginatedAdminReviews> {
-  const res = await serverApi.get<PaginatedAdminReviews>('/admin/reviews', { params })
-  return res.data
 }
 
 export async function updateReviewStatus(id: string, status: ReviewStatus): Promise<AdminReview> {

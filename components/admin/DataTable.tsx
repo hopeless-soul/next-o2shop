@@ -10,6 +10,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table'
 import { ArrowUp, ArrowDown, ArrowUpDown, PackageOpen } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import {
   Table,
   TableBody,
@@ -32,6 +33,7 @@ export interface DataTableProps<T> {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
   onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void
+  onRowClick?: (row: T) => void
 }
 
 export default function DataTable<T>({
@@ -42,6 +44,7 @@ export default function DataTable<T>({
   sortBy,
   sortOrder,
   onSortChange,
+  onRowClick,
 }: DataTableProps<T>) {
   const sorting: SortingState = sortBy
     ? [{ id: sortBy, desc: sortOrder === 'desc' }]
@@ -236,7 +239,11 @@ export default function DataTable<T>({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className="border-b border-[var(--admin-border)] transition-colors duration-100"
+                onClick={() => onRowClick?.(row.original)}
+                className={cn(
+                  'border-b border-[var(--admin-border)] transition-colors duration-100',
+                  onRowClick && 'cursor-pointer hover:bg-[var(--admin-bg)]',
+                )}
                 style={{ minHeight: 'var(--admin-table-row-h)' }}
               >
                 {row.getVisibleCells().map((cell) => (
