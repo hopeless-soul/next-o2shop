@@ -69,7 +69,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
 
   const descBlocks = product.description?.blocks ?? [];
 
-  const productType = product.type ?? product.category;
+  const productType = product.type ?? product.category?.displayName;
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)", marginTop: 8 }}>

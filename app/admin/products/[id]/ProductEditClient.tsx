@@ -22,7 +22,6 @@ import {
   setDefaultVariantAction,
   uploadPhotoAction,
   deletePhotoAction,
-  updatePhotoAction,
   reorderPhotosAction,
   uploadFeaturedPhotoAction,
   deleteFeaturedPhotoAction,
@@ -257,6 +256,8 @@ function PhotosTab({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isDirty, setIsDirty] = useState(false)
+  const [applying, setApplying] = useState(false)
   const dragIndexRef = useRef<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -302,42 +303,48 @@ function PhotosTab({
     return list.map((p, i) => ({ ...p, sortOrder: i }))
   }
 
-  async function persistReorder(list: PhotoWithOrder[]) {
-    setPhotos(list)
-    try {
-      await reorderPhotosAction(productId, list.map(p => ({ id: p.id, sortOrder: p.sortOrder })))
-    } catch (err) {
-      setErrors(e => ({ ...e, _reorder: err instanceof Error ? err.message : 'Reorder failed.' }))
-    }
-  }
-
   function moveUp(idx: number) {
     if (idx === 0) return
     const next = [...photos]
     ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
-    persistReorder(reassignOrders(next))
+    setPhotos(reassignOrders(next))
+    setIsDirty(true)
   }
 
   function moveDown(idx: number) {
     if (idx === photos.length - 1) return
     const next = [...photos]
     ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
-    persistReorder(reassignOrders(next))
+    setPhotos(reassignOrders(next))
+    setIsDirty(true)
   }
 
   // ── Manual sortOrder input ───────────────────────────────
-  async function handleSortOrderBlur(photo: PhotoWithOrder, value: string) {
-    const n = Number(value)
-    if (isNaN(n) || n === photo.sortOrder) return
-    clearError(photo.id)
+  function handleSortOrderBlur(photoId: string, value: string) {
+    const raw = Number(value)
+    if (isNaN(raw)) return
+    const max = photos.length - 1
+    const clamped = Math.max(0, Math.min(max, raw))
+    const fromIdx = photos.findIndex(p => p.id === photoId)
+    if (fromIdx === -1 || clamped === fromIdx) return
+    const next = [...photos]
+    const [item] = next.splice(fromIdx, 1)
+    next.splice(clamped, 0, item)
+    setPhotos(reassignOrders(next))
+    setIsDirty(true)
+  }
+
+  // ── Apply reorder ────────────────────────────────────────
+  async function handleApply() {
+    setApplying(true)
     try {
-      const updated = await updatePhotoAction(productId, photo.id, { sortOrder: n })
-      setPhotos(prev =>
-        [...prev.map(p => (p.id === photo.id ? { ...p, sortOrder: updated.sortOrder } : p))]
-          .sort((a, b) => a.sortOrder - b.sortOrder)
-      )
+      await reorderPhotosAction(productId, photos.map(p => ({ id: p.id, sortOrder: p.sortOrder })))
+      setIsDirty(false)
+      setErrors(e => { const n = { ...e }; delete n._reorder; return n })
     } catch (err) {
-      setErrors(e => ({ ...e, [photo.id]: err instanceof Error ? err.message : 'Update failed.' }))
+      setErrors(e => ({ ...e, _reorder: err instanceof Error ? err.message : 'Reorder failed.' }))
+    } finally {
+      setApplying(false)
     }
   }
 
@@ -347,6 +354,14 @@ function PhotosTab({
     try {
       await updateProductAction(productId, { primaryPhotoId: photoId })
       setPrimaryId(photoId)
+      const fromIdx = photos.findIndex(p => p.id === photoId)
+      if (fromIdx > 0) {
+        const next = [...photos]
+        const [item] = next.splice(fromIdx, 1)
+        next.splice(0, 0, item)
+        setPhotos(reassignOrders(next))
+        setIsDirty(true)
+      }
     } catch (err) {
       setErrors(e => ({ ...e, [photoId]: err instanceof Error ? err.message : 'Update failed.' }))
     }
@@ -371,9 +386,7 @@ function PhotosTab({
   function handleDrop() {
     const list = reassignOrders(photos)
     setPhotos(list)
-    reorderPhotosAction(productId, list.map(p => ({ id: p.id, sortOrder: p.sortOrder }))).catch(err => {
-      setErrors(e => ({ ...e, _reorder: err instanceof Error ? err.message : 'Reorder failed.' }))
-    })
+    setIsDirty(true)
     dragIndexRef.current = null
   }
 
@@ -408,6 +421,20 @@ function PhotosTab({
       )}
       {errors._reorder && (
         <p className="text-[13px] text-[var(--admin-destructive)]">{errors._reorder}</p>
+      )}
+
+      {isDirty && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleApply}
+            disabled={applying}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-[4px] bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] disabled:opacity-50 transition-colors"
+          >
+            {applying && <Loader2 className="size-3.5 animate-spin" />}
+            Apply
+          </button>
+        </div>
       )}
 
       {/* Photo list */}
@@ -447,9 +474,11 @@ function PhotosTab({
               <span className="text-[10px] text-[var(--admin-text-muted)]">Order</span>
               <input
                 type="number"
+                min={0}
+                max={photos.length - 1}
                 defaultValue={photo.sortOrder}
                 key={`${photo.id}-${photo.sortOrder}`}
-                onBlur={e => handleSortOrderBlur(photo, e.target.value)}
+                onBlur={e => handleSortOrderBlur(photo.id, e.target.value)}
                 className="w-14 h-7 px-1.5 text-center rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[13px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)]"
               />
             </div>
@@ -717,7 +746,9 @@ export default function ProductEditClient({
                 <label className={labelCls}>Category</label>
                 <Select value={categoryId} onValueChange={handleCategoryChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder="Select category">
+                      {categories.find(c => c.id === categoryId)?.displayName}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map(c => (
@@ -737,7 +768,9 @@ export default function ProductEditClient({
                   disabled={!categoryId || subCategories.length === 0}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select subcategory" />
+                    <SelectValue placeholder="Select subcategory">
+                      {subCategories.find(s => s.id === subCategoryId)?.displayName}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {subCategories.map(s => (
@@ -763,7 +796,9 @@ export default function ProductEditClient({
                 <label className={labelCls}>Collection</label>
                 <Select value={collectionId} onValueChange={setCollectionId}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="No collection" />
+                    <SelectValue placeholder="No collection">
+                      {collections.find(c => c.id === collectionId)?.displayName}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">None</SelectItem>
