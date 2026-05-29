@@ -147,18 +147,6 @@ export default function ProductsContent({
         </span>
       ),
     },
-    {
-      id: 'actions',
-      header: '',
-      cell: ({ row }) => (
-        <Link
-          href={`/admin/products/${row.original.id}`}
-          className="text-[13px] text-[var(--admin-text-secondary)] hover:underline"
-        >
-          Edit
-        </Link>
-      ),
-    },
   ]
 
   return (

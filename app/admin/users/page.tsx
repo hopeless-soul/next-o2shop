@@ -38,6 +38,8 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
       <AdminPageHeader
         title="Users"
         breadcrumb={[{ label: 'Admin', href: '/admin' }, { label: 'Users' }]}
+        actionLabel="Create User"
+        actionHref="/admin/users/new"
       />
       <UsersContent
         users={result.data}

@@ -229,7 +229,7 @@ export default function FilterBar({
         className="shrink-0"
         onClick={handleSubmit}
       >
-        Search
+        Search <Search className="size-4" />  
       </Button>
     </div>
   )

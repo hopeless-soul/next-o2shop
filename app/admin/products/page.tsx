@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getAdminProducts } from '@/lib/api/admin-products-server'
 import ProductsContent from './ProductsContent'
@@ -58,14 +57,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <AdminPageHeader
         title="Products"
         breadcrumb={[{ label: 'Admin', href: '/admin' }, { label: 'Products' }]}
-        action={
-          <Link
-            href="/admin/products/new"
-            className="inline-flex items-center gap-1.5 h-9 px-4 rounded-[4px] text-[13px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150"
-          >
-            + New Product
-          </Link>
-        }
+        actionLabel="Create Product"
+        actionHref="/admin/products/new"
       />
       <ProductsContent
         products={result.data}
