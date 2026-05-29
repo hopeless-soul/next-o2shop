@@ -1,0 +1,705 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Switch } from '@/components/ui/switch'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/admin/ui/select'
+import FormCard from '@/components/admin/FormCard'
+import type { AdminCategory } from '@/lib/api/admin-categories'
+import type { AdminCollection } from '@/lib/api/admin-collections'
+import type { CreateVariantDto, ProductDescription } from '@/lib/api/admin-products'
+import { createProductAction, createVariantAction } from './actions'
+
+const inputCls =
+  'h-9 px-2.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30 w-full'
+const labelCls = 'block text-[12px] font-medium text-[var(--admin-text-secondary)] mb-1'
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_]/g, '')
+}
+
+const RequiredAsterisk = () => <span className="text-admin-destructive">*</span>
+
+// ────────────────────────────────────────────────────────────
+// Tag chip input (copied pattern from ProductEditClient)
+// ────────────────────────────────────────────────────────────
+
+function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+  const [input, setInput] = useState('')
+
+  function addTag(raw: string) {
+    const trimmed = raw.trim()
+    if (trimmed && !tags.includes(trimmed)) onChange([...tags, trimmed])
+    setInput('')
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5 min-h-9 px-2.5 py-1.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] focus-within:border-[var(--admin-ring)] focus-within:ring-2 focus-within:ring-[var(--admin-ring)]/30">
+      {tags.map(tag => (
+        <span
+          key={tag}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[4px] bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] text-[12px] font-medium"
+        >
+          {tag}
+          <button type="button" onClick={() => onChange(tags.filter(t => t !== tag))} className="opacity-70 hover:opacity-100 leading-none">×</button>
+        </span>
+      ))}
+      <input
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(input) }
+          else if (e.key === 'Backspace' && input === '' && tags.length > 0) onChange(tags.slice(0, -1))
+        }}
+        onBlur={() => { if (input.trim()) addTag(input) }}
+        placeholder={tags.length === 0 ? 'Type and press Enter or comma…' : ''}
+        className="flex-1 min-w-[120px] text-[14px] text-[var(--admin-text-primary)] bg-transparent outline-none"
+      />
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// Pending variant dialog (local state — no server calls)
+// ────────────────────────────────────────────────────────────
+
+type PendingVariantFormState = {
+  colorName: string
+  colorValue: string
+  colorHex: string
+  size: string
+  sku: string
+  stock: string
+  priceOverride: string
+  compareAtPrice: string
+}
+
+function emptyVariantForm(): PendingVariantFormState {
+  return {
+    colorName: '',
+    colorValue: '#000000',
+    colorHex: '#000000',
+    size: '',
+    sku: '',
+    stock: '',
+    priceOverride: '',
+    compareAtPrice: '',
+  }
+}
+
+function PendingVariantDialog({
+  open,
+  editIndex,
+  initial,
+  onOpenChange,
+  onSave,
+}: {
+  open: boolean
+  editIndex: number | null
+  initial?: PendingVariantFormState
+  onOpenChange: (open: boolean) => void
+  onSave: (dto: CreateVariantDto, index: number | null) => void
+}) {
+  const [form, setForm] = useState<PendingVariantFormState>(() => initial ?? emptyVariantForm())
+  const [error, setError] = useState<string | null>(null)
+
+  function handleColorPickerChange(hex: string) {
+    setForm(f => ({ ...f, colorValue: hex, colorHex: hex }))
+  }
+
+  function handleColorHexChange(raw: string) {
+    const val = raw.startsWith('#') ? raw : `#${raw}`
+    setForm(f => ({ ...f, colorHex: raw }))
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) setForm(f => ({ ...f, colorValue: val, colorHex: val }))
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    if (!form.colorName.trim() || !form.size.trim()) {
+      setError('Color name and size are required.')
+      return
+    }
+    const dto: CreateVariantDto = {
+      colorName: form.colorName,
+      colorValue: form.colorValue,
+      size: form.size,
+      sku: form.sku || undefined,
+      stock: form.stock !== '' ? Number(form.stock) : undefined,
+      priceOverride: form.priceOverride !== '' ? Number(form.priceOverride) : undefined,
+      compareAtPrice: form.compareAtPrice !== '' ? Number(form.compareAtPrice) : null,
+    }
+    onSave(dto, editIndex)
+    onOpenChange(false)
+  }
+
+  const iCls =
+    'h-9 px-2.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30'
+  const lCls = 'text-[12px] font-medium text-[var(--admin-text-secondary)]'
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-lg rounded-[8px]"
+        style={{ fontFamily: 'var(--font-admin, inherit)' }}
+      >
+        <DialogHeader>
+          <DialogTitle className="text-[16px] font-semibold text-[var(--admin-text-primary)]">
+            {editIndex !== null ? 'Edit Variant' : 'Add Variant'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            {/* colorName */}
+            <div className="col-span-2 flex flex-col gap-1">
+              <label className={lCls}>Color Name</label>
+              <input
+                required
+                value={form.colorName}
+                onChange={e => setForm(f => ({ ...f, colorName: e.target.value }))}
+                placeholder="e.g. Navy Blue"
+                className={iCls}
+              />
+            </div>
+
+            {/* colorValue */}
+            <div className="col-span-2 flex flex-col gap-1">
+              <label className={lCls}>Color Value</label>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full border border-[var(--admin-border-input)] shrink-0" style={{ background: form.colorValue }} />
+                <input
+                  type="color"
+                  value={form.colorValue}
+                  onChange={e => handleColorPickerChange(e.target.value)}
+                  className="w-9 h-9 cursor-pointer rounded-[4px] border border-[var(--admin-border-input)] p-0.5 bg-transparent"
+                />
+                <input
+                  value={form.colorHex}
+                  onChange={e => handleColorHexChange(e.target.value)}
+                  placeholder="#000000"
+                  className={`flex-1 ${iCls} font-mono`}
+                />
+              </div>
+            </div>
+
+            {/* size */}
+            <div className="flex flex-col gap-1">
+              <label className={lCls}>Size</label>
+              <input
+                required
+                value={form.size}
+                onChange={e => setForm(f => ({ ...f, size: e.target.value }))}
+                placeholder="e.g. M"
+                className={iCls}
+              />
+            </div>
+
+            {/* sku */}
+            <div className="flex flex-col gap-1">
+              <label className={lCls}>SKU</label>
+              <input
+                value={form.sku}
+                onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
+                placeholder="e.g. BLU-M-001"
+                className={iCls}
+              />
+            </div>
+
+            {/* stock */}
+            <div className="flex flex-col gap-1">
+              <label className={lCls}>Stock</label>
+              <input
+                type="number" min="0" step="1"
+                value={form.stock}
+                onChange={e => setForm(f => ({ ...f, stock: e.target.value }))}
+                placeholder="0"
+                className={iCls}
+              />
+            </div>
+
+            {/* priceOverride */}
+            <div className="flex flex-col gap-1">
+              <label className={lCls}>Price Override</label>
+              <input
+                type="number" min="0" step="0.01"
+                value={form.priceOverride}
+                onChange={e => setForm(f => ({ ...f, priceOverride: e.target.value }))}
+                placeholder="Optional"
+                className={iCls}
+              />
+            </div>
+
+            {/* compareAtPrice */}
+            <div className="flex flex-col gap-1">
+              <label className={lCls}>Compare At Price</label>
+              <input
+                type="number" min="0" step="0.01"
+                value={form.compareAtPrice}
+                onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))}
+                placeholder="Optional"
+                className={iCls}
+              />
+            </div>
+
+            {error && <p className="text-[13px] text-[var(--admin-destructive)]">{error}</p>}
+
+            <DialogFooter className="gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="px-3 py-1.5 text-[14px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors duration-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex items-center gap-2 px-4 py-1.5 text-[14px] font-medium rounded-[4px] bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-100"
+              >
+                {editIndex !== null ? 'Save Changes' : 'Add Variant'}
+              </button>
+            </DialogFooter>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ────────────────────────────────────────────────────────────
+// Main create form
+// ────────────────────────────────────────────────────────────
+
+interface ProductCreateClientProps {
+  categories: AdminCategory[]
+  collections: AdminCollection[]
+}
+
+export default function ProductCreateClient({ categories, collections }: ProductCreateClientProps) {
+  const router = useRouter()
+
+  // Details
+  const [displayName, setDisplayName] = useState('')
+  const [name, setName] = useState('')
+  const [slugManual, setSlugManual] = useState(false)
+  const [categoryId, setCategoryId] = useState('')
+  const [subCategoryId, setSubCategoryId] = useState('')
+  const [type, setType] = useState('')
+  const [collectionId, setCollectionId] = useState('')
+  const [basePrice, setBasePrice] = useState('')
+  const [compareAtPrice, setCompareAtPrice] = useState('')
+  const [currency, setCurrency] = useState('USD')
+  const [tags, setTags] = useState<string[]>([])
+  // const [description, setDescription] = useState('')
+  const [isPublished, setIsPublished] = useState(false)
+
+  // Pending variants
+  const [pendingVariants, setPendingVariants] = useState<CreateVariantDto[]>([])
+  const [variantDialogOpen, setVariantDialogOpen] = useState(false)
+  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+
+  // Submit state
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  const selectedCategory = categories.find(c => c.id === categoryId)
+  const subCategories = selectedCategory?.subCategories ?? []
+
+  // Variant handlers
+  function openAddVariant() {
+    setEditVariantIndex(null)
+    setVariantDialogOpen(true)
+  }
+
+  function openEditVariant(index: number) {
+    setEditVariantIndex(index)
+    setVariantDialogOpen(true)
+  }
+
+  function handleVariantSave(dto: CreateVariantDto, index: number | null) {
+    if (index !== null) {
+      setPendingVariants(prev => prev.map((v, i) => (i === index ? dto : v)))
+    } else {
+      setPendingVariants(prev => [...prev, dto])
+    }
+  }
+
+  function removeVariant(index: number) {
+    setPendingVariants(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Submit
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setSaveError(null)
+
+    try {
+      const product = await createProductAction({
+        name,
+        displayName,
+        categoryId,
+        subCategoryId,
+        basePrice: Number(basePrice),
+        currency,
+        collectionId: collectionId || undefined,
+        compareAtPrice: compareAtPrice !== '' ? Number(compareAtPrice) : null,
+        tags: tags.length > 0 ? tags : undefined,
+        type: type || null,
+        isPublished,
+        description: {} as ProductDescription,
+      })
+
+      // Batch-create pending variants — best-effort; redirect regardless
+      await Promise.allSettled(
+        pendingVariants.map(v => createVariantAction(product.id, v))
+      )
+
+      router.push(`/admin/products/${product.id}`)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to create product.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // 
+
+  const editingVariantInitial =
+    editVariantIndex !== null
+      ? (() => {
+        const v = pendingVariants[editVariantIndex]
+        return {
+          colorName: v.colorName,
+          colorValue: v.colorValue ?? '#000000',
+          colorHex: v.colorValue ?? '#000000',
+          size: v.size,
+          sku: v.sku ?? '',
+          stock: v.stock != null ? String(v.stock) : '',
+          priceOverride: v.priceOverride != null ? String(v.priceOverride) : '',
+          compareAtPrice: v.compareAtPrice != null ? String(v.compareAtPrice) : '',
+        }
+      })()
+      : undefined
+
+  // Main Return
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+
+        <Tabs defaultValue="details" className="space-y-6">
+          <TabsList className="bg-[var(--admin-sidebar-bg)] border border-[var(--admin-border)] rounded-[6px] p-1 gap-1">
+            <TabsTrigger
+              value="details"
+              className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
+            >
+              Details
+            </TabsTrigger>
+            <TabsTrigger
+              value="variants"
+              className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
+            >
+              Variants ({pendingVariants.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* ── DETAILS TAB ── */}
+          <TabsContent value="details" className="space-y-4">
+            {/*  Name */}
+            <FormCard title="Name">
+              {/* Display Name */}
+              <div className="space-y-3 mt-3">
+                <div>
+                  <label className={labelCls}>Display Name <RequiredAsterisk /></label>
+                  <input
+                    required
+                    value={displayName}
+                    className={inputCls}
+                    placeholder="e.g. Blue Widget"
+                    onChange={e => {
+                      setDisplayName(e.target.value)
+                      if (!slugManual) setName(slugify(e.target.value))
+                    }}
+                  />
+                </div>
+
+                {/* Slug */}
+                <div>
+                  <label className={labelCls}>Slug <RequiredAsterisk /></label>
+                  <input
+                    required
+                    value={name}
+                    className={inputCls}
+                    placeholder="e.g. blue_widget"
+                    pattern="^[a-z0-9_]+$"
+                    title="Lowercase letters, numbers, and underscores only"
+                    onChange={e => {
+                      setName(e.target.value)
+                      setSlugManual(true)
+                    }}
+                  />
+                  <p className="mt-1 text-[11px] text-[var(--admin-text-muted)]">
+                    Lowercase letters, numbers, and underscores only
+                  </p>
+                </div>
+              </div>
+            </FormCard>
+
+            {/* Category */}
+            <FormCard title="Category">
+              {/* Category */}
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div>
+                  <label className={labelCls}>Category <RequiredAsterisk /></label>
+                  <Select
+                    value={categoryId}
+                    onValueChange={id => {
+                      if (id === null) return
+                      setCategoryId(id)
+                      setSubCategoryId('')
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select category">
+                        {categories.find(c => c.id === categoryId)?.displayName}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.displayName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Subcategory */}
+                <div>
+                  <label className={labelCls}>Subcategory</label>
+                  <Select
+                    value={subCategoryId}
+                    disabled={!categoryId || subCategories.length === 0}
+                    onValueChange={id => {
+                      if (id === null) return
+                      setSubCategoryId(id)
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={!categoryId ? 'Select category first' : 'Select subcategory'}>
+                        {subCategories.find(s => s.id === subCategoryId)?.displayName}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subCategories.map(s => (
+                        <SelectItem key={s.id} value={s.id}>{s.displayName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Type */}
+                <div>
+                  <label className={labelCls}>Type</label>
+                  <input
+                    value={type}
+                    className={inputCls}
+                    placeholder="e.g. Ushanka"
+                    onChange={e => setType(e.target.value.trim())}
+                  />
+                </div>
+
+                {/* Collection */}
+                <div>
+                  <label className={labelCls}>Collection</label>
+                  <Select
+                    value={collectionId}
+                    onValueChange={id => {
+                      if (id === null) return
+                      setCollectionId(id)
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="No collection">
+                        {collections.find(c => c.id === collectionId)?.displayName}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {collections.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.displayName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </FormCard>
+
+            {/* Pricing */}
+            <FormCard title="Pricing">
+              <div className="grid grid-cols-3 gap-3 mt-3">
+                <div>
+                  <label className={labelCls}>Base Price <RequiredAsterisk /></label>
+                  <input
+                    required
+                    type="number" min="0" step="0.01"
+                    value={basePrice}
+                    className={inputCls}
+                    placeholder="0.00"
+                    onChange={e => setBasePrice(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Compare At Price</label>
+                  <input
+                    type="number" min="0" step="0.01"
+                    value={compareAtPrice}
+                    className={inputCls}
+                    placeholder="Optional"
+                    onChange={e => setCompareAtPrice(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Currency <RequiredAsterisk /></label>
+                  <input
+                    required
+                    value={currency}
+                    onChange={e => setCurrency(e.target.value.toUpperCase().slice(0, 3))}
+                    maxLength={3}
+                    className={inputCls}
+                    placeholder="USD"
+                  />
+                </div>
+              </div>
+            </FormCard>
+
+            <FormCard title="Tags">
+              <div className="mt-3">
+                <TagInput tags={tags} onChange={setTags} />
+              </div>
+            </FormCard>
+
+            <FormCard title="Visibility">
+              <div className="flex items-center gap-3 mt-3">
+                <Switch checked={isPublished} onCheckedChange={setIsPublished} />
+                <span className="text-[14px] text-[var(--admin-text-primary)]">
+                  {isPublished ? 'Published' : 'Draft'}
+                </span>
+              </div>
+            </FormCard>
+          </TabsContent>
+
+          {/* ── VARIANTS TAB ── */}
+          <TabsContent value="variants" className="space-y-4">
+            {/* "Add variant" button */}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={openAddVariant}
+                className="flex items-center gap-1.5 h-9 px-4 rounded-[4px] text-[13px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150"
+              >
+                <Plus className="size-4" />
+                Add Variant
+              </button>
+            </div>
+
+            {pendingVariants.length === 0 && (
+              <p className="text-[13px] text-[var(--admin-text-muted)] text-center py-8">
+                No variants yet. Add one to begin.
+              </p>
+            )}
+
+            <div className="space-y-2">
+              {pendingVariants.map((v, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 p-4 bg-white border border-[var(--admin-border)] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                >
+                  <div
+                    className="w-4 h-4 rounded-full shrink-0 border border-[var(--admin-border)]"
+                    style={{ background: v.colorValue }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[14px] font-medium text-[var(--admin-text-primary)]">{v.colorName}</span>
+                      <span className="text-[13px] text-[var(--admin-text-muted)]">{v.size}</span>
+                      {v.sku && <span className="text-[12px] text-[var(--admin-text-muted)]">SKU: {v.sku}</span>}
+                      {v.stock != null && <span className="text-[12px] text-[var(--admin-text-muted)]">Stock: {v.stock}</span>}
+                      {v.priceOverride != null && <span className="text-[12px] text-[var(--admin-text-primary)]">${v.priceOverride.toFixed(2)}</span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => openEditVariant(idx)}
+                      className="px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeVariant(idx)}
+                      className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* ── Footer ── */}
+        {saveError && (
+          <p className="mt-4 text-[13px] text-[var(--admin-destructive)]">{saveError}</p>
+        )}
+
+        <div className="flex items-center justify-end gap-3 mt-6">
+          <Link
+            href="/admin/products"
+            className="h-9 px-4 flex items-center rounded-[4px] text-[14px] font-medium text-[var(--admin-text-secondary)] border border-[var(--admin-border)] hover:bg-[var(--admin-sidebar-bg)] transition-colors duration-150"
+          >
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            disabled={saving}
+            className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-70"
+          >
+            {saving && <Loader2 className="size-4 animate-spin" />}
+            {saving ? 'Creating…' : 'Create Product'}
+          </button>
+        </div>
+      </form>
+
+      <PendingVariantDialog
+        key={`${variantDialogOpen}-${editVariantIndex}`}
+        open={variantDialogOpen}
+        editIndex={editVariantIndex}
+        initial={editingVariantInitial}
+        onOpenChange={setVariantDialogOpen}
+        onSave={handleVariantSave}
+      />
+    </>
+  )
+}

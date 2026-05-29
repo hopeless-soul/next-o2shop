@@ -29,9 +29,7 @@ export type ProductVariant = {
   priceOverride?: number
   compareAtPrice?: number | null
   weight?: number | null
-  inventoryPolicy: 'deny' | 'continue'
   quantityRule: QuantityRule
-  barcode?: string | null
   featuredImageId?: string
   featuredImage?: ProductPhoto
 }
@@ -132,9 +130,7 @@ export type CreateVariantDto = {
   priceOverride?: number
   compareAtPrice?: number | null
   weight?: number
-  inventoryPolicy?: 'deny' | 'continue'
   quantityRule?: QuantityRule
-  barcode?: string | null
   featuredImageId?: string
 }
 

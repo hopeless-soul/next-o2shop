@@ -49,9 +49,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     // render empty state on error
   }
 
-  console.log("Result: ")
-  console.log(result)
-
   return (
     <>
       <AdminPageHeader

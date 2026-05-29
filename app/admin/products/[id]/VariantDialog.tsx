@@ -38,7 +38,6 @@ type FormState = {
   priceOverride: string
   compareAtPrice: string
   available: boolean
-  inventoryPolicy: 'deny' | 'continue'
 }
 
 function emptyForm(): FormState {
@@ -52,7 +51,6 @@ function emptyForm(): FormState {
     priceOverride: '',
     compareAtPrice: '',
     available: true,
-    inventoryPolicy: 'deny',
   }
 }
 
@@ -67,7 +65,6 @@ function fromVariant(v: ProductVariant): FormState {
     priceOverride: v.priceOverride != null ? String(v.priceOverride) : '',
     compareAtPrice: v.compareAtPrice != null ? String(v.compareAtPrice) : '',
     available: v.available,
-    inventoryPolicy: v.inventoryPolicy,
   }
 }
 
@@ -117,8 +114,6 @@ function VariantForm({
         stock: form.stock !== '' ? Number(form.stock) : undefined,
         priceOverride: form.priceOverride !== '' ? Number(form.priceOverride) : undefined,
         compareAtPrice: form.compareAtPrice !== '' ? Number(form.compareAtPrice) : null,
-        available: form.available,
-        inventoryPolicy: form.inventoryPolicy,
       }
       const saved = variant
         ? await updateVariantAction(productId, variant.id, dto)
@@ -237,25 +232,6 @@ function VariantForm({
             placeholder="Optional"
             className={inputCls}
           />
-        </div>
-
-        {/* inventoryPolicy */}
-        <div className="flex flex-col gap-1">
-          <label className={labelCls}>Inventory Policy</label>
-          <Select
-            value={form.inventoryPolicy}
-            onValueChange={v =>
-              setForm(f => ({ ...f, inventoryPolicy: v as 'deny' | 'continue' }))
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="deny">Deny</SelectItem>
-              <SelectItem value="continue">Continue</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* available */}

@@ -87,9 +87,8 @@ export type ProductVariant = {
   priceOverride?: number;
   compareAtPrice?: number;
   weight?: number;
-  inventoryPolicy: "deny" | "continue";
   quantityRule: { min: number; max: number | null; increment: number };
-  barcode?: string;
+
   featuredImageId?: string;
   featuredImage?: ProductPhoto;
 };
