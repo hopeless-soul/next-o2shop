@@ -6,13 +6,7 @@ import Link from 'next/link'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
+import VariantDialog from '@/components/admin/products/VariantDialog'
 import {
   Select,
   SelectContent,
@@ -79,213 +73,6 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
 }
 
 // ────────────────────────────────────────────────────────────
-// Pending variant dialog (local state — no server calls)
-// ────────────────────────────────────────────────────────────
-
-type PendingVariantFormState = {
-  colorName: string
-  colorValue: string
-  colorHex: string
-  size: string
-  sku: string
-  stock: string
-  priceOverride: string
-  compareAtPrice: string
-}
-
-function emptyVariantForm(): PendingVariantFormState {
-  return {
-    colorName: '',
-    colorValue: '#000000',
-    colorHex: '#000000',
-    size: '',
-    sku: '',
-    stock: '',
-    priceOverride: '',
-    compareAtPrice: '',
-  }
-}
-
-function PendingVariantDialog({
-  open,
-  editIndex,
-  initial,
-  onOpenChange,
-  onSave,
-}: {
-  open: boolean
-  editIndex: number | null
-  initial?: PendingVariantFormState
-  onOpenChange: (open: boolean) => void
-  onSave: (dto: CreateVariantDto, index: number | null) => void
-}) {
-  const [form, setForm] = useState<PendingVariantFormState>(() => initial ?? emptyVariantForm())
-  const [error, setError] = useState<string | null>(null)
-
-  function handleColorPickerChange(hex: string) {
-    setForm(f => ({ ...f, colorValue: hex, colorHex: hex }))
-  }
-
-  function handleColorHexChange(raw: string) {
-    const val = raw.startsWith('#') ? raw : `#${raw}`
-    setForm(f => ({ ...f, colorHex: raw }))
-    if (/^#[0-9A-Fa-f]{6}$/.test(val)) setForm(f => ({ ...f, colorValue: val, colorHex: val }))
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    if (!form.colorName.trim() || !form.size.trim()) {
-      setError('Color name and size are required.')
-      return
-    }
-    const dto: CreateVariantDto = {
-      colorName: form.colorName,
-      colorValue: form.colorValue,
-      size: form.size,
-      sku: form.sku || undefined,
-      stock: form.stock !== '' ? Number(form.stock) : undefined,
-      priceOverride: form.priceOverride !== '' ? Number(form.priceOverride) : undefined,
-      compareAtPrice: form.compareAtPrice !== '' ? Number(form.compareAtPrice) : null,
-    }
-    onSave(dto, editIndex)
-    onOpenChange(false)
-  }
-
-  const iCls =
-    'h-9 px-2.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30'
-  const lCls = 'text-[12px] font-medium text-[var(--admin-text-secondary)]'
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-lg rounded-[8px]"
-        style={{ fontFamily: 'var(--font-admin, inherit)' }}
-      >
-        <DialogHeader>
-          <DialogTitle className="text-[16px] font-semibold text-[var(--admin-text-primary)]">
-            {editIndex !== null ? 'Edit Variant' : 'Add Variant'}
-          </DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            {/* colorName */}
-            <div className="col-span-2 flex flex-col gap-1">
-              <label className={lCls}>Color Name</label>
-              <input
-                required
-                value={form.colorName}
-                onChange={e => setForm(f => ({ ...f, colorName: e.target.value }))}
-                placeholder="e.g. Navy Blue"
-                className={iCls}
-              />
-            </div>
-
-            {/* colorValue */}
-            <div className="col-span-2 flex flex-col gap-1">
-              <label className={lCls}>Color Value</label>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full border border-[var(--admin-border-input)] shrink-0" style={{ background: form.colorValue }} />
-                <input
-                  type="color"
-                  value={form.colorValue}
-                  onChange={e => handleColorPickerChange(e.target.value)}
-                  className="w-9 h-9 cursor-pointer rounded-[4px] border border-[var(--admin-border-input)] p-0.5 bg-transparent"
-                />
-                <input
-                  value={form.colorHex}
-                  onChange={e => handleColorHexChange(e.target.value)}
-                  placeholder="#000000"
-                  className={`flex-1 ${iCls} font-mono`}
-                />
-              </div>
-            </div>
-
-            {/* size */}
-            <div className="flex flex-col gap-1">
-              <label className={lCls}>Size</label>
-              <input
-                required
-                value={form.size}
-                onChange={e => setForm(f => ({ ...f, size: e.target.value }))}
-                placeholder="e.g. M"
-                className={iCls}
-              />
-            </div>
-
-            {/* sku */}
-            <div className="flex flex-col gap-1">
-              <label className={lCls}>SKU</label>
-              <input
-                value={form.sku}
-                onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
-                placeholder="e.g. BLU-M-001"
-                className={iCls}
-              />
-            </div>
-
-            {/* stock */}
-            <div className="flex flex-col gap-1">
-              <label className={lCls}>Stock</label>
-              <input
-                type="number" min="0" step="1"
-                value={form.stock}
-                onChange={e => setForm(f => ({ ...f, stock: e.target.value }))}
-                placeholder="0"
-                className={iCls}
-              />
-            </div>
-
-            {/* priceOverride */}
-            <div className="flex flex-col gap-1">
-              <label className={lCls}>Price Override</label>
-              <input
-                type="number" min="0" step="0.01"
-                value={form.priceOverride}
-                onChange={e => setForm(f => ({ ...f, priceOverride: e.target.value }))}
-                placeholder="Optional"
-                className={iCls}
-              />
-            </div>
-
-            {/* compareAtPrice */}
-            <div className="flex flex-col gap-1">
-              <label className={lCls}>Compare At Price</label>
-              <input
-                type="number" min="0" step="0.01"
-                value={form.compareAtPrice}
-                onChange={e => setForm(f => ({ ...f, compareAtPrice: e.target.value }))}
-                placeholder="Optional"
-                className={iCls}
-              />
-            </div>
-
-            {error && <p className="text-[13px] text-[var(--admin-destructive)]">{error}</p>}
-
-            <DialogFooter className="gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => onOpenChange(false)}
-                className="px-3 py-1.5 text-[14px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors duration-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-4 py-1.5 text-[14px] font-medium rounded-[4px] bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-100"
-              >
-                {editIndex !== null ? 'Save Changes' : 'Add Variant'}
-              </button>
-            </DialogFooter>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-// ────────────────────────────────────────────────────────────
 // Main create form
 // ────────────────────────────────────────────────────────────
 
@@ -335,12 +122,12 @@ export default function ProductCreateClient({ categories, collections }: Product
     setVariantDialogOpen(true)
   }
 
-  function handleVariantSave(dto: CreateVariantDto, index: number | null) {
-    if (index !== null) {
-      setPendingVariants(prev => prev.map((v, i) => (i === index ? dto : v)))
-    } else {
-      setPendingVariants(prev => [...prev, dto])
-    }
+  function handleVariantSave(dto: CreateVariantDto) {
+    setPendingVariants(prev =>
+      editVariantIndex !== null
+        ? prev.map((v, i) => (i === editVariantIndex ? dto : v))
+        : [...prev, dto]
+    )
   }
 
   function removeVariant(index: number) {
@@ -382,25 +169,6 @@ export default function ProductCreateClient({ categories, collections }: Product
       setSaving(false)
     }
   }
-
-  // 
-
-  const editingVariantInitial =
-    editVariantIndex !== null
-      ? (() => {
-        const v = pendingVariants[editVariantIndex]
-        return {
-          colorName: v.colorName,
-          colorValue: v.colorValue ?? '#000000',
-          colorHex: v.colorValue ?? '#000000',
-          size: v.size,
-          sku: v.sku ?? '',
-          stock: v.stock != null ? String(v.stock) : '',
-          priceOverride: v.priceOverride != null ? String(v.priceOverride) : '',
-          compareAtPrice: v.compareAtPrice != null ? String(v.compareAtPrice) : '',
-        }
-      })()
-      : undefined
 
   // Main Return
 
@@ -692,13 +460,12 @@ export default function ProductCreateClient({ categories, collections }: Product
         </div>
       </form>
 
-      <PendingVariantDialog
-        key={`${variantDialogOpen}-${editVariantIndex}`}
+      <VariantDialog
+        mode="create"
         open={variantDialogOpen}
-        editIndex={editVariantIndex}
-        initial={editingVariantInitial}
         onOpenChange={setVariantDialogOpen}
-        onSave={handleVariantSave}
+        initialValues={editVariantIndex !== null ? pendingVariants[editVariantIndex] : undefined}
+        onSubmit={handleVariantSave}
       />
     </>
   )

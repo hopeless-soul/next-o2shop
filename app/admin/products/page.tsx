@@ -21,6 +21,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const collectionSlug = p.collectionSlug ?? ''
   const isPublished =
     p.isPublished === 'true' ? true : p.isPublished === 'false' ? false : undefined
+  const includeDeleted = p.includeDeleted === 'true' ? true : undefined
   const sortBy = (SORT_BY_VALUES as readonly string[]).includes(p.sortBy)
     ? (p.sortBy as SortBy)
     : undefined
@@ -42,6 +43,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       categorySlug: categorySlug || undefined,
       collectionSlug: collectionSlug || undefined,
       isPublished,
+      includeDeleted,
       sortBy,
       sortOrder,
     })
@@ -66,6 +68,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         categorySlug={categorySlug}
         collectionSlug={collectionSlug}
         isPublished={isPublished}
+        includeDeleted={includeDeleted}
         sortBy={sortBy ?? ''}
         sortOrder={sortOrder ?? 'asc'}
       />

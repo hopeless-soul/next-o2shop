@@ -33,6 +33,7 @@ interface ProductsContentProps {
   categorySlug: string
   collectionSlug: string
   isPublished?: boolean
+  includeDeleted?: boolean
   sortBy: string
   sortOrder: 'asc' | 'desc'
 }
@@ -46,6 +47,7 @@ export default function ProductsContent({
   categorySlug,
   collectionSlug,
   isPublished,
+  includeDeleted,
   sortBy,
   sortOrder,
 }: ProductsContentProps) {
@@ -129,12 +131,16 @@ export default function ProductsContent({
     {
       id: 'status',
       header: 'Status',
-      cell: ({ row }) => (
-        <AdminBadge
-          variant={row.original.isPublished ? 'success' : 'neutral'}
-          label={row.original.isPublished ? 'Published' : 'Draft'}
-        />
-      ),
+      cell: ({ row }) => {
+        const p = row.original
+        if (p.deletedAt) return <AdminBadge variant="error" label="Deleted" />
+        return (
+          <AdminBadge
+            variant={p.isPublished ? 'success' : 'neutral'}
+            label={p.isPublished ? 'Published' : 'Draft'}
+          />
+        )
+      },
     },
     {
       id: 'createdAt',
@@ -158,13 +164,20 @@ export default function ProductsContent({
         onApply={(s, fv) => updateParams({ search: s, ...fv })}
         filters={[
           {
-            key: 'isPublished',
+            key: 'status',
             label: 'All Status',
-            value: isPublished === true ? 'true' : isPublished === false ? 'false' : '',
-            onChange: (v) => updateParams({ isPublished: v }),
+            value: includeDeleted ? 'deleted' : isPublished === true ? 'true' : isPublished === false ? 'false' : '',
+            onChange: (v) => {
+              if (v === 'deleted') {
+                updateParams({ includeDeleted: 'true', isPublished: undefined })
+              } else {
+                updateParams({ includeDeleted: undefined, isPublished: v })
+              }
+            },
             options: [
               { label: 'Published', value: 'true' },
               { label: 'Draft', value: 'false' },
+              { label: 'Deleted', value: 'deleted' },
             ],
           },
           {

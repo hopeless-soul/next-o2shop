@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Loader2, GripVertical, ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -25,6 +26,7 @@ import {
   reorderPhotosAction,
   uploadFeaturedPhotoAction,
   deleteFeaturedPhotoAction,
+  deleteProductAction,
 } from './actions'
 import type { AdminCategory } from '@/lib/api/admin-categories'
 import type { AdminCollection } from '@/lib/api/admin-collections'
@@ -215,7 +217,7 @@ function FeaturedPhotoSection({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,image/avif"
         className="hidden"
         onChange={handleFileSelect}
       />
@@ -410,7 +412,7 @@ function PhotosTab({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/avif"
           className="hidden"
           onChange={handleFileSelect}
         />
@@ -564,6 +566,8 @@ export default function ProductEditClient({
   categories,
   collections,
 }: ProductEditClientProps) {
+  const router = useRouter()
+
   // ── Details form state ───────────────────────────────────
   const [displayName, setDisplayName] = useState(product.displayName)
   const [name, setName] = useState(product.name)
@@ -641,6 +645,14 @@ export default function ProductEditClient({
     }
   }
 
+  // ── Delete product ───────────────────────────────────────
+  const [deleteProductOpen, setDeleteProductOpen] = useState(false)
+
+  async function handleDeleteProduct() {
+    await deleteProductAction(product.id)
+    router.push('/admin/products')
+  }
+
   // ── Variant actions ──────────────────────────────────────
   function openAddVariant() {
     setEditingVariant(undefined)
@@ -684,6 +696,7 @@ export default function ProductEditClient({
   const labelCls = 'block text-[12px] font-medium text-[var(--admin-text-secondary)] mb-1'
 
   return (
+    <>
     <Tabs defaultValue="details" className="space-y-6">
       <TabsList className="bg-[var(--admin-sidebar-bg)] border border-[var(--admin-border)] rounded-[6px] p-1 gap-1">
         <TabsTrigger
@@ -1018,5 +1031,35 @@ export default function ProductEditClient({
         />
       </TabsContent>
     </Tabs>
+
+    {/* ── DANGER ZONE ── */}
+    <FormCard title="Danger Zone">
+      <div className="mt-3 flex items-center justify-between">
+        <div>
+          <p className="text-[14px] text-[var(--admin-text-primary)]">Delete this product</p>
+          <p className="text-[12px] text-[var(--admin-text-muted)] mt-0.5">
+            The product will no longer be visible to customers.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setDeleteProductOpen(true)}
+          className="h-9 px-4 rounded-[4px] text-[14px] font-medium border border-[var(--admin-destructive)] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors duration-150"
+        >
+          Delete Product
+        </button>
+      </div>
+    </FormCard>
+
+    <ConfirmDialog
+      open={deleteProductOpen}
+      onOpenChange={open => { if (!open) setDeleteProductOpen(false) }}
+      title="Delete Product"
+      description={`Delete "${product.displayName}"? The product will no longer be visible to customers.`}
+      confirmLabel="Delete"
+      destructive
+      onConfirm={handleDeleteProduct}
+    />
+    </>
   )
 }

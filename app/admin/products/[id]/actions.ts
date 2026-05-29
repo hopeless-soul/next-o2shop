@@ -89,3 +89,7 @@ export async function uploadFeaturedPhotoAction(productId: string, formData: For
 export async function deleteFeaturedPhotoAction(productId: string): Promise<void> {
   await serverApi.delete(`/admin/products/${productId}/featured-photo`)
 }
+
+export async function deleteProductAction(id: string): Promise<void> {
+  await serverApi.delete(`/admin/products/${id}`)
+}
