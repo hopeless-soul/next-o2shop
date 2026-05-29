@@ -26,7 +26,7 @@ export interface DataTableProps<T> {
   total: number
   page: number
   limit: number
-  onPageChange: (page: number) => void
+  onPageChange?: (page: number) => void
   onLimitChange?: (limit: number) => void
   isLoading?: boolean
   emptyMessage?: string

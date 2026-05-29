@@ -1,4 +1,5 @@
 import clientApi from './client'
+import type { AdminUser } from './admin-users'
 
 export type ReviewStatus = 'pending' | 'approved' | 'rejected'
 
@@ -39,4 +40,12 @@ export async function updateReviewStatus(id: string, status: ReviewStatus): Prom
 
 export async function deleteReview(id: string): Promise<void> {
   await clientApi.delete(`/admin/reviews/${id}`)
+}
+
+export async function findUserByEmailClient(email: string): Promise<AdminUser | null> {
+  const res = await clientApi.get<{ total: number; data: AdminUser[] }>('/admin/users', {
+    params: { search: email, limit: 1 },
+  })
+  const user = res.data.data[0]
+  return user?.email === email ? user : null
 }

@@ -144,6 +144,13 @@ export type UpdatePhotoDto = {
 
 export type ReorderPhotoItem = { id: string; sortOrder: number }
 
+// --- Client-side reads ---
+
+export async function getAdminProductById(id: string): Promise<AdminProduct> {
+  const res = await clientApi.get<AdminProduct>(`/admin/products/${id}`)
+  return res.data
+}
+
 // --- Client-side mutations ---
 
 export async function createProduct(dto: CreateProductDto): Promise<AdminProduct> {

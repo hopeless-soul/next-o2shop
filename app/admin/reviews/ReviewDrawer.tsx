@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Drawer } from '@base-ui/react/drawer'
-import { X, Loader2, CheckCircle, XCircle, Trash2 } from 'lucide-react'
+import { X, Loader2, CheckCircle, XCircle, Trash2, UserCheck, UserX } from 'lucide-react'
 import AdminBadge, { reviewVariant } from '@/components/admin/AdminBadge'
 import StarRating from '@/components/ui/StarRating'
 import { Button } from '@/components/admin/ui/button'
-import { updateReviewStatus } from '@/lib/api/admin-reviews'
+import { updateReviewStatus, findUserByEmailClient } from '@/lib/api/admin-reviews'
+import { getAdminProductById } from '@/lib/api/admin-products'
 import type { AdminReview } from '@/lib/api/admin-reviews'
+import type { ProductPhoto } from '@/lib/api/admin-products'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 
@@ -41,6 +43,32 @@ export default function ReviewDrawer({
 }: ReviewDrawerProps) {
   const [actionLoading, setActionLoading] = useState<'approve' | 'reject' | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+
+  type ProductExtra = { displayName: string; primaryPhoto: ProductPhoto | null | undefined; rating: number | null | undefined }
+  type CustomerExtra = { id: string; displayName?: string } | null
+
+  const [productExtra, setProductExtra] = useState<ProductExtra | null>(null)
+  const [customer, setCustomer] = useState<CustomerExtra | undefined>(undefined) // undefined = loading
+
+  useEffect(() => {
+    if (!open) {
+      setProductExtra(null)
+      setCustomer(undefined)
+      return
+    }
+    setProductExtra(null)
+    setCustomer(undefined)
+    Promise.all([
+      getAdminProductById(review.productId),
+      findUserByEmailClient(review.email),
+    ]).then(([product, user]) => {
+      setProductExtra({ displayName: product.displayName, primaryPhoto: product.primaryPhoto, rating: product.rating })
+      setCustomer(user ? { id: user.id, displayName: user.displayName } : null)
+    }).catch(() => {
+      setProductExtra(null)
+      setCustomer(null)
+    })
+  }, [open, review.id, review.productId, review.email])
 
   async function handleStatusChange(status: 'approved' | 'rejected') {
     setActionLoading(status === 'approved' ? 'approve' : 'reject')
@@ -111,6 +139,24 @@ export default function ReviewDrawer({
                   {review.displayName}
                 </p>
                 <p className="text-[13px] text-[var(--admin-text-muted)]">{review.email}</p>
+                <div className="mt-2">
+                  {customer === undefined ? (
+                    <div className="h-4 w-36 rounded-[3px] skeleton" />
+                  ) : customer ? (
+                    <Link
+                      href={`/admin/users/${customer.id}`}
+                      className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--admin-primary)] hover:underline"
+                    >
+                      <UserCheck className="size-3.5 shrink-0" />
+                      {customer.displayName ?? 'View account'}
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-[12px] text-[var(--admin-text-muted)]">
+                      <UserX className="size-3.5 shrink-0" />
+                      No registered account
+                    </span>
+                  )}
+                </div>
               </section>
 
               {/* Rating */}
@@ -131,12 +177,52 @@ export default function ReviewDrawer({
                 <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-text-muted)] mb-1.5">
                   Product
                 </p>
-                <Link
-                  href={`/admin/products/${review.productId}`}
-                  className="text-[13px] font-mono text-[var(--admin-primary)] hover:underline break-all"
-                >
-                  {review.productId}
-                </Link>
+                <div className="flex items-start gap-3">
+                  {/* Primary photo */}
+                  <div className="shrink-0 w-14 h-14 rounded-[4px] border border-[var(--admin-border)] overflow-hidden bg-[var(--admin-bg)]">
+                    {productExtra?.primaryPhoto ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={resolveUrl(productExtra.primaryPhoto.url)}
+                        alt={productExtra.primaryPhoto.altText ?? ''}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className={`w-full h-full ${productExtra === null ? '' : 'skeleton'}`} />
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    {productExtra ? (
+                      <p className="text-[13px] font-medium text-[var(--admin-text-primary)] truncate mb-0.5">
+                        {productExtra.displayName}
+                      </p>
+                    ) : (
+                      <div className="h-4 w-28 rounded-[3px] skeleton mb-1" />
+                    )}
+                    <Link
+                      href={`/admin/products/${review.productId}`}
+                      className="text-[12px] font-mono text-[var(--admin-primary)] hover:underline break-all"
+                    >
+                      {review.productId.slice(0, 8)}…
+                    </Link>
+                    {/* Product aggregate rating */}
+                    {productExtra ? (
+                      productExtra.rating != null ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <StarRating rating={productExtra.rating} max={5} size={12} />
+                          <span className="text-[11px] text-[var(--admin-text-muted)]">
+                            {productExtra.rating.toFixed(1)} avg
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-[var(--admin-text-muted)] mt-1">No product rating yet</p>
+                      )
+                    ) : (
+                      <div className="h-3 w-24 rounded-[3px] skeleton mt-1" />
+                    )}
+                  </div>
+                </div>
               </section>
 
               {/* Review content */}
