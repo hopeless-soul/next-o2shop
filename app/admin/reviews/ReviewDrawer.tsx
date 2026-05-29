@@ -130,6 +130,19 @@ export default function ReviewDrawer({
 
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+              {/* Review content — top */}
+              <section>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-text-muted)] mb-1.5">
+                  Review
+                </p>
+                <textarea
+                  readOnly
+                  value={review.content}
+                  rows={5}
+                  className="w-full resize-none rounded-[4px] border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2.5 text-[13px] text-[var(--admin-text-primary)] leading-relaxed focus:outline-none cursor-default select-text"
+                />
+              </section>
+
               {/* Reviewer */}
               <section>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-text-muted)] mb-1.5">
@@ -223,16 +236,6 @@ export default function ReviewDrawer({
                     )}
                   </div>
                 </div>
-              </section>
-
-              {/* Review content */}
-              <section>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-text-muted)] mb-1.5">
-                  Review
-                </p>
-                <p className="text-[14px] text-[var(--admin-text-primary)] leading-relaxed whitespace-pre-wrap">
-                  {review.content}
-                </p>
               </section>
 
               {/* Photos */}
