@@ -12,6 +12,7 @@ import {
   X,
   Loader2,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import AdminPagination from '@/components/admin/AdminPagination'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
 import { Button } from '@/components/admin/ui/button'
@@ -175,7 +176,7 @@ export default function CollectionsContent({
       <div className="rounded-[6px] border border-[var(--admin-border)] overflow-hidden bg-[var(--admin-surface)]">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#f9fafb] border-b border-[var(--admin-border)]">
+            <tr className="bg-[var(--admin-bg)] border-b border-[var(--admin-border)]">
               <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--admin-text-secondary)] w-[38%]">
                 Name
               </th>
@@ -301,7 +302,11 @@ export default function CollectionsContent({
               return (
                 <tr
                   key={col.id}
-                  className={`bg-[var(--admin-surface)] transition-colors duration-100 ${!isEditing ? 'hover:bg-[#f5f5f5]' : ''} ${!isLast ? 'border-b border-[var(--admin-border)]' : ''}`}
+                  className={cn(
+                    'bg-[var(--admin-surface)] transition-colors duration-100',
+                    !isEditing && 'hover:bg-[var(--admin-row-hover-bg)]',
+                    !isLast && 'border-b border-[var(--admin-border)]',
+                  )}
                 >
                   {/* Name / Description */}
                   <td className="px-4 py-3 min-h-[48px]">

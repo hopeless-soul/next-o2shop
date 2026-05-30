@@ -17,7 +17,7 @@ import {
 import FormCard from '@/components/admin/FormCard'
 import type { AdminCategory } from '@/lib/api/admin-categories'
 import type { AdminCollection } from '@/lib/api/admin-collections'
-import type { CreateVariantDto, ProductDescription } from '@/lib/api/admin-products'
+import type { CreateVariantDto } from '@/lib/api/admin-products'
 import { createProductAction, createVariantAction } from './actions'
 
 const inputCls =
@@ -154,7 +154,6 @@ export default function ProductCreateClient({ categories, collections }: Product
         tags: tags.length > 0 ? tags : undefined,
         type: type || null,
         isPublished,
-        description: {} as ProductDescription,
       })
 
       // Batch-create pending variants — best-effort; redirect regardless

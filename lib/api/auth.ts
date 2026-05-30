@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import clientApi, { setClientToken, clearClientToken } from './client'
 import serverApi from './server'
 
@@ -36,7 +37,7 @@ export async function refreshTokens(): Promise<void> {
   await clientApi.post('/auth/refresh')
 }
 
-export async function getMe(): Promise<User> {
+export const getMe = cache(async function getMe(): Promise<User> {
   const res = await serverApi.get<User>('/me')
   return res.data
-}
+})

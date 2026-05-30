@@ -213,7 +213,7 @@ export default function ReviewsContent({
             leftIcon: Eye,
             width: 1,
             value: status,
-            onChange: () => { },
+            onChange: (v) => updateParams({ status: v }),
             options: [
               { label: 'Pending', value: 'pending' },
               { label: 'Approved', value: 'approved' },

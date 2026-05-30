@@ -157,7 +157,7 @@ export default function UserEditClient({ user }: { user: AdminUser }) {
           <div className="mt-5 pt-4 border-t border-[var(--admin-border)] flex items-center justify-between gap-3">
             <div className="text-[13px]">
               {saveError && <span className="text-[var(--admin-destructive)]">{saveError}</span>}
-              {saveSuccess && <span className="text-[#16a34a]">User updated.</span>}
+              {saveSuccess && <span className="text-[var(--admin-status-success-fg)]">User updated.</span>}
             </div>
             <button
               type="submit"

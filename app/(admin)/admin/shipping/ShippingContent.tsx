@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MoreHorizontal, Pencil, Trash2, Plus, Check, X, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge from '@/components/admin/AdminBadge'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
@@ -162,7 +163,7 @@ export default function ShippingContent({ methods, total, page, limit, adding, o
       <div className="rounded-[6px] border border-[var(--admin-border)] overflow-hidden bg-[var(--admin-surface)]">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#f9fafb] border-b border-[var(--admin-border)]">
+            <tr className="bg-[var(--admin-bg)] border-b border-[var(--admin-border)]">
               <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--admin-text-secondary)] w-[30%]">
                 Name
               </th>
@@ -312,7 +313,11 @@ export default function ShippingContent({ methods, total, page, limit, adding, o
               return (
                 <tr
                   key={method.id}
-                  className={`bg-[var(--admin-surface)] transition-colors duration-100 ${!isEditing ? 'hover:bg-[#f5f5f5]' : ''} ${!isLast ? 'border-b border-[var(--admin-border)]' : ''}`}
+                  className={cn(
+                    'bg-[var(--admin-surface)] transition-colors duration-100',
+                    !isEditing && 'hover:bg-[var(--admin-row-hover-bg)]',
+                    !isLast && 'border-b border-[var(--admin-border)]',
+                  )}
                 >
                   {/* Name */}
                   <td className="px-4 py-3">

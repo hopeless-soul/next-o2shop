@@ -206,7 +206,7 @@ export default function ChangesContent({
             key: 'action',
             label: 'All Actions',
             value: action,
-            onChange: () => {},
+            onChange: (v) => updateParams({ action: v }),
             options: [
               { label: 'Create', value: 'CREATE' },
               { label: 'Update', value: 'UPDATE' },
@@ -218,14 +218,14 @@ export default function ChangesContent({
             type: 'date',
             label: 'From',
             value: dateFrom,
-            onChange: () => {},
+            onChange: (v) => updateParams({ dateFrom: v }),
           },
           {
             key: 'dateTo',
             type: 'date',
             label: 'To',
             value: dateTo,
-            onChange: () => {},
+            onChange: (v) => updateParams({ dateTo: v }),
           },
         ]}
       />

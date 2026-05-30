@@ -13,6 +13,7 @@ import {
   X,
   Loader2,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import AdminPagination from '@/components/admin/AdminPagination'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
 import { Button } from '@/components/admin/ui/button'
@@ -286,15 +287,21 @@ export default function CategoriesContent({
     }
   }
 
+  const [deleteSubError, setDeleteSubError] = useState<string | null>(null)
+
   async function handleDeleteSub(categoryId: string, subId: string) {
-    await deleteSubcategory(categoryId, subId)
-    setCats((prev) =>
-      prev.map((c) =>
-        c.id === categoryId
-          ? { ...c, subCategories: c.subCategories.filter((s) => s.id !== subId) }
-          : c,
-      ),
-    )
+    try {
+      await deleteSubcategory(categoryId, subId)
+      setCats((prev) =>
+        prev.map((c) =>
+          c.id === categoryId
+            ? { ...c, subCategories: c.subCategories.filter((s) => s.id !== subId) }
+            : c,
+        ),
+      )
+    } catch (err) {
+      setDeleteSubError(err instanceof Error ? err.message : 'Failed to delete subcategory.')
+    }
   }
 
   return (
@@ -302,7 +309,7 @@ export default function CategoriesContent({
       <div className="rounded-[6px] border border-[var(--admin-border)] overflow-hidden bg-[var(--admin-surface)]">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#f9fafb] border-b border-[var(--admin-border)]">
+            <tr className="bg-[var(--admin-bg)] border-b border-[var(--admin-border)]">
               <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--admin-text-secondary)] w-[40%]">
                 Name
               </th>
@@ -407,7 +414,11 @@ export default function CategoriesContent({
                 // ── Category row ──────────────────────────────────────────
                 <tr
                   key={cat.id}
-                  className={`bg-[var(--admin-surface)] transition-colors duration-100 ${!isEditingCat ? 'hover:bg-[#f5f5f5]' : ''} ${!isLastCat || expanded ? 'border-b border-[var(--admin-border)]' : ''}`}
+                  className={cn(
+                    'bg-[var(--admin-surface)] transition-colors duration-100',
+                    !isEditingCat && 'hover:bg-[var(--admin-row-hover-bg)]',
+                    (!isLastCat || expanded) && 'border-b border-[var(--admin-border)]',
+                  )}
                 >
                   <td className="px-4 py-3 min-h-[48px]">
                     {isEditingCat ? (
@@ -542,7 +553,11 @@ export default function CategoriesContent({
                         return (
                           <tr
                             key={sub.id}
-                            className={`bg-[var(--admin-sidebar-bg)] transition-colors duration-100 ${isEditing ? '' : 'hover:bg-[#ebebed]'} ${!isLastSub || addingSubFor === cat.id ? 'border-b border-[var(--admin-border)]' : ''}`}
+                            className={cn(
+                              'bg-[var(--admin-sidebar-bg)] transition-colors duration-100',
+                              !isEditing && 'hover:bg-[var(--admin-sub-row-hover-bg)]',
+                              (!isLastSub || addingSubFor === cat.id) && 'border-b border-[var(--admin-border)]',
+                            )}
                           >
                             <td className="px-4 py-2.5">
                               {isEditing ? (
@@ -786,10 +801,10 @@ export default function CategoriesContent({
       <ConfirmDialog
         open={!!deleteSubTarget}
         onOpenChange={(open) => {
-          if (!open) setDeleteSubTarget(null)
+          if (!open) { setDeleteSubTarget(null); setDeleteSubError(null) }
         }}
         title="Delete subcategory"
-        description={`This will permanently delete "${deleteSubTarget?.name ?? ''}".`}
+        description={deleteSubError ?? `This will permanently delete "${deleteSubTarget?.name ?? ''}".`}
         onConfirm={() => handleDeleteSub(deleteSubTarget!.categoryId, deleteSubTarget!.subId)}
       />
     </>

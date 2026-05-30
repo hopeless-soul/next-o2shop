@@ -647,10 +647,15 @@ export default function ProductEditClient({
 
   // ── Delete product ───────────────────────────────────────
   const [deleteProductOpen, setDeleteProductOpen] = useState(false)
+  const [deleteProductError, setDeleteProductError] = useState<string | null>(null)
 
   async function handleDeleteProduct() {
-    await deleteProductAction(product.id)
-    router.push('/admin/products')
+    try {
+      await deleteProductAction(product.id)
+      router.push('/admin/products')
+    } catch (err) {
+      setDeleteProductError(err instanceof Error ? err.message : 'Failed to delete product.')
+    }
   }
 
   // ── Variant actions ──────────────────────────────────────
@@ -673,9 +678,16 @@ export default function ProductEditClient({
 
   async function handleDeleteVariant() {
     if (!deleteVariantId) return
-    await deleteVariantAction(product.id, deleteVariantId)
-    setVariants(prev => prev.filter(v => v.id !== deleteVariantId))
-    if (defaultVariantId === deleteVariantId) setDefaultVariantId(null)
+    try {
+      await deleteVariantAction(product.id, deleteVariantId)
+      setVariants(prev => prev.filter(v => v.id !== deleteVariantId))
+      if (defaultVariantId === deleteVariantId) setDefaultVariantId(null)
+    } catch (err) {
+      setVariantActionErrors(e => ({
+        ...e,
+        [deleteVariantId]: err instanceof Error ? err.message : 'Failed to delete variant.',
+      }))
+    }
   }
 
   async function handleSetDefault(variantId: string) {
@@ -893,7 +905,7 @@ export default function ProductEditClient({
             <p className="text-[13px] text-[var(--admin-destructive)]">{saveError}</p>
           )}
           {saveSuccess && (
-            <p className="text-[13px] text-[#16a34a]">Changes saved.</p>
+            <p className="text-[13px] text-[var(--admin-status-success-fg)]">Changes saved.</p>
           )}
 
           <div className="flex justify-end">
@@ -1044,12 +1056,15 @@ export default function ProductEditClient({
         </div>
         <button
           type="button"
-          onClick={() => setDeleteProductOpen(true)}
+          onClick={() => { setDeleteProductOpen(true); setDeleteProductError(null) }}
           className="h-9 px-4 rounded-[4px] text-[14px] font-medium border border-[var(--admin-destructive)] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors duration-150"
         >
           Delete Product
         </button>
       </div>
+      {deleteProductError && (
+        <p className="mt-2 text-[13px] text-[var(--admin-destructive)]">{deleteProductError}</p>
+      )}
     </FormCard>
 
     <ConfirmDialog

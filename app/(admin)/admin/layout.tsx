@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import { AdminFontProvider } from '@/components/admin/AdminFontProvider'
 import { getMe } from '@/lib/api/auth'
+import { cn } from '@/lib/utils'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -19,7 +20,7 @@ export default async function AdminLayout({
 
   return (
     <div
-      className={`${plusJakartaSans.variable} flex min-h-screen`}
+      className={cn(plusJakartaSans.variable, 'flex min-h-screen')}
       style={{ fontFamily: 'var(--font-admin)', background: 'var(--admin-bg)' }}
     >
       <AdminFontProvider fontVariable={plusJakartaSans.variable} />

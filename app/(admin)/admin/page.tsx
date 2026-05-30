@@ -1,8 +1,7 @@
 import { getMe } from "@/lib/api/auth";
-import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
-  const user = await getMe().catch(() => redirect("/login"));
+  const user = await getMe();
 
   return (
     <div
