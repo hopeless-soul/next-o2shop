@@ -1,4 +1,3 @@
-import serverApi from './server'
 import clientApi from './client'
 
 export type ShippingMethod = {
@@ -25,11 +24,6 @@ export type CreateShippingMethodDto = {
   currency: string
   estimatedDays?: number
   isActive?: boolean
-}
-
-export async function getShippingMethods(params: { page?: number; limit?: number } = {}): Promise<PaginatedShippingMethods> {
-  const res = await serverApi.get<PaginatedShippingMethods>('/admin/shipping-methods', { params })
-  return res.data
 }
 
 export async function createShippingMethod(dto: CreateShippingMethodDto): Promise<ShippingMethod> {

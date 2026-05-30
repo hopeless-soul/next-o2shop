@@ -1,4 +1,3 @@
-import serverApi from './server'
 import clientApi from './client'
 
 export type AdminCollection = {
@@ -31,16 +30,6 @@ export type UpdateCollectionDto = {
   displayName?: string
   description?: string
   isActive?: boolean
-}
-
-export async function getAdminCollections(params: { page?: number; limit?: number } = {}): Promise<PaginatedAdminCollections> {
-  const res = await serverApi.get<PaginatedAdminCollections>('/admin/collections', { params })
-  return res.data
-}
-
-export async function getAdminCollection(id: string): Promise<AdminCollection> {
-  const res = await serverApi.get<AdminCollection>(`/admin/collections/${id}`)
-  return res.data
 }
 
 export async function createCollection(dto: CreateCollectionDto): Promise<AdminCollection> {

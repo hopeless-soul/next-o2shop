@@ -3,7 +3,7 @@ import Link from 'next/link'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getAdminProduct } from '@/lib/api/admin-products-server'
 import { getAdminCategories } from '@/lib/api/admin-categories-server'
-import { getAdminCollections } from '@/lib/api/admin-collections'
+import { getAdminCollections } from '@/lib/api/admin-collections-server'
 import { NotFoundError, AuthError } from '@/lib/api/errors'
 import ProductEditClient from './ProductEditClient'
 
