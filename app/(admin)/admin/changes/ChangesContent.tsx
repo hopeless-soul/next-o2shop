@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '@/components/admin/DataTable'
@@ -188,11 +189,17 @@ export default function ChangesContent({
   return (
     <>
       <FilterBar
-        searchPlaceholder="Filter by entity type…"
-        searchValue={entityType}
-        onSearchChange={(v) => updateParams({ entityType: v })}
-        onApply={(s, fv) => updateParams({ entityType: s, ...fv })}
+        onApply={(fv) => updateParams({ ...fv })}
         filters={[
+          {
+            key: 'entityType',
+            label: 'Filter by entity type…',
+            type: 'text',
+            leftIcon: Search,
+            width: 3,
+            value: entityType,
+            onChange: (v) => updateParams({ entityType: v }),
+          },
           {
             key: 'action',
             label: 'All Actions',

@@ -25,18 +25,12 @@ export interface FilterOption {
 }
 
 interface FilterBarProps {
-  searchPlaceholder?: string
-  searchValue: string
-  onSearchChange: (value: string) => void
   filters?: FilterOption[]
-  onApply?: (search: string, filterValues: Record<string, string>) => void
+  onApply?: (filterValues: Record<string, string>) => void
   className?: string
 }
 
 export default function FilterBar({
-  searchPlaceholder = 'Search…',
-  searchValue,
-  onSearchChange,
   filters,
   onApply,
   className,
@@ -44,20 +38,12 @@ export default function FilterBar({
   const buildDrafts = (fs: FilterOption[] | undefined) =>
     Object.fromEntries(fs?.map((f) => [f.key, f.value]) ?? [])
 
-  const [inputValue, setInputValue] = useState(searchValue)
-  const [syncedProp, setSyncedProp] = useState(searchValue)
   const [filterDrafts, setFilterDrafts] = useState<Record<string, string>>(() =>
     buildDrafts(filters),
   )
   const [syncedFilterProps, setSyncedFilterProps] = useState<Record<string, string>>(() =>
     buildDrafts(filters),
   )
-
-  // Detect external search reset
-  if (syncedProp !== searchValue) {
-    setSyncedProp(searchValue)
-    setInputValue(searchValue)
-  }
 
   // Detect external filter resets
   const filterPropsChanged = filters?.some((f) => syncedFilterProps[f.key] !== f.value) ?? false
@@ -70,20 +56,13 @@ export default function FilterBar({
   function handleSubmit(e?: React.SyntheticEvent) {
     e?.preventDefault()
     if (onApply) {
-      onApply(inputValue, Object.fromEntries(filters?.map((f) => [f.key, filterDrafts[f.key] ?? '']) ?? []))
+      onApply(Object.fromEntries(filters?.map((f) => [f.key, filterDrafts[f.key] ?? '']) ?? []))
     } else {
-      onSearchChange(inputValue)
       filters?.forEach((f) => f.onChange(filterDrafts[f.key] ?? ''))
     }
   }
 
-  function handleClearSearch() {
-    setInputValue('')
-    onSearchChange('')
-  }
-
   function handleClearAll() {
-    setInputValue('')
     setFilterDrafts(Object.fromEntries(filters?.map((f) => [f.key, '']) ?? []))
   }
 
@@ -91,39 +70,14 @@ export default function FilterBar({
     setFilterDrafts((prev) => ({ ...prev, [key]: value }))
   }
 
-  const hasActiveDraft =
-    inputValue !== '' || Object.values(filterDrafts).some((v) => v !== '')
+  const hasActiveDraft = Object.values(filterDrafts).some((v) => v !== '')
 
   return (
     <div className={`flex justify-between items-start gap-2 mb-4${className ? ` ${className}` : ''}`}>
       <form
         onSubmit={handleSubmit}
-        className="flex items-center gap-2 grow min-w-0"
+        className="flex flex-1 min-w-0 flex-wrap items-center gap-2"
       >
-        {/* Search input */}
-        <div className="relative w-[280px] shrink-0">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-[var(--admin-text-muted)] pointer-events-none" />
-          <Input
-            type="text"
-            placeholder={searchPlaceholder}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="pl-8 pr-7 h-9 text-[14px] border-[var(--admin-border-input)] rounded-[4px] focus-visible:ring-[var(--admin-ring)]"
-          />
-          {inputValue !== '' && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--admin-text-muted)] hover:text-[var(--admin-text-secondary)] transition-colors duration-100"
-              aria-label="Clear search"
-            >
-              <X className="size-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Filter chips */}
-        <div className="flex flex-1 min-w-0 flex-wrap items-center gap-2">
         {filters?.map((filter) => {
           const draftValue = filterDrafts[filter.key] ?? ''
           const LeftIcon = filter.leftIcon
@@ -163,6 +117,7 @@ export default function FilterBar({
               </div>
             )
           }
+
           if (filter.type === 'text') {
             return (
               <div key={filter.key} className={`relative ${filter.width ? '' : 'w-[160px]'}`} style={widthStyle}>
@@ -192,6 +147,7 @@ export default function FilterBar({
               </div>
             )
           }
+
           return (
             <div key={filter.key} className={`relative ${filter.width ? '' : 'w-[160px]'}`} style={widthStyle}>
               <Select
@@ -233,7 +189,6 @@ export default function FilterBar({
           )
         })}
 
-        {/* Clear all */}
         {hasActiveDraft && (
           <button
             type="button"
@@ -244,7 +199,6 @@ export default function FilterBar({
             Clear filters
           </button>
         )}
-        </div>
       </form>
 
       <Button
@@ -254,7 +208,7 @@ export default function FilterBar({
         className="shrink-0"
         onClick={handleSubmit}
       >
-        Search <Search className="size-4" />  
+        Search <Search className="size-4" />
       </Button>
     </div>
   )

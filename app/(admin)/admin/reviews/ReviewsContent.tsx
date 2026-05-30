@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -194,11 +195,17 @@ export default function ReviewsContent({
   return (
     <>
       <FilterBar
-        searchPlaceholder="Search by name or email…"
-        searchValue={search}
-        onSearchChange={(v) => updateParams({ search: v })}
-        onApply={(s, fv) => updateParams({ search: s, ...fv })}
+        onApply={(fv) => updateParams({ ...fv })}
         filters={[
+          {
+            key: 'search',
+            label: 'Search by name or email…',
+            type: 'text',
+            leftIcon: Search,
+            width: 3,
+            value: search,
+            onChange: (v) => updateParams({ search: v }),
+          },
           {
             key: 'status',
             label: 'All Status',

@@ -159,29 +159,16 @@ export default function ProductsContent({
   return (
     <>
       <FilterBar
-        searchPlaceholder="Search products…"
-        searchValue={search}
-        onSearchChange={(v) => updateParams({ search: v })}
-        onApply={(s, fv) => updateParams({ search: s, ...fv })}
+        onApply={(fv) => updateParams({ ...fv })}
         filters={[
           {
-            key: 'status',
-            label: 'All Status',
-            leftIcon: Eye,
-            width: 1,
-            value: includeDeleted ? 'deleted' : isPublished === true ? 'true' : isPublished === false ? 'false' : '',
-            onChange: (v) => {
-              if (v === 'deleted') {
-                updateParams({ includeDeleted: 'true', isPublished: undefined })
-              } else {
-                updateParams({ includeDeleted: undefined, isPublished: v })
-              }
-            },
-            options: [
-              { label: 'Published', value: 'true' },
-              { label: 'Draft', value: 'false' },
-              { label: 'Deleted', value: 'deleted' },
-            ],
+            key: 'search',
+            label: 'Search products…',
+            type: 'text',
+            leftIcon: Search,
+            width: 2,
+            value: search,
+            onChange: (v) => updateParams({ search: v }),
           },
           {
             key: 'categorySlug',
@@ -200,6 +187,25 @@ export default function ProductsContent({
             leftIcon: Search,
             value: collectionSlug,
             onChange: (v) => updateParams({ collectionSlug: v }),
+          },
+          {
+            key: 'status',
+            label: 'All Status',
+            leftIcon: Eye,
+            width: 1,
+            value: includeDeleted ? 'deleted' : isPublished === true ? 'true' : isPublished === false ? 'false' : '',
+            onChange: (v) => {
+              if (v === 'deleted') {
+                updateParams({ includeDeleted: 'true', isPublished: undefined })
+              } else {
+                updateParams({ includeDeleted: undefined, isPublished: v })
+              }
+            },
+            options: [
+              { label: 'Published', value: 'true' },
+              { label: 'Draft', value: 'false' },
+              { label: 'Deleted', value: 'deleted' },
+            ],
           },
         ]}
       />

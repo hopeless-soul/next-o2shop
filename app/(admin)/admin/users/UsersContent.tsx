@@ -1,5 +1,6 @@
 'use client'
 
+import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -130,10 +131,17 @@ export default function UsersContent({
   return (
     <>
       <FilterBar
-        searchValue={search}
-        onSearchChange={(v) => updateParams({ search: v })}
-        onApply={(s, fv) => updateParams({ search: s, ...fv })}
+        onApply={(fv) => updateParams({ ...fv })}
         filters={[
+          {
+            key: 'search',
+            label: 'Search users…',
+            type: 'text',
+            leftIcon: Search,
+            width: 3,
+            value: search,
+            onChange: (v) => updateParams({ search: v }),
+          },
           {
             key: 'role',
             label: 'All Roles',
