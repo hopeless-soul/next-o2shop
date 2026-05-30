@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import AdminBadge from '@/components/admin/AdminBadge'
 import {
   MoreHorizontal,
   Pencil,
@@ -389,15 +390,10 @@ export default function CollectionsContent({
                         <span className="text-[12px] text-[var(--admin-text-secondary)]">Active</span>
                       </label>
                     ) : (
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                          col.isActive
-                            ? 'bg-[#dcfce7] text-[#166534]'
-                            : 'bg-[#f3f4f6] text-[var(--admin-text-muted)]'
-                        }`}
-                      >
-                        {col.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                      <AdminBadge
+                        variant={col.isActive ? 'success' : 'neutral'}
+                        label={col.isActive ? 'Active' : 'Inactive'}
+                      />
                     )}
                   </td>
 
