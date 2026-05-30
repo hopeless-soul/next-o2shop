@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Eye } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -81,11 +81,12 @@ export default function ReviewsContent({
     setDeleteTarget(review)
   }
 
+  // Columns
   const columns: ColumnDef<AdminReview>[] = [
     {
       id: 'reviewer',
       header: 'Reviewer',
-      size: 180,
+      size: 100,
       cell: ({ row }) => {
         const r = row.original
         return (
@@ -101,21 +102,21 @@ export default function ReviewsContent({
     {
       id: 'product',
       header: 'Product',
-      size: 130,
+      size: 120,
       cell: ({ row }) => (
         <Link
           href={`/admin/products/${row.original.productId}`}
           onClick={(e) => e.stopPropagation()}
           className="text-[13px] font-mono text-[var(--admin-primary)] hover:underline"
         >
-          {row.original.productId.slice(0, 8)}…
+          {row.original.productId}
         </Link>
       ),
     },
     {
       id: 'rating',
       header: 'Rating',
-      size: 120,
+      size: 60,
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <StarRating rating={row.original.rating / 2} max={5} size={13} />
@@ -128,7 +129,7 @@ export default function ReviewsContent({
     {
       id: 'content',
       header: 'Content',
-      size: 220,
+      size: 120,
       cell: ({ row }) => {
         const text = row.original.content
         return (
@@ -192,6 +193,7 @@ export default function ReviewsContent({
     },
   ]
 
+  // Main Return
   return (
     <>
       <FilterBar
@@ -202,15 +204,17 @@ export default function ReviewsContent({
             label: 'Search by name or email…',
             type: 'text',
             leftIcon: Search,
-            width: 3,
+            width: 2,
             value: search,
             onChange: (v) => updateParams({ search: v }),
           },
           {
             key: 'status',
             label: 'All Status',
+            leftIcon: Eye,
+            width: 1,
             value: status,
-            onChange: () => {},
+            onChange: () => { },
             options: [
               { label: 'Pending', value: 'pending' },
               { label: 'Approved', value: 'approved' },
