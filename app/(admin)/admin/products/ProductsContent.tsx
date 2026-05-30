@@ -8,6 +8,7 @@ import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge from '@/components/admin/AdminBadge'
 import type { AdminProductListItem } from '@/lib/api/admin-products'
+import { Search, Eye, Tag } from 'lucide-react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 
@@ -166,6 +167,8 @@ export default function ProductsContent({
           {
             key: 'status',
             label: 'All Status',
+            leftIcon: Eye,
+            width: 6,
             value: includeDeleted ? 'deleted' : isPublished === true ? 'true' : isPublished === false ? 'false' : '',
             onChange: (v) => {
               if (v === 'deleted') {
@@ -184,6 +187,7 @@ export default function ProductsContent({
             key: 'categorySlug',
             label: 'Category slug',
             type: 'text',
+            leftIcon: Tag,
             value: categorySlug,
             onChange: (v) => updateParams({ categorySlug: v }),
           },
@@ -191,6 +195,7 @@ export default function ProductsContent({
             key: 'collectionSlug',
             label: 'Collection slug',
             type: 'text',
+            leftIcon: Tag,
             value: collectionSlug,
             onChange: (v) => updateParams({ collectionSlug: v }),
           },
