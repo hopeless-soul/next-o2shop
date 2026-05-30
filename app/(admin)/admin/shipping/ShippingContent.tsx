@@ -27,6 +27,8 @@ interface ShippingContentProps {
   total: number
   page: number
   limit: number
+  adding: boolean
+  onAddingChange: (v: boolean) => void
 }
 
 const EMPTY_FORM: CreateShippingMethodDto = {
@@ -41,7 +43,7 @@ function formatPrice(price: number, currency: string) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price)
 }
 
-export default function ShippingContent({ methods, total, page, limit }: ShippingContentProps) {
+export default function ShippingContent({ methods, total, page, limit, adding, onAddingChange }: ShippingContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -52,7 +54,6 @@ export default function ShippingContent({ methods, total, page, limit }: Shippin
     setItems(methods)
   }
 
-  const [adding, setAdding] = useState(false)
   const [newForm, setNewForm] = useState<CreateShippingMethodDto>(EMPTY_FORM)
   const [newError, setNewError] = useState<string | null>(null)
   const [isSavingNew, setIsSavingNew] = useState(false)
@@ -79,15 +80,17 @@ export default function ShippingContent({ methods, total, page, limit }: Shippin
 
   // ── New method ─────────────────────────────────────────────────────────────
 
-  function startAdd() {
-    setEditingId(null)
-    setAdding(true)
-    setNewForm(EMPTY_FORM)
-    setNewError(null)
+  const [prevAdding, setPrevAdding] = useState(adding)
+  if (prevAdding !== adding) {
+    setPrevAdding(adding)
+    if (adding) {
+      setEditingId(null)
+      setNewError(null)
+    }
   }
 
   function cancelAdd() {
-    setAdding(false)
+    onAddingChange(false)
     setNewForm(EMPTY_FORM)
     setNewError(null)
   }
@@ -104,7 +107,7 @@ export default function ShippingContent({ methods, total, page, limit }: Shippin
         estimatedDays: newForm.estimatedDays || undefined,
       })
       setItems((prev) => [created, ...prev])
-      setAdding(false)
+      onAddingChange(false)
       setNewForm(EMPTY_FORM)
     } catch (err) {
       setNewError(err instanceof Error ? err.message : 'Failed to create shipping method')
@@ -116,7 +119,7 @@ export default function ShippingContent({ methods, total, page, limit }: Shippin
   // ── Edit method ────────────────────────────────────────────────────────────
 
   function startEdit(method: ShippingMethod) {
-    setAdding(false)
+    onAddingChange(false)
     setEditingId(method.id)
     setEditForm({
       name: method.name,
@@ -156,12 +159,6 @@ export default function ShippingContent({ methods, total, page, limit }: Shippin
 
   return (
     <>
-      <div className="flex justify-end mb-3">
-        <Button type="button" variant="secondary" size="lg" onClick={startAdd} disabled={adding}>
-          New Method <Plus className="size-4" />
-        </Button>
-      </div>
-
       <div className="rounded-[6px] border border-[var(--admin-border)] overflow-hidden bg-[var(--admin-surface)]">
         <table className="w-full border-collapse">
           <thead>

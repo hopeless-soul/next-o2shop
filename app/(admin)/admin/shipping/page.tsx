@@ -1,6 +1,5 @@
-import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getShippingMethods } from '@/lib/api/admin-shipping-server'
-import ShippingContent from './ShippingContent'
+import ShippingPageClient from './ShippingPageClient'
 import type { ShippingMethod } from '@/lib/api/admin-shipping'
 
 interface ShippingPageProps {
@@ -25,17 +24,11 @@ export default async function ShippingPage({ searchParams }: ShippingPageProps) 
   }
 
   return (
-    <>
-      <AdminPageHeader
-        title="Shipping"
-        breadcrumb={[{ label: 'Admin', href: '/admin' }, { label: 'Shipping' }]}
-      />
-      <ShippingContent
-        methods={result.data}
-        total={result.total}
-        page={page}
-        limit={limit}
-      />
-    </>
+    <ShippingPageClient
+      methods={result.data}
+      total={result.total}
+      page={page}
+      limit={limit}
+    />
   )
 }
