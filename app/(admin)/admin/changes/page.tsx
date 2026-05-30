@@ -1,6 +1,7 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getAuditLog } from '@/lib/api/admin-audit-log-server'
 import type { AuditAction, AuditLogEntry } from '@/lib/api/admin-audit-log'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import ChangesContent from './ChangesContent'
 
 const ACTION_VALUES: AuditAction[] = ['CREATE', 'UPDATE', 'DELETE']
@@ -11,8 +12,7 @@ interface ChangesPageProps {
 
 export default async function ChangesPage({ searchParams }: ChangesPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
   const entityType = p.entityType ?? ''
   const action = ACTION_VALUES.includes(p.action as AuditAction)
     ? (p.action as AuditAction)

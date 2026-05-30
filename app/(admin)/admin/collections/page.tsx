@@ -1,4 +1,5 @@
 import { getAdminCollections } from '@/lib/api/admin-collections-server'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import CollectionsPageClient from './CollectionsPageClient'
 
 interface CollectionsPageProps {
@@ -7,8 +8,7 @@ interface CollectionsPageProps {
 
 export default async function CollectionsPage({ searchParams }: CollectionsPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
 
   let result = {
     total: 0,

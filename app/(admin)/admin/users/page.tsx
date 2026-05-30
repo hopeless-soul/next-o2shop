@@ -1,5 +1,6 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminUsers } from '@/lib/api/admin-users'
+import { getAdminUsers } from '@/lib/api/admin-users-server'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import UsersContent from './UsersContent'
 
 interface UsersPageProps {
@@ -8,8 +9,7 @@ interface UsersPageProps {
 
 export default async function UsersPage({ searchParams }: UsersPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
   const search = p.search ?? ''
   const role = (p.role === 'regular' || p.role === 'admin') ? p.role : undefined
   const isActive = p.isActive === 'true' ? true : p.isActive === 'false' ? false : undefined

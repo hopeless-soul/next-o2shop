@@ -1,4 +1,3 @@
-import serverApi from './server'
 import clientApi from './client'
 
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
@@ -71,16 +70,6 @@ export type GetAdminOrdersParams = {
 export type UpdateOrderStatusDto = {
   paymentStatus?: PaymentStatus
   fulfillmentStatus?: FulfillmentStatus
-}
-
-export async function getAdminOrders(params: GetAdminOrdersParams = {}): Promise<PaginatedAdminOrders> {
-  const res = await serverApi.get<PaginatedAdminOrders>('/admin/orders', { params })
-  return res.data
-}
-
-export async function getAdminOrder(id: string): Promise<AdminOrder> {
-  const res = await serverApi.get<AdminOrder>(`/admin/orders/${id}`)
-  return res.data
 }
 
 export async function updateOrderStatus(id: string, dto: UpdateOrderStatusDto): Promise<AdminOrder> {

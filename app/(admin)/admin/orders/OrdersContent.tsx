@@ -1,7 +1,8 @@
 'use client'
 
 import { Search, CreditCard, Truck } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { formatDate, formatAmount } from '@/lib/admin/formatters'
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '@/components/admin/DataTable'
@@ -21,18 +22,6 @@ interface OrdersContentProps {
   fulfillmentStatus: string
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function formatAmount(amount: number, currency: string) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
-}
-
 export default function OrdersContent({
   orders,
   total,
@@ -42,21 +31,7 @@ export default function OrdersContent({
   paymentStatus,
   fulfillmentStatus,
 }: OrdersContentProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/orders?${params.toString()}`)
-  }
+  const updateParams = useAdminUrlParams()
 
   const columns: ColumnDef<AdminOrder>[] = [
     {

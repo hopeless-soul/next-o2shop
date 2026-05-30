@@ -26,6 +26,7 @@ export type ProductVariant = {
   sku: string
   stock: number
   available: boolean
+  inventoryPolicy?: string
   priceOverride?: number
   compareAtPrice?: number | null
   weight?: number | null
@@ -117,9 +118,10 @@ export type CreateProductDto = {
   type?: string | null
 }
 
-export type UpdateProductDto = Partial<CreateProductDto> & {
+export type UpdateProductDto = Omit<Partial<CreateProductDto>, 'subCategoryId' | 'type'> & {
   primaryPhotoId?: string | null
   subCategoryId?: string | null
+  type?: string | null
 }
 
 export type CreateVariantDto = {

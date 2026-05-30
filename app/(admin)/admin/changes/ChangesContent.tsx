@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Search } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { formatDateTime } from '@/lib/admin/formatters'
 import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '@/components/admin/DataTable'
 import FilterBar from '@/components/admin/FilterBar'
@@ -11,16 +12,6 @@ import AdminBadge from '@/components/admin/AdminBadge'
 import type { AdminBadgeVariant } from '@/components/admin/AdminBadge'
 import type { AuditLogEntry, AuditAction } from '@/lib/api/admin-audit-log'
 import ChangeDrawer from './ChangeDrawer'
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 function formatValue(v: unknown): string {
   if (v === null || v === undefined) return '—'
@@ -55,27 +46,13 @@ export default function ChangesContent({
   dateFrom,
   dateTo,
 }: ChangesContentProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const updateParams = useAdminUrlParams()
   const [selected, setSelected] = useState<AuditLogEntry | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   function openDrawer(entry: AuditLogEntry) {
     setSelected(entry)
     setDrawerOpen(true)
-  }
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/changes?${params.toString()}`)
   }
 
   const columns: ColumnDef<AuditLogEntry>[] = [
@@ -182,7 +159,7 @@ export default function ChangesContent({
       size: 150,
       cell: ({ row }) => (
         <span className="text-[13px] text-[var(--admin-text-secondary)]">
-          {formatDate(row.original.changedAt)}
+          {formatDateTime(row.original.changedAt)}
         </span>
       ),
     },

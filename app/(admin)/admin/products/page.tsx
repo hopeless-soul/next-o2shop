@@ -1,5 +1,6 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getAdminProducts } from '@/lib/api/admin-products-server'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import ProductsContent from './ProductsContent'
 
 interface ProductsPageProps {
@@ -14,8 +15,7 @@ type SortOrder = typeof SORT_ORDER_VALUES[number]
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
   const search = p.search ?? ''
   const categorySlug = p.categorySlug ?? ''
   const collectionSlug = p.collectionSlug ?? ''

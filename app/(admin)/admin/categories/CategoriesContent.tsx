@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { toSlug } from '@/lib/admin/formatters'
 import {
   ChevronDown,
   ChevronRight,
@@ -35,10 +37,6 @@ import {
   type AdminSubCategory,
 } from '@/lib/api/admin-categories'
 
-function toSlug(name: string) {
-  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-}
-
 interface CategoriesContentProps {
   categories: AdminCategory[]
   total: number
@@ -57,7 +55,7 @@ export default function CategoriesContent({
   onAddingCatChange,
 }: CategoriesContentProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const updateParams = useAdminUrlParams()
 
   // Local copy — mutations update optimistically (no router.refresh needed).
   // Sync from parent RSC via derived-state pattern.
@@ -101,19 +99,6 @@ export default function CategoriesContent({
   const [editSubError, setEditSubError] = useState<string | null>(null)
 
   const [isSavingSub, setIsSavingSub] = useState(false)
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/categories?${params.toString()}`)
-  }
 
   function toggleRow(id: string) {
     setExpandedRows((prev) => {

@@ -1,4 +1,3 @@
-import serverApi from './server'
 import clientApi from './client'
 
 export type AdminUser = {
@@ -48,16 +47,6 @@ export type UpdateAdminUserDto = {
   role?: 'regular' | 'admin'
   isActive?: boolean
   resetTokenVersion?: boolean
-}
-
-export async function getAdminUsers(params: GetAdminUsersParams = {}): Promise<PaginatedAdminUsers> {
-  const res = await serverApi.get<PaginatedAdminUsers>('/admin/users', { params })
-  return res.data
-}
-
-export async function getAdminUser(id: string): Promise<AdminUser> {
-  const res = await serverApi.get<AdminUser>(`/admin/users/${id}`)
-  return res.data
 }
 
 export async function updateAdminUser(id: string, dto: UpdateAdminUserDto): Promise<AdminUser> {

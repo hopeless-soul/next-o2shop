@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { useInlineEditForm } from '@/hooks/useInlineEditForm'
+import { toSlug } from '@/lib/admin/formatters'
 import AdminBadge from '@/components/admin/AdminBadge'
 import {
   MoreHorizontal,
@@ -30,10 +33,6 @@ import {
   type AdminCollection,
 } from '@/lib/api/admin-collections'
 
-function toSlug(name: string) {
-  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-}
-
 type CollectionForm = {
   displayName: string
   slug: string
@@ -61,7 +60,7 @@ export default function CollectionsContent({
   onAddingChange,
 }: CollectionsContentProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const updateParams = useAdminUrlParams()
 
   const [prevCollections, setPrevCollections] = useState(collections)
   const [cols, setCols] = useState<AdminCollection[]>(collections)
@@ -70,44 +69,25 @@ export default function CollectionsContent({
     setCols(collections)
   }
 
-  const [newForm, setNewForm] = useState<CollectionForm>(emptyForm)
-  const [newError, setNewError] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editForm, setEditForm] = useState<CollectionForm>(emptyForm)
-  const [editError, setEditError] = useState<string | null>(null)
-
-  const [deleteTarget, setDeleteTarget] = useState<AdminCollection | null>(null)
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/collections?${params.toString()}`)
-  }
+  const {
+    newForm, setNewForm, newError, setNewError, isSavingNew: isSaving, setIsSavingNew: setIsSaving, resetNewForm,
+    editingId, editForm, setEditForm, editError, setEditError,
+    startEdit: startEditForm, cancelEdit,
+    deleteTarget, setDeleteTarget,
+    resetOnAddOpen,
+  } = useInlineEditForm<CollectionForm, AdminCollection>(emptyForm)
 
   // ── New collection ──────────────────────────────────────────────────────
 
   const [prevAdding, setPrevAdding] = useState(adding)
   if (prevAdding !== adding) {
     setPrevAdding(adding)
-    if (adding) {
-      setEditingId(null)
-      setNewError(null)
-    }
+    if (adding) resetOnAddOpen()
   }
 
   function cancelAdd() {
     onAddingChange(false)
-    setNewForm(emptyForm)
-    setNewError(null)
+    resetNewForm()
   }
 
   async function saveNew() {
@@ -123,7 +103,7 @@ export default function CollectionsContent({
       })
       setCols((prev) => [created, ...prev])
       onAddingChange(false)
-      setNewForm(emptyForm)
+      resetNewForm()
     } catch (err) {
       setNewError(err instanceof Error ? err.message : 'Failed to create collection')
     } finally {
@@ -135,20 +115,12 @@ export default function CollectionsContent({
 
   function startEdit(col: AdminCollection) {
     onAddingChange(false)
-    setEditingId(col.id)
-    setEditForm({
+    startEditForm(col.id, {
       displayName: col.displayName,
       slug: col.slug,
       description: col.description ?? '',
       isActive: col.isActive,
     })
-    setEditError(null)
-  }
-
-  function cancelEdit() {
-    setEditingId(null)
-    setEditForm(emptyForm)
-    setEditError(null)
   }
 
   async function saveEdit(id: string) {
@@ -163,7 +135,7 @@ export default function CollectionsContent({
         isActive: editForm.isActive,
       })
       setCols((prev) => prev.map((c) => (c.id === id ? updated : c)))
-      setEditingId(null)
+      cancelEdit()
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Failed to update collection')
     } finally {

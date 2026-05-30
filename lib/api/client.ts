@@ -1,48 +1,52 @@
-import axios from 'axios'
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { parseApiError } from './errors'
 
-// Proxy through Next.js (/api/* → NEXT_PUBLIC_API_URL/*) so login cookies are
-// set on localhost:3000 and the middleware/serverApi can read them via next/headers.
+// Proxy through Next.js (/api/* → NEXT_PUBLIC_API_URL/*) so cookies are set on
+// the same origin and the middleware/serverApi can read them via next/headers.
 const clientApi = axios.create({
   baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 })
 
-const TOKEN_KEY = 'o2shop_access_token'
+// Cookies are sent automatically — no manual Bearer header needed.
 
-export function getClientToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(TOKEN_KEY)
-}
+let isRefreshing = false
+let waitQueue: Array<{ resolve: () => void; reject: (e: unknown) => void }> = []
 
-export function setClientToken(token: string): void {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(TOKEN_KEY, token)
-}
-
-export function clearClientToken(): void {
-  if (typeof window === 'undefined') return
-  localStorage.removeItem(TOKEN_KEY)
-}
-
-// Attach the stored access_token as Authorization: Bearer on every request.
-// The backend JwtStrategy accepts both cookie and Bearer header; Bearer is reliable
-// because it doesn't depend on cookie-parser being installed in NestJS.
-clientApi.interceptors.request.use((config) => {
-  const token = getClientToken()
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
-
-// On 401 clear the token and redirect to login — no refresh attempt.
 clientApi.interceptors.response.use(
   (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      clearClientToken()
-      window.location.href = '/login'
+  async (err: AxiosError) => {
+    const original = err.config as InternalAxiosRequestConfig & { _retried?: boolean }
+
+    if (err.response?.status !== 401 || original._retried) {
+      return Promise.reject(parseApiError(err))
     }
-    return Promise.reject(parseApiError(err))
+
+    original._retried = true
+
+    if (isRefreshing) {
+      return new Promise<void>((resolve, reject) => {
+        waitQueue.push({ resolve, reject })
+      }).then(() => clientApi(original))
+    }
+
+    isRefreshing = true
+    try {
+      // Call /auth/refresh directly (not /api/auth/refresh) so the browser
+      // sends the refresh_token cookie which has Path=/auth/refresh.
+      await axios.post('/auth/refresh', null, { withCredentials: true })
+      isRefreshing = false
+      waitQueue.forEach((q) => q.resolve())
+      waitQueue = []
+      return clientApi(original)
+    } catch {
+      isRefreshing = false
+      waitQueue.forEach((q) => q.reject(new Error('session expired')))
+      waitQueue = []
+      if (typeof window !== 'undefined') window.location.href = '/login'
+      return Promise.reject(parseApiError(err))
+    }
   },
 )
 

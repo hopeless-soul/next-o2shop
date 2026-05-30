@@ -84,6 +84,7 @@ export type ProductVariant = {
   sku: string;
   stock: number;
   available: boolean;
+  inventoryPolicy?: string;
   priceOverride?: number;
   compareAtPrice?: number;
   weight?: number;

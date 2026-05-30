@@ -1,6 +1,7 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminOrders } from '@/lib/api/admin-orders'
+import { getAdminOrders } from '@/lib/api/admin-orders-server'
 import type { AdminOrder, PaymentStatus, FulfillmentStatus } from '@/lib/api/admin-orders'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import OrdersContent from './OrdersContent'
 
 interface OrdersPageProps {
@@ -17,8 +18,7 @@ const FULFILLMENT_STATUSES: FulfillmentStatus[] = [
 
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
   const email = p.email ?? ''
   const paymentStatus = PAYMENT_STATUSES.includes(p.paymentStatus as PaymentStatus)
     ? (p.paymentStatus as PaymentStatus)

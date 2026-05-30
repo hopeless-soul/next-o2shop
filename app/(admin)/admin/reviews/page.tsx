@@ -1,6 +1,7 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getAdminReviews } from '@/lib/api/admin-reviews-server'
 import type { AdminReview, ReviewStatus } from '@/lib/api/admin-reviews'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import ReviewsContent from './ReviewsContent'
 
 interface ReviewsPageProps {
@@ -11,8 +12,7 @@ const STATUS_VALUES: ReviewStatus[] = ['pending', 'approved', 'rejected']
 
 export default async function ReviewsPage({ searchParams }: ReviewsPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
   const search = p.search ?? ''
   const status = STATUS_VALUES.includes(p.status as ReviewStatus)
     ? (p.status as ReviewStatus)

@@ -1,6 +1,7 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { formatDate } from '@/lib/admin/formatters'
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '@/components/admin/DataTable'
@@ -15,14 +16,6 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 function resolveUrl(url: string) {
   if (url.startsWith('http')) return url
   return `${API_BASE}${url}`
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 interface ProductsContentProps {
@@ -52,21 +45,7 @@ export default function ProductsContent({
   sortBy,
   sortOrder,
 }: ProductsContentProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/products?${params.toString()}`)
-  }
+  const updateParams = useAdminUrlParams()
 
   const columns: ColumnDef<AdminProductListItem>[] = [
     {

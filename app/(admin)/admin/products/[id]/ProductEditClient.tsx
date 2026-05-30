@@ -611,8 +611,8 @@ export default function ProductEditClient({
     setSlugManual(true)
   }
 
-  function handleCategoryChange(id: string) {
-    setCategoryId(id)
+  function handleCategoryChange(id: string | null) {
+    setCategoryId(id ?? '')
     setSubCategoryId('')
   }
 
@@ -789,7 +789,7 @@ export default function ProductEditClient({
                 <label className={labelCls}>Subcategory</label>
                 <Select
                   value={subCategoryId}
-                  onValueChange={setSubCategoryId}
+                  onValueChange={(v) => setSubCategoryId(v ?? '')}
                   disabled={!categoryId}
                 >
                   <SelectTrigger className="w-full">
@@ -820,7 +820,7 @@ export default function ProductEditClient({
 
               <div>
                 <label className={labelCls}>Collection</label>
-                <Select value={collectionId} onValueChange={setCollectionId}>
+                <Select value={collectionId} onValueChange={(v) => setCollectionId(v ?? '')}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="No collection">
                       {collections.find(c => c.id === collectionId)?.displayName}

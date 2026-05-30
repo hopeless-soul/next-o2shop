@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { Search, Eye } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { formatDate } from '@/lib/admin/formatters'
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '@/components/admin/DataTable'
@@ -19,14 +21,6 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 
 function resolveUrl(url: string) {
   return url.startsWith('http') ? url : `${API_BASE}${url}`
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 interface ReviewsContentProps {
@@ -47,24 +41,11 @@ export default function ReviewsContent({
   status,
 }: ReviewsContentProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const updateParams = useAdminUrlParams()
 
   const [selectedReview, setSelectedReview] = useState<AdminReview | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<AdminReview | null>(null)
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/reviews?${params.toString()}`)
-  }
 
   function openDrawer(review: AdminReview) {
     setSelectedReview(review)

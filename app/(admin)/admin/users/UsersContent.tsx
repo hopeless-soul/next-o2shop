@@ -1,7 +1,8 @@
 'use client'
 
 import { Search, UserLock, Eye, Trash} from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { formatDate } from '@/lib/admin/formatters'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -24,14 +25,6 @@ interface UsersContentProps {
   createdBefore: string
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
 export default function UsersContent({
   users,
   total,
@@ -44,22 +37,7 @@ export default function UsersContent({
   createdAfter,
   createdBefore,
 }: UsersContentProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    // Reset to page 1 when filters change (unless explicitly setting page)
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/users?${params.toString()}`)
-  }
+  const updateParams = useAdminUrlParams()
 
   const columns: ColumnDef<AdminUser>[] = [
     {

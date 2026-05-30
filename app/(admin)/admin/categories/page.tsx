@@ -1,4 +1,5 @@
 import { getAdminCategories } from '@/lib/api/admin-categories-server'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import CategoriesPageClient from './CategoriesPageClient'
 
 interface CategoriesPageProps {
@@ -7,8 +8,7 @@ interface CategoriesPageProps {
 
 export default async function CategoriesPage({ searchParams }: CategoriesPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
 
   let result = {
     total: 0,

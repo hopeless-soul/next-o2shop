@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useAdminUrlParams } from '@/hooks/useAdminUrlParams'
+import { useInlineEditForm } from '@/hooks/useInlineEditForm'
+import { formatAmount } from '@/lib/admin/formatters'
 import { MoreHorizontal, Pencil, Trash2, Plus, Check, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import AdminPagination from '@/components/admin/AdminPagination'
@@ -40,13 +42,8 @@ const EMPTY_FORM: CreateShippingMethodDto = {
   isActive: true,
 }
 
-function formatPrice(price: number, currency: string) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price)
-}
-
 export default function ShippingContent({ methods, total, page, limit, adding, onAddingChange }: ShippingContentProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const updateParams = useAdminUrlParams()
 
   const [prev, setPrev] = useState(methods)
   const [items, setItems] = useState<ShippingMethod[]>(methods)
@@ -55,45 +52,25 @@ export default function ShippingContent({ methods, total, page, limit, adding, o
     setItems(methods)
   }
 
-  const [newForm, setNewForm] = useState<CreateShippingMethodDto>(EMPTY_FORM)
-  const [newError, setNewError] = useState<string | null>(null)
-  const [isSavingNew, setIsSavingNew] = useState(false)
-
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editForm, setEditForm] = useState<CreateShippingMethodDto>(EMPTY_FORM)
-  const [editError, setEditError] = useState<string | null>(null)
-  const [isSavingEdit, setIsSavingEdit] = useState(false)
-
-  const [deleteTarget, setDeleteTarget] = useState<ShippingMethod | null>(null)
-
-  function updateParams(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === '') {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    if (!('page' in updates)) params.set('page', '1')
-    router.replace(`/admin/shipping?${params.toString()}`)
-  }
+  const {
+    newForm, setNewForm, newError, setNewError, isSavingNew, setIsSavingNew, resetNewForm,
+    editingId, editForm, setEditForm, editError, setEditError, isSavingEdit, setIsSavingEdit,
+    startEdit: startEditForm, cancelEdit,
+    deleteTarget, setDeleteTarget,
+    resetOnAddOpen,
+  } = useInlineEditForm<CreateShippingMethodDto, ShippingMethod>(EMPTY_FORM)
 
   // ── New method ─────────────────────────────────────────────────────────────
 
   const [prevAdding, setPrevAdding] = useState(adding)
   if (prevAdding !== adding) {
     setPrevAdding(adding)
-    if (adding) {
-      setEditingId(null)
-      setNewError(null)
-    }
+    if (adding) resetOnAddOpen()
   }
 
   function cancelAdd() {
     onAddingChange(false)
-    setNewForm(EMPTY_FORM)
-    setNewError(null)
+    resetNewForm()
   }
 
   async function saveNew() {
@@ -109,7 +86,7 @@ export default function ShippingContent({ methods, total, page, limit, adding, o
       })
       setItems((prev) => [created, ...prev])
       onAddingChange(false)
-      setNewForm(EMPTY_FORM)
+      resetNewForm()
     } catch (err) {
       setNewError(err instanceof Error ? err.message : 'Failed to create shipping method')
     } finally {
@@ -121,21 +98,13 @@ export default function ShippingContent({ methods, total, page, limit, adding, o
 
   function startEdit(method: ShippingMethod) {
     onAddingChange(false)
-    setEditingId(method.id)
-    setEditForm({
+    startEditForm(method.id, {
       name: method.name,
       price: method.price,
       currency: method.currency,
       estimatedDays: method.estimatedDays,
       isActive: method.isActive,
     })
-    setEditError(null)
-  }
-
-  function cancelEdit() {
-    setEditingId(null)
-    setEditForm(EMPTY_FORM)
-    setEditError(null)
   }
 
   async function saveEdit(id: string) {
@@ -150,7 +119,7 @@ export default function ShippingContent({ methods, total, page, limit, adding, o
         estimatedDays: editForm.estimatedDays || undefined,
       })
       setItems((prev) => prev.map((m) => (m.id === id ? updated : m)))
-      setEditingId(null)
+      cancelEdit()
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Failed to update shipping method')
     } finally {
@@ -380,7 +349,7 @@ export default function ShippingContent({ methods, total, page, limit, adding, o
                       </div>
                     ) : (
                       <span className="text-[14px] text-[var(--admin-text-primary)]">
-                        {formatPrice(method.price, method.currency)}
+                        {formatAmount(method.price, method.currency)}
                       </span>
                     )}
                   </td>

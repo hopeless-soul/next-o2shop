@@ -1,4 +1,5 @@
 import { getShippingMethods } from '@/lib/api/admin-shipping-server'
+import { parsePagination } from '@/lib/admin/parse-search-params'
 import ShippingPageClient from './ShippingPageClient'
 import type { ShippingMethod } from '@/lib/api/admin-shipping'
 
@@ -8,8 +9,7 @@ interface ShippingPageProps {
 
 export default async function ShippingPage({ searchParams }: ShippingPageProps) {
   const p = await searchParams
-  const page = Math.max(1, Number(p.page ?? '1'))
-  const limit = Math.min(100, Math.max(1, Number(p.limit ?? '20')))
+  const { page, limit } = parsePagination(p)
 
   let result = {
     total: 0,

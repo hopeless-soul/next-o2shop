@@ -16,16 +16,9 @@ import AdminBadge, { roleVariant } from '@/components/admin/AdminBadge'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
 import type { AdminUser } from '@/lib/api/admin-users'
 import { updateUserAction, deleteUserAction } from './actions'
+import { formatDate } from '@/lib/admin/formatters'
 
 const labelCls = 'block text-[12px] font-medium text-[var(--admin-text-secondary)] mb-1'
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
 
 export default function UserEditClient({ user }: { user: AdminUser }) {
   const router = useRouter()
