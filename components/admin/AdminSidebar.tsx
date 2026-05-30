@@ -14,6 +14,8 @@ import {
   Truck,
   History,
   LogOut,
+  Settings,
+  Laptop,
   type LucideIcon,
 } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -53,9 +55,16 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Reviews', href: '/admin/reviews', icon: Star },
       { label: 'Shipping', href: '/admin/shipping', icon: Truck },
-      { label: 'Changes', href: '/admin/changes', icon: History },
     ],
   },
+  {
+    label: 'SYSTEM',
+    items: [
+      { label: 'Changes', href: '/admin/changes', icon: History },
+      { label: 'Website', href: '/admin/frontpage', icon: Laptop },
+      { label: 'Settings', href: '/admin/settings', icon: Settings },
+    ],
+  }
 ]
 
 export interface AdminSidebarUser {

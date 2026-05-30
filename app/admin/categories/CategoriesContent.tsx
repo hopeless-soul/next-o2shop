@@ -43,6 +43,8 @@ interface CategoriesContentProps {
   total: number
   page: number
   limit: number
+  addingCat: boolean
+  onAddingCatChange: (v: boolean) => void
 }
 
 export default function CategoriesContent({
@@ -50,6 +52,8 @@ export default function CategoriesContent({
   total,
   page,
   limit,
+  addingCat,
+  onAddingCatChange,
 }: CategoriesContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -66,7 +70,6 @@ export default function CategoriesContent({
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
 
   // New category inline row
-  const [addingCat, setAddingCat] = useState(false)
   const [newCatForm, setNewCatForm] = useState({ displayName: '', slug: '' })
   const [newCatError, setNewCatError] = useState<string | null>(null)
   const [isSavingCat, setIsSavingCat] = useState(false)
@@ -126,15 +129,18 @@ export default function CategoriesContent({
 
   // ── New category ─────────────────────────────────────────────────────────
 
-  function startAddCat() {
-    setEditingCatId(null)
-    setAddingCat(true)
-    setNewCatForm({ displayName: '', slug: '' })
-    setNewCatError(null)
+  // When the header button activates the inline form, cancel any in-progress edit.
+  const [prevAddingCat, setPrevAddingCat] = useState(addingCat)
+  if (prevAddingCat !== addingCat) {
+    setPrevAddingCat(addingCat)
+    if (addingCat) {
+      setEditingCatId(null)
+      setNewCatError(null)
+    }
   }
 
   function cancelAddCat() {
-    setAddingCat(false)
+    onAddingCatChange(false)
     setNewCatForm({ displayName: '', slug: '' })
     setNewCatError(null)
   }
@@ -149,7 +155,7 @@ export default function CategoriesContent({
         slug: newCatForm.slug || toSlug(newCatForm.displayName),
       })
       setCats((prev) => [{ ...created, subCategories: created.subCategories ?? [] }, ...prev])
-      setAddingCat(false)
+      onAddingCatChange(false)
       setNewCatForm({ displayName: '', slug: '' })
     } catch (err) {
       setNewCatError(err instanceof Error ? err.message : 'Failed to create category')
@@ -161,7 +167,7 @@ export default function CategoriesContent({
   // ── Edit category ─────────────────────────────────────────────────────────
 
   function startEditCat(catId: string, displayName: string, slug: string) {
-    setAddingCat(false)
+    onAddingCatChange(false)
     setEditingCatId(catId)
     setEditCatForm({ displayName, slug })
     setEditCatError(null)
@@ -293,19 +299,6 @@ export default function CategoriesContent({
 
   return (
     <>
-      {/* Toolbar */}
-      <div className="flex justify-end mb-3">
-        <Button
-          type="button"
-          variant="secondary"
-          size="lg"
-          onClick={startAddCat}
-          disabled={addingCat}
-        >
-          New Category <Plus className="size-4" />
-        </Button>
-      </div>
-
       <div className="rounded-[6px] border border-[var(--admin-border)] overflow-hidden bg-[var(--admin-surface)]">
         <table className="w-full border-collapse">
           <thead>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/admin/ui/button'
@@ -19,6 +19,9 @@ export interface FilterOption {
   options?: { label: string; value: string }[]
   value: string
   onChange: (value: string) => void
+  leftIcon?: React.ElementType
+  rightIcon?: React.ElementType
+  width?: number
 }
 
 interface FilterBarProps {
@@ -122,17 +125,27 @@ export default function FilterBar({
         {/* Filter selects */}
         {filters?.map((filter) => {
           const draftValue = filterDrafts[filter.key] ?? ''
+          const LeftIcon = filter.leftIcon
+          const RightIcon = filter.rightIcon
+          const widthStyle = filter.width ? { flex: filter.width } : undefined
+
           if (filter.type === 'date') {
             return (
-              <div key={filter.key} className="flex items-center gap-1.5">
+              <div key={filter.key} className="flex items-center gap-1.5" style={widthStyle}>
                 <span className="text-[12px] text-[var(--admin-text-muted)] shrink-0">{filter.label}</span>
-                <div className="relative w-[130px]">
+                <div className={`relative ${filter.width ? 'flex-1' : 'w-[130px]'}`}>
+                  {LeftIcon && (
+                    <LeftIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-[var(--admin-text-muted)] pointer-events-none" />
+                  )}
                   <input
                     type="date"
                     value={draftValue}
                     onChange={(e) => setFilterDraft(filter.key, e.target.value)}
-                    className="w-full h-9 text-[13px] border border-[var(--admin-border-input)] rounded-[4px] px-2 text-[var(--admin-text-secondary)] bg-transparent focus:outline-none focus:ring-1 focus:ring-[var(--admin-ring)]"
+                    className={`w-full h-9 text-[13px] border border-[var(--admin-border-input)] rounded-[4px] text-[var(--admin-text-secondary)] bg-transparent focus:outline-none focus:ring-1 focus:ring-[var(--admin-ring)] ${LeftIcon ? 'pl-8' : 'px-2'} ${RightIcon ? 'pr-14' : 'pr-2'}`}
                   />
+                  {RightIcon && (
+                    <RightIcon className="absolute right-8 top-1/2 -translate-y-1/2 size-4 text-[var(--admin-text-muted)] pointer-events-none" />
+                  )}
                   {draftValue !== '' && (
                     <button
                       type="button"
@@ -149,14 +162,20 @@ export default function FilterBar({
           }
           if (filter.type === 'text') {
             return (
-              <div key={filter.key} className="relative w-[160px]">
+              <div key={filter.key} className={`relative ${filter.width ? '' : 'w-[160px]'}`} style={widthStyle}>
+                {LeftIcon && (
+                  <LeftIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-[var(--admin-text-muted)] pointer-events-none" />
+                )}
                 <Input
                   type="text"
                   placeholder={filter.label}
                   value={draftValue}
                   onChange={(e) => setFilterDraft(filter.key, e.target.value)}
-                  className="h-9 text-[13px] border-[var(--admin-border-input)] rounded-[4px] pr-7 focus-visible:ring-[var(--admin-ring)]"
+                  className={`h-9 text-[13px] border-[var(--admin-border-input)] rounded-[4px] focus-visible:ring-[var(--admin-ring)] ${LeftIcon ? 'pl-8' : ''} ${RightIcon ? 'pr-14' : 'pr-7'}`}
                 />
+                {RightIcon && (
+                  <RightIcon className="absolute right-8 top-1/2 -translate-y-1/2 size-4 text-[var(--admin-text-muted)] pointer-events-none" />
+                )}
                 {draftValue !== '' && (
                   <button
                     type="button"
@@ -171,17 +190,19 @@ export default function FilterBar({
             )
           }
           return (
-            <div key={filter.key} className="relative w-[160px]">
+            <div key={filter.key} className={`relative ${filter.width ? '' : 'w-[160px]'}`} style={widthStyle}>
               <Select
                 value={draftValue}
                 onValueChange={(v) => setFilterDraft(filter.key, v ?? '')}
               >
                 <SelectTrigger className="w-full">
+                  {LeftIcon && <LeftIcon className="size-4 text-[var(--admin-text-muted)] shrink-0 pointer-events-none" />}
                   <SelectValue className={draftValue ? 'text-admin-text-primary' : 'text-admin-text-muted'}>
                     {draftValue
                       ? (filter.options?.find((o) => o.value === draftValue)?.label ?? draftValue)
                       : filter.label}
                   </SelectValue>
+                  {RightIcon && <RightIcon className="size-4 text-[var(--admin-text-muted)] shrink-0 pointer-events-none" />}
                 </SelectTrigger>
                 <SelectContent>
                   {filter.options?.map((opt) => (

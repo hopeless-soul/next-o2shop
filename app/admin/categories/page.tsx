@@ -1,6 +1,5 @@
-import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getAdminCategories } from '@/lib/api/admin-categories-server'
-import CategoriesContent from './CategoriesContent'
+import CategoriesPageClient from './CategoriesPageClient'
 
 interface CategoriesPageProps {
   searchParams: Promise<Record<string, string>>
@@ -24,17 +23,13 @@ export default async function CategoriesPage({ searchParams }: CategoriesPagePro
   }
 
   return (
-    <>
-      <AdminPageHeader
-        title="Categories"
-        breadcrumb={[{ label: 'Admin', href: '/admin' }, { label: 'Categories' }]}
-      />
-      <CategoriesContent
-        categories={result.data}
-        total={result.total}
-        page={page}
-        limit={limit}
-      />
-    </>
+    // render client component to enable interactivity 
+    // (adding category) without refetching the list
+    <CategoriesPageClient
+      categories={result.data}
+      total={result.total}
+      page={page}
+      limit={limit}
+    />
   )
 }
