@@ -91,6 +91,8 @@ export default function UsersContent({
     {
       id: 'displayName',
       header: 'Display Name',
+      accessorKey: 'displayName',
+      meta: { truncate: true },
       cell: ({ row }) => (
         <span className="text-[14px] text-[var(--admin-text-secondary)]">
           {row.original.displayName ?? <span className="text-[var(--admin-text-muted)]">—</span>}

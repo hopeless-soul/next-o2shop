@@ -130,14 +130,13 @@ export default function ReviewsContent({
       id: 'content',
       header: 'Content',
       size: 120,
-      cell: ({ row }) => {
-        const text = row.original.content
-        return (
-          <span className="text-[13px] text-[var(--admin-text-secondary)]">
-            {text.length > 100 ? `${text.slice(0, 100)}…` : text}
-          </span>
-        )
-      },
+      accessorKey: 'content',
+      meta: { truncate: true },
+      cell: ({ row }) => (
+        <span className="text-[13px] text-[var(--admin-text-secondary)]">
+          {row.original.content}
+        </span>
+      ),
     },
     {
       id: 'photos',

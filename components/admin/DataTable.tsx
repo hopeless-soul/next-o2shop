@@ -4,11 +4,19 @@ import { useState, useRef } from 'react'
 import {
   type ColumnDef,
   type Header,
+  type RowData,
   flexRender,
   getCoreRowModel,
   useReactTable,
   type SortingState,
 } from '@tanstack/react-table'
+
+declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    truncate?: boolean
+  }
+}
 import { ArrowUp, ArrowDown, ArrowUpDown, PackageOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -246,15 +254,24 @@ export default function DataTable<T>({
                 )}
                 style={{ minHeight: 'var(--admin-table-row-h)' }}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]"
-                    style={{ width: cell.column.getSize() }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const shouldTruncate = cell.column.columnDef.meta?.truncate
+                  const rawValue = cell.getValue()
+                  const titleText = shouldTruncate && rawValue != null ? String(rawValue) : undefined
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className="px-4 py-3 text-[14px] text-[var(--admin-text-primary)]"
+                      style={{ width: cell.column.getSize() }}
+                    >
+                      {shouldTruncate ? (
+                        <div className="truncate w-full" title={titleText}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </div>
+                      ) : flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           )}

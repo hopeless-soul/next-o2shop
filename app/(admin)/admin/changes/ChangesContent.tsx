@@ -112,12 +112,14 @@ export default function ChangesContent({
       id: 'field',
       header: 'Field',
       size: 130,
+      accessorKey: 'field',
+      meta: { truncate: true },
       cell: ({ row }) => {
         const f = row.original.field
         if (!f) return <span className="text-[var(--admin-text-muted)]">—</span>
         return (
           <span className="text-[13px] font-mono text-[var(--admin-text-secondary)]">
-            {String(f)}
+            {f}
           </span>
         )
       },

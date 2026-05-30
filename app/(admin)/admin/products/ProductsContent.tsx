@@ -123,6 +123,8 @@ export default function ProductsContent({
     {
       id: 'category',
       header: 'Category',
+      accessorFn: (row) => row.category.displayName,
+      meta: { truncate: true },
       cell: ({ row }) => (
         <span className="text-[14px] text-[var(--admin-text-secondary)]">
           {row.original.category.displayName}
