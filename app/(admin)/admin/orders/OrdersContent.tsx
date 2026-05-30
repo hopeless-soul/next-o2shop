@@ -1,6 +1,6 @@
 'use client'
 
-import { Search } from 'lucide-react'
+import { Search, CreditCard, Truck } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -9,6 +9,7 @@ import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge, { fulfillmentVariant, paymentVariant } from '@/components/admin/AdminBadge'
 import type { AdminOrder } from '@/lib/api/admin-orders'
+
 
 interface OrdersContentProps {
   orders: AdminOrder[]
@@ -145,13 +146,15 @@ export default function OrdersContent({
             label: 'Search by email…',
             type: 'text',
             leftIcon: Search,
-            width: 3,
+            width: 2,
             value: email,
             onChange: (v) => updateParams({ email: v }),
           },
           {
             key: 'fulfillmentStatus',
             label: 'All Fulfillments',
+            width: 2,
+            leftIcon: Truck,
             value: fulfillmentStatus,
             onChange: (v) => updateParams({ fulfillmentStatus: v }),
             options: [
@@ -164,6 +167,8 @@ export default function OrdersContent({
           {
             key: 'paymentStatus',
             label: 'All Payments',
+            width: 2,
+            leftIcon: CreditCard,
             value: paymentStatus,
             onChange: (v) => updateParams({ paymentStatus: v }),
             options: [

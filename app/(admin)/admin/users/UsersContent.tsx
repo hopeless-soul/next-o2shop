@@ -1,6 +1,6 @@
 'use client'
 
-import { Search } from 'lucide-react'
+import { Search, UserLock, Eye, Trash} from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -138,13 +138,15 @@ export default function UsersContent({
             label: 'Search users…',
             type: 'text',
             leftIcon: Search,
-            width: 3,
+            width: 2,
             value: search,
             onChange: (v) => updateParams({ search: v }),
           },
           {
             key: 'role',
             label: 'All Roles',
+            leftIcon: UserLock,
+            width: 1, 
             value: role,
             onChange: (v) => updateParams({ role: v }),
             options: [
@@ -155,6 +157,8 @@ export default function UsersContent({
           {
             key: 'isActive',
             label: 'All Active',
+            leftIcon: Eye,
+            width: 2,
             value: isActive === true ? 'true' : isActive === false ? 'false' : '',
             onChange: (v) => updateParams({ isActive: v }),
             options: [
@@ -165,6 +169,8 @@ export default function UsersContent({
           {
             key: 'isDeleted',
             label: 'All Status',
+            leftIcon: Trash,
+            width: 2,
             value: isDeleted === true ? 'true' : isDeleted === false ? 'false' : '',
             onChange: (v) => updateParams({ isDeleted: v }),
             options: [
@@ -176,6 +182,7 @@ export default function UsersContent({
             key: 'createdAfter',
             label: 'From',
             type: 'date',
+            width: 1,
             value: createdAfter,
             onChange: (v) => updateParams({ createdAfter: v }),
           },
@@ -183,6 +190,7 @@ export default function UsersContent({
             key: 'createdBefore',
             label: 'To',
             type: 'date',
+            width: 1,
             value: createdBefore,
             onChange: (v) => updateParams({ createdBefore: v }),
           },
