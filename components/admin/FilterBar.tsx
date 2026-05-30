@@ -98,10 +98,10 @@ export default function FilterBar({
     <div className={`flex justify-between items-start gap-2 mb-4${className ? ` ${className}` : ''}`}>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-wrap items-center gap-2"
+        className="flex items-center gap-2 grow min-w-0"
       >
         {/* Search input */}
-        <div className="relative w-[280px]">
+        <div className="relative w-[280px] shrink-0">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-[var(--admin-text-muted)] pointer-events-none" />
           <Input
             type="text"
@@ -122,12 +122,15 @@ export default function FilterBar({
           )}
         </div>
 
-        {/* Filter selects */}
+        {/* Filter chips */}
+        <div className="flex flex-1 min-w-0 flex-wrap items-center gap-2">
         {filters?.map((filter) => {
           const draftValue = filterDrafts[filter.key] ?? ''
           const LeftIcon = filter.leftIcon
           const RightIcon = filter.rightIcon
-          const widthStyle = filter.width ? { flex: filter.width } : undefined
+          const widthStyle = filter.width
+            ? { flex: `0 0 calc(${filter.width} / 12 * 100%)` }
+            : undefined
 
           if (filter.type === 'date') {
             return (
@@ -241,6 +244,7 @@ export default function FilterBar({
             Clear filters
           </button>
         )}
+        </div>
       </form>
 
       <Button

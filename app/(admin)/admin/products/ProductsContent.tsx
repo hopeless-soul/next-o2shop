@@ -168,7 +168,7 @@ export default function ProductsContent({
             key: 'status',
             label: 'All Status',
             leftIcon: Eye,
-            width: 6,
+            width: 1,
             value: includeDeleted ? 'deleted' : isPublished === true ? 'true' : isPublished === false ? 'false' : '',
             onChange: (v) => {
               if (v === 'deleted') {
@@ -185,17 +185,19 @@ export default function ProductsContent({
           },
           {
             key: 'categorySlug',
-            label: 'Category slug',
+            label: 'Category slug...',
             type: 'text',
-            leftIcon: Tag,
+            leftIcon: Search,
+            width: 2,
             value: categorySlug,
             onChange: (v) => updateParams({ categorySlug: v }),
           },
           {
             key: 'collectionSlug',
-            label: 'Collection slug',
+            label: 'Collection slug...',
             type: 'text',
-            leftIcon: Tag,
+            width: 2,
+            leftIcon: Search,
             value: collectionSlug,
             onChange: (v) => updateParams({ collectionSlug: v }),
           },
