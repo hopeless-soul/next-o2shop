@@ -1,6 +1,5 @@
-import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { getAdminCollections } from '@/lib/api/admin-collections-server'
-import CollectionsContent from './CollectionsContent'
+import CollectionsPageClient from './CollectionsPageClient'
 
 interface CollectionsPageProps {
   searchParams: Promise<Record<string, string>>
@@ -24,17 +23,11 @@ export default async function CollectionsPage({ searchParams }: CollectionsPageP
   }
 
   return (
-    <>
-      <AdminPageHeader
-        title="Collections"
-        breadcrumb={[{ label: 'Admin', href: '/admin' }, { label: 'Collections' }]}
-      />
-      <CollectionsContent
-        collections={result.data}
-        total={result.total}
-        page={page}
-        limit={limit}
-      />
-    </>
+    <CollectionsPageClient
+      collections={result.data}
+      total={result.total}
+      page={page}
+      limit={limit}
+    />
   )
 }

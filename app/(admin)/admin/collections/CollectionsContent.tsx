@@ -46,6 +46,8 @@ interface CollectionsContentProps {
   total: number
   page: number
   limit: number
+  adding: boolean
+  onAddingChange: (v: boolean) => void
 }
 
 export default function CollectionsContent({
@@ -53,6 +55,8 @@ export default function CollectionsContent({
   total,
   page,
   limit,
+  adding,
+  onAddingChange,
 }: CollectionsContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -64,7 +68,6 @@ export default function CollectionsContent({
     setCols(collections)
   }
 
-  const [adding, setAdding] = useState(false)
   const [newForm, setNewForm] = useState<CollectionForm>(emptyForm)
   const [newError, setNewError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -90,15 +93,17 @@ export default function CollectionsContent({
 
   // ── New collection ──────────────────────────────────────────────────────
 
-  function startAdd() {
-    setEditingId(null)
-    setAdding(true)
-    setNewForm(emptyForm)
-    setNewError(null)
+  const [prevAdding, setPrevAdding] = useState(adding)
+  if (prevAdding !== adding) {
+    setPrevAdding(adding)
+    if (adding) {
+      setEditingId(null)
+      setNewError(null)
+    }
   }
 
   function cancelAdd() {
-    setAdding(false)
+    onAddingChange(false)
     setNewForm(emptyForm)
     setNewError(null)
   }
@@ -115,7 +120,7 @@ export default function CollectionsContent({
         isActive: newForm.isActive,
       })
       setCols((prev) => [created, ...prev])
-      setAdding(false)
+      onAddingChange(false)
       setNewForm(emptyForm)
     } catch (err) {
       setNewError(err instanceof Error ? err.message : 'Failed to create collection')
@@ -127,7 +132,7 @@ export default function CollectionsContent({
   // ── Edit collection ─────────────────────────────────────────────────────
 
   function startEdit(col: AdminCollection) {
-    setAdding(false)
+    onAddingChange(false)
     setEditingId(col.id)
     setEditForm({
       displayName: col.displayName,
@@ -166,19 +171,6 @@ export default function CollectionsContent({
 
   return (
     <>
-      {/* Toolbar */}
-      <div className="flex justify-end mb-3">
-        <Button
-          type="button"
-          variant="secondary"
-          size="lg"
-          onClick={startAdd}
-          disabled={adding}
-        >
-          New Collection <Plus className="size-4" />
-        </Button>
-      </div>
-
       <div className="rounded-[6px] border border-[var(--admin-border)] overflow-hidden bg-[var(--admin-surface)]">
         <table className="w-full border-collapse">
           <thead>
