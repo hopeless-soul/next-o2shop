@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import axios from "axios";
 import { Button } from "@/components/ui/Button";
 import { login } from "@/lib/api/auth-client";
 import { ApiError } from "@/lib/api/errors";
@@ -13,6 +14,17 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+  // Silently re-authenticate if a valid refresh_token is already in the browser.
+  // The browser sends refresh_token here because the POST goes to /auth/refresh
+  // which matches the cookie's Path=/auth/refresh attribute.
+  useEffect(() => {
+    axios
+      .post("/auth/refresh", null, { withCredentials: true })
+      .then(() => router.replace("/account"))
+      .catch(() => setIsCheckingSession(false));
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,6 +44,8 @@ export default function LoginForm() {
       setIsPending(false);
     }
   }
+
+  if (isCheckingSession) return null;
 
   return (
     <div

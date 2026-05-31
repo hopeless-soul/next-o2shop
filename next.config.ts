@@ -6,13 +6,6 @@ const { protocol, hostname, port } = new URL(apiUrl);
 const nextConfig: NextConfig = {
   async rewrites() {
     return [
-      // Dedicated rewrite so the browser calls /auth/refresh at the exact path
-      // that matches the refresh_token cookie's Path=/auth/refresh scope.
-      // Must come before the /api/* catch-all.
-      {
-        source: '/auth/refresh',
-        destination: `${apiUrl}/auth/refresh`,
-      },
       // Proxy client-side API calls through Next.js so cookies stay same-origin
       {
         source: '/api/:path*',

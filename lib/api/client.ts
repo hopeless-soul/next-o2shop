@@ -40,8 +40,10 @@ clientApi.interceptors.response.use(
 
     isRefreshing = true
     try {
-      // Call /auth/refresh directly (not /api/auth/refresh) so the browser
-      // sends the refresh_token cookie which has Path=/auth/refresh.
+      // Call /auth/refresh (not /api/auth/refresh): the backend sets
+      // refresh_token with Path=/auth/refresh so the browser only sends it
+      // for this exact path. The Route Handler at app/auth/refresh/route.ts
+      // reads the cookie and proxies to the backend.
       await axios.post('/auth/refresh', null, { withCredentials: true })
       isRefreshing = false
       waitQueue.forEach((q) => q.resolve())

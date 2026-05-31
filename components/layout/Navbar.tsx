@@ -127,7 +127,7 @@ export default function Navbar({
                 src="/logo.svg"
                 alt="O2Shop"
                 width={32}
-                height={80}
+                height={42}
                 priority
                 style={{
                   filter: logoFilter,
