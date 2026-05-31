@@ -1,5 +1,6 @@
+import 'client-only'
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
-import { parseApiError } from './errors'
+import { parseApiError, AuthError } from './errors'
 
 // Proxy through Next.js (/api/* → NEXT_PUBLIC_API_URL/*) so cookies are set on
 // the same origin and the middleware/serverApi can read them via next/headers.
@@ -19,7 +20,13 @@ clientApi.interceptors.response.use(
   async (err: AxiosError) => {
     const original = err.config as InternalAxiosRequestConfig & { _retried?: boolean }
 
-    if (err.response?.status !== 401 || original._retried) {
+    // Skip refresh for non-401s, already-retried requests, and logout calls
+    // (logout with expired token should just fail, not extend the session).
+    if (
+      err.response?.status !== 401 ||
+      original._retried ||
+      original.url?.includes('/auth/logout')
+    ) {
       return Promise.reject(parseApiError(err))
     }
 
@@ -42,7 +49,9 @@ clientApi.interceptors.response.use(
       return clientApi(original)
     } catch {
       isRefreshing = false
-      waitQueue.forEach((q) => q.reject(new Error('session expired')))
+      waitQueue.forEach((q) =>
+        q.reject(new AuthError('Session expired', ['Session expired'], 'Unauthorized')),
+      )
       waitQueue = []
       if (typeof window !== 'undefined') window.location.href = '/login'
       return Promise.reject(parseApiError(err))

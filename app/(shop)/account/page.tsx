@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/api/auth";
 import { listMyOrders } from "@/lib/api/orders";
-import { listAddresses } from "@/lib/api/addresses";
+import { listAddresses } from "@/lib/api/addresses-server";
 import { AuthError } from "@/lib/api/errors";
 import OrderStatusBadge from "@/components/account/OrderStatusBadge";
 import PaymentStatusBadge from "@/components/account/PaymentStatusBadge";

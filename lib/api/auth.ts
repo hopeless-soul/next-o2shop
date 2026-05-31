@@ -1,5 +1,4 @@
 import { cache } from 'react'
-import clientApi from './client'
 import serverApi from './server'
 
 export type UserRole = 'regular' | 'admin'
@@ -13,22 +12,6 @@ export type User = {
   role: UserRole
   isActive: boolean
   createdAt: string
-}
-
-export type LoginPayload = { email: string; password: string }
-export type RegisterPayload = { email: string; password: string }
-
-export async function login(payload: LoginPayload): Promise<void> {
-  await clientApi.post('/auth/login', payload)
-}
-
-export async function register(payload: RegisterPayload): Promise<User> {
-  const res = await clientApi.post<User>('/auth/register', payload)
-  return res.data
-}
-
-export async function logout(): Promise<void> {
-  await clientApi.delete('/auth/logout')
 }
 
 export const getMe = cache(async function getMe(): Promise<User> {

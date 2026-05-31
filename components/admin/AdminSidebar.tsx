@@ -86,8 +86,11 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
   }
 
   async function handleLogout() {
-    await logout()
-    router.push('/login')
+    try {
+      await logout()
+    } finally {
+      router.push('/login')
+    }
   }
 
   const initials = user.email.slice(0, 2).toUpperCase()

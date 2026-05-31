@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/api/products";
-import { listReviewsByProduct } from "@/lib/api/reviews";
+import { listReviewsByProduct } from "@/lib/api/reviews-server";
 import { NotFoundError } from "@/lib/api/errors";
 import ProductDetailClient from "./ProductDetailClient";
 
