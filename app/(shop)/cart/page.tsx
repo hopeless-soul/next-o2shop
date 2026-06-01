@@ -84,7 +84,7 @@ export default function CartPage() {
                   <td className="py-5 pr-6">
                     <div className="flex items-center gap-4">
                       {item.imageUrl && (
-                        <div className="w-16 h-16 relative flex-shrink-0 overflow-hidden bg-gray-100">
+                        <div className="w-16 h-16 relative flex-shrink-0 overflow-hidden" style={{ backgroundColor: "var(--color-muted)" }}>
                           <Image
                             src={item.imageUrl}
                             alt={item.productName}
@@ -130,7 +130,7 @@ export default function CartPage() {
                         onClick={() =>
                           updateQuantity(item.variantId, item.quantity - 1)
                         }
-                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center transition-colors hover:opacity-50"
                         aria-label="Decrease quantity"
                       >
                         <Minus size={12} />
@@ -145,7 +145,7 @@ export default function CartPage() {
                         onClick={() =>
                           updateQuantity(item.variantId, item.quantity + 1)
                         }
-                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center transition-colors hover:opacity-50"
                         aria-label="Increase quantity"
                       >
                         <Plus size={12} />
