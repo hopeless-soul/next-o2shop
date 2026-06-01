@@ -51,3 +51,4 @@ CLAUDE*
 /specs/screenshots/
 /specs/*
 !/specs/*.md
+.superpowers

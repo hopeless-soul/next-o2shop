@@ -158,6 +158,7 @@ export default function CheckoutShell({
                   Shipping
                 </span>
                 <span
+                  suppressHydrationWarning
                   className="font-sans text-[13px]"
                   style={{ color: "var(--color-foreground)" }}
                 >

@@ -1,7 +1,7 @@
 // app/(shop)/checkout/payment/page.tsx
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { loadStripe } from "@stripe/stripe-js"
 import {
@@ -14,6 +14,7 @@ import { useCart } from "@/lib/cart/CartContext"
 import { useCheckout } from "@/lib/checkout/CheckoutContext"
 import axios from "axios"
 import clientApi from "@/lib/api/client"
+import { ApiError } from "@/lib/api/errors"
 import type { Order } from "@/lib/types"
 
 const stripePromise = loadStripe(
@@ -82,10 +83,15 @@ function PaymentForm() {
       clearCart()
       clearCheckout()
       router.push(`/checkout/confirmation?order=${res.data.orderNumber}`)
-    } catch {
-      setError(
-        "Payment succeeded but order placement failed. Please contact support.",
-      )
+    } catch (err) {
+      const msg =
+        err instanceof ApiError && err.messages.length > 0
+          ? err.messages.join(", ")
+          : err instanceof Error
+            ? err.message
+            : "Payment succeeded but order placement failed. Please contact support."
+      console.error("Order placement failed:", err)
+      setError(msg)
       setProcessing(false)
     }
   }
@@ -136,8 +142,12 @@ export default function PaymentPage() {
   const { subtotal } = useCart()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const intentCreated = useRef(false)
 
   useEffect(() => {
+    if (intentCreated.current) return
+    intentCreated.current = true
+
     // Guard: shipping step must be complete
     if (!checkout.shippingMethodId) {
       router.replace("/checkout/shipping")
