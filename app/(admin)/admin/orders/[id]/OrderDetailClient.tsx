@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
 import FormCard from '@/components/admin/FormCard'
 import {
   Select,
@@ -117,7 +116,7 @@ export default function OrderDetailClient({ order }: OrderDetailClientProps) {
               <span className="text-[12px] text-[var(--admin-text-muted)] text-right">Total</span>
               <div className="col-span-5 h-px bg-[var(--admin-border)]" />
               {order.items.map((item) => (
-                <React.Fragment key={item.id}>
+                <Fragment key={item.id}>
                   <span className="text-[14px] text-[var(--admin-text-primary)]">{item.productName}</span>
                   <span className="text-[14px] text-[var(--admin-text-secondary)]">{item.productSku}</span>
                   <span className="text-[14px] text-[var(--admin-text-primary)] text-right">{item.quantity}</span>
@@ -127,7 +126,7 @@ export default function OrderDetailClient({ order }: OrderDetailClientProps) {
                   <span className="text-[14px] font-medium text-[var(--admin-text-primary)] text-right">
                     {formatAmount(item.total, item.productCurrency)}
                   </span>
-                </React.Fragment>
+                </Fragment>
               ))}
             </div>
           </div>
