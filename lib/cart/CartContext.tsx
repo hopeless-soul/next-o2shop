@@ -5,7 +5,9 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
+  useRef,
   type ReactNode,
 } from "react"
 
@@ -95,32 +97,45 @@ const STORAGE_KEY = "o2shop_cart"
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, derive([]))
+  const isHydrated = useRef(false)
 
+  // hydration effect — runs first, sets flag
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) dispatch({ type: "HYDRATE", items: JSON.parse(stored) })
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed)) {
+          dispatch({ type: "HYDRATE", items: parsed })
+        }
+      }
     } catch {
       // ignore corrupt storage
     }
+    isHydrated.current = true
   }, [])
 
+  // write effect — skips the initial empty-cart write
   useEffect(() => {
+    if (!isHydrated.current) return
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
   }, [state.items])
 
+  const value = useMemo(
+    () => ({
+      ...state,
+      addItem: (item: CartItem) => dispatch({ type: "ADD_ITEM", payload: item }),
+      updateQuantity: (variantId: string, qty: number) =>
+        dispatch({ type: "UPDATE_QUANTITY", variantId, qty }),
+      removeItem: (variantId: string) =>
+        dispatch({ type: "REMOVE_ITEM", variantId }),
+      clearCart: () => dispatch({ type: "CLEAR_CART" }),
+    }),
+    [state],
+  )
+
   return (
-    <CartContext.Provider
-      value={{
-        ...state,
-        addItem: (item) => dispatch({ type: "ADD_ITEM", payload: item }),
-        updateQuantity: (variantId, qty) =>
-          dispatch({ type: "UPDATE_QUANTITY", variantId, qty }),
-        removeItem: (variantId) =>
-          dispatch({ type: "REMOVE_ITEM", variantId }),
-        clearCart: () => dispatch({ type: "CLEAR_CART" }),
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   )
