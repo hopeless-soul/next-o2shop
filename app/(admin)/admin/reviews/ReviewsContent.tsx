@@ -83,7 +83,7 @@ export default function ReviewsContent({
     {
       id: 'product',
       header: 'Product',
-      size: 120,
+      size: 160,
       cell: ({ row }) => (
         <Link
           href={`/admin/products/${row.original.productId}`}
@@ -97,7 +97,7 @@ export default function ReviewsContent({
     {
       id: 'rating',
       header: 'Rating',
-      size: 60,
+      size: 70,
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <StarRating rating={row.original.rating / 2} max={5} size={13} />

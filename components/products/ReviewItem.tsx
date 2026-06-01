@@ -55,7 +55,9 @@ export default function ReviewItem({ review }: ReviewItemProps) {
             letterSpacing: "0.3px",
             color: "#ffffff",
             backgroundColor: "rgb(156,156,156)",
-            padding: "3px 6px",
+            padding: "1px 6px",
+            margin: "2px 0",
+            borderRadius: "4px",
           }}
         >
           Verified
