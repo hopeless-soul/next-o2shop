@@ -6,13 +6,13 @@ import ProductCardSkeleton from "@/components/products/ProductCardSkeleton";
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string }>;
+  searchParams: Promise<{ category?: string; subcategory?: string; q?: string, sale?: boolean }>;
 }) {
-  const { category, q } = await searchParams;
+  const { category, subcategory, q, sale } = await searchParams;
 
   let result: Awaited<ReturnType<typeof listProducts>> | null = null;
   try {
-    result = await listProducts({ categorySlug: category, search: q, limit: 20 });
+    result = await listProducts({ categorySlug: category, subCategorySlug: subcategory, onSale: sale, search: q, limit: 20 });
   } catch {
     // API unreachable — show empty grid
   }
@@ -22,9 +22,13 @@ export default async function ProductsPage({
 
   const pageTitle = category
     ? category.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-    : q
-      ? `Search: "${q}"`
-      : "All Products";
+    : subcategory
+      ? subcategory.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+      : q
+        ? `Search: "${q}"`
+        : sale
+          ? "On Sale"
+          : "All Products";
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)" }}>
@@ -68,41 +72,6 @@ export default async function ProductsPage({
           {total} products
         </span>
       </div>
-
-      {/* Filter strip placeholder - Depriicated */}
-      {/* <div
-        className="flex items-center gap-3 py-4 border-b overflow-x-auto"
-        style={{
-          paddingLeft: "var(--header-px-desktop)",
-          paddingRight: "var(--header-px-desktop)",
-          borderColor: "var(--color-border)",
-        }}
-      >
-        {[
-          { label: "All", slug: undefined },
-          { label: "Beanies", slug: "beanies" },
-          { label: "Snapbacks", slug: "snapbacks" },
-          { label: "Bucket Hats", slug: "bucket-hats" },
-          { label: "Dad Caps", slug: "dad-caps" },
-        ].map((f) => {
-          const active = f.slug ? category === f.slug : !category;
-          return (
-            <Link
-              key={f.label}
-              href={f.slug ? `/products?category=${f.slug}` : "/products"}
-              className="flex-shrink-0 font-sans text-[12px] uppercase tracking-widest px-4 py-2 border hover:opacity-70"
-              style={{
-                borderColor: active ? "var(--color-foreground-dark)" : "var(--color-border)",
-                backgroundColor: active ? "var(--color-foreground-dark)" : "transparent",
-                color: active ? "var(--color-on-dark)" : "var(--color-foreground)",
-                transition: "var(--transition-base)",
-              }}
-            >
-              {f.label}
-            </Link>
-          );
-        })}
-      </div> */}
 
       {/* Product grid */}
       <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: "2px", padding: "2px" }}>

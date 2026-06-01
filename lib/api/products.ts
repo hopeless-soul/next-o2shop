@@ -17,6 +17,7 @@ export type ProductListParams = {
   search?: string
   minPrice?: number
   maxPrice?: number
+  onSale?: boolean
   sortBy?: 'createdAt' | 'basePrice' | 'name'
   sortOrder?: 'asc' | 'desc'
 }

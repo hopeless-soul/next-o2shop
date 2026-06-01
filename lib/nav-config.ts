@@ -29,9 +29,10 @@ export const NAV_CATEGORIES: NavCategory[] = [
     displayName: "Tops",
     href: "/products?category=tops",
     subCategories: [
-      { slug: "tshirts", displayName: "T-Shirts", href: "/products?category=tshirts" },
-      { slug: "hoodies", displayName: "Hoodies",  href: "/products?category=hoodies" },
-      { slug: "jackets", displayName: "Jackets",  href: "/products?category=jackets" },
+      { slug: "tees", displayName: "Tees", href: "/products?subcategory=tees" },
+      { slug: "hoodies", displayName: "Hoodies",  href: "/products?subcategory=hoodies" },
+      { slug: "shirts", displayName: "Shirts",  href: "/products?subcategory=shirts" },
+      { slug: "jackets", displayName: "Jackets",  href: "/products?subcategory=jackets" },
     ],
   },
   {
@@ -39,9 +40,6 @@ export const NAV_CATEGORIES: NavCategory[] = [
     displayName: "Bottoms",
     href: "/products?category=bottoms",
     subCategories: [
-      { slug: "tshirts", displayName: "T-Shirts", href: "/products?category=tshirts" },
-      { slug: "hoodies", displayName: "Hoodies",  href: "/products?category=hoodies" },
-      { slug: "jackets", displayName: "Jackets",  href: "/products?category=jackets" },
     ],
   },
   {
@@ -49,9 +47,9 @@ export const NAV_CATEGORIES: NavCategory[] = [
     displayName: "Accessories",
     href: "/products?category=accessories",
     subCategories: [
-      { slug: "hats", displayName: "Hats", href: "/products?category=hats" },
-      { slug: "bags", displayName: "Bags",  href: "/products?category=bags" },
-      { slug: "jewellery", displayName: "Jewellery",  href: "/products?category=jewellery" },
+      { slug: "hats", displayName: "Hats", href: "/products?subcategory=hats" },
+      { slug: "bags", displayName: "Bags",  href: "/products?subcategory=bags" },
+      { slug: "jewellery", displayName: "Jewellery",  href: "/products?subcategory=jewellery" },
     ],  
   },
 ];
