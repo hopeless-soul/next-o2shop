@@ -74,13 +74,31 @@ export default async function ProductsPage({
       </div>
 
       {/* Product grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: "2px", padding: "2px" }}>
-        {result === null
-          ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-          : products.length > 0
-            ? products.map((product) => <ProductCard key={product.id} product={product} />)
-            : Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
-      </div>
+      {result !== null && products.length === 0 ? (
+        <div
+          className="flex flex-col items-center justify-center py-24 gap-3"
+          style={{ paddingLeft: "var(--header-px-desktop)", paddingRight: "var(--header-px-desktop)" }}
+        >
+          <p
+            className="text-[28px] uppercase tracking-[0.56px] leading-none"
+            style={{ fontFamily: "var(--font-primary)", color: "var(--color-foreground-dark)" }}
+          >
+            No products found
+          </p>
+          <p
+            className="text-[13px]"
+            style={{ fontFamily: "var(--font-secondary)", color: "var(--color-foreground-subtle)" }}
+          >
+            Try adjusting your search or filters.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4" style={{ gap: "2px", padding: "2px" }}>
+          {result === null
+            ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : products.map((product) => <ProductCard key={product.id} product={product} />)}
+        </div>
+      )}
     </div>
   );
 }
