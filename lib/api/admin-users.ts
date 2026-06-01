@@ -44,6 +44,9 @@ export type CreateAdminUserDto = {
 }
 
 export type UpdateAdminUserDto = {
+  email?: string
+  displayName?: string
+  password?: string
   role?: 'regular' | 'admin'
   isActive?: boolean
   resetTokenVersion?: boolean

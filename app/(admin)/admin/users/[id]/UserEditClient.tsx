@@ -19,25 +19,56 @@ import { updateUserAction, deleteUserAction } from './actions'
 import { formatDate } from '@/lib/admin/formatters'
 
 const labelCls = 'block text-[12px] font-medium text-[var(--admin-text-secondary)] mb-1'
+const inputCls =
+  'h-9 px-2.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30 w-full'
 
 export default function UserEditClient({ user }: { user: AdminUser }) {
   const router = useRouter()
 
+  // Profile
+  const [email, setEmail] = useState(user.email)
+  const [displayName, setDisplayName] = useState(user.displayName ?? '')
+  const [password, setPassword] = useState('')
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileError, setProfileError] = useState<string | null>(null)
+  const [profileSuccess, setProfileSuccess] = useState(false)
+
+  // Permissions
   const [role, setRole] = useState<'regular' | 'admin'>(user.role)
   const [isActive, setIsActive] = useState(user.isActive)
   const [resetTokens, setResetTokens] = useState(false)
-
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [permSaving, setPermSaving] = useState(false)
+  const [permError, setPermError] = useState<string | null>(null)
+  const [permSuccess, setPermSuccess] = useState(false)
 
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleProfileSave(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true)
-    setSaveError(null)
-    setSaveSuccess(false)
+    setProfileSaving(true)
+    setProfileError(null)
+    setProfileSuccess(false)
+    try {
+      await updateUserAction(user.id, {
+        email: email !== user.email ? email : undefined,
+        displayName: displayName !== (user.displayName ?? '') ? displayName || undefined : undefined,
+        password: password || undefined,
+      })
+      setPassword('')
+      setProfileSuccess(true)
+      setTimeout(() => setProfileSuccess(false), 3000)
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Failed to save changes.')
+    } finally {
+      setProfileSaving(false)
+    }
+  }
+
+  async function handlePermSave(e: React.FormEvent) {
+    e.preventDefault()
+    setPermSaving(true)
+    setPermError(null)
+    setPermSuccess(false)
     try {
       await updateUserAction(user.id, {
         role,
@@ -45,12 +76,12 @@ export default function UserEditClient({ user }: { user: AdminUser }) {
         ...(resetTokens ? { resetTokenVersion: true } : {}),
       })
       setResetTokens(false)
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
+      setPermSuccess(true)
+      setTimeout(() => setPermSuccess(false), 3000)
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save changes.')
+      setPermError(err instanceof Error ? err.message : 'Failed to save changes.')
     } finally {
-      setSaving(false)
+      setPermSaving(false)
     }
   }
 
@@ -63,20 +94,10 @@ export default function UserEditClient({ user }: { user: AdminUser }) {
 
   return (
     <div className="space-y-4 max-w-2xl">
-      {/* ── Account Info (read-only) ── */}
+      {/* ── Account Info (read-only metadata) ── */}
       <FormCard title="Account Info">
         <div className="space-y-4 mt-3">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className={labelCls}>Email</p>
-              <p className="text-[14px] text-[var(--admin-text-primary)] break-all">{user.email}</p>
-            </div>
-            <div>
-              <p className={labelCls}>Display Name</p>
-              <p className="text-[14px] text-[var(--admin-text-primary)]">
-                {user.displayName ?? <span className="text-[var(--admin-text-muted)]">—</span>}
-              </p>
-            </div>
             <div>
               <p className={labelCls}>Member Since</p>
               <p className="text-[14px] text-[var(--admin-text-secondary)]">{formatDate(user.createdAt)}</p>
@@ -100,8 +121,64 @@ export default function UserEditClient({ user }: { user: AdminUser }) {
         </div>
       </FormCard>
 
+      {/* ── Profile (editable) ── */}
+      <form onSubmit={handleProfileSave}>
+        <FormCard title="Profile">
+          <div className="space-y-3 mt-3">
+            <div>
+              <label className={labelCls}>Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className={inputCls}
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Display Name</label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={e => setDisplayName(e.target.value)}
+                className={inputCls}
+                placeholder="Jane Doe"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>New Password</label>
+              <input
+                type="password"
+                minLength={8}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className={inputCls}
+                placeholder="Leave blank to keep current password"
+                autoComplete="new-password"
+              />
+            </div>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-[var(--admin-border)] flex items-center justify-between gap-3">
+            <div className="text-[13px]">
+              {profileError && <span className="text-[var(--admin-destructive)]">{profileError}</span>}
+              {profileSuccess && <span className="text-[var(--admin-status-success-fg)]">Profile updated.</span>}
+            </div>
+            <button
+              type="submit"
+              disabled={profileSaving}
+              className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-70"
+            >
+              {profileSaving && <Loader2 className="size-4 animate-spin" />}
+              Save Profile
+            </button>
+          </div>
+        </FormCard>
+      </form>
+
       {/* ── Permissions (editable) ── */}
-      <form onSubmit={handleSave}>
+      <form onSubmit={handlePermSave}>
         <FormCard title="Permissions">
           <div className="space-y-5 mt-3">
             <div>
@@ -149,16 +226,16 @@ export default function UserEditClient({ user }: { user: AdminUser }) {
 
           <div className="mt-5 pt-4 border-t border-[var(--admin-border)] flex items-center justify-between gap-3">
             <div className="text-[13px]">
-              {saveError && <span className="text-[var(--admin-destructive)]">{saveError}</span>}
-              {saveSuccess && <span className="text-[var(--admin-status-success-fg)]">User updated.</span>}
+              {permError && <span className="text-[var(--admin-destructive)]">{permError}</span>}
+              {permSuccess && <span className="text-[var(--admin-status-success-fg)]">Permissions updated.</span>}
             </div>
             <button
               type="submit"
-              disabled={saving}
+              disabled={permSaving}
               className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-70"
             >
-              {saving && <Loader2 className="size-4 animate-spin" />}
-              Save Changes
+              {permSaving && <Loader2 className="size-4 animate-spin" />}
+              Save Permissions
             </button>
           </div>
         </FormCard>

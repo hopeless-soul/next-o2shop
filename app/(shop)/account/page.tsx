@@ -9,6 +9,7 @@ import { AuthError } from "@/lib/api/errors";
 import OrderStatusBadge from "@/components/account/OrderStatusBadge";
 import PaymentStatusBadge from "@/components/account/PaymentStatusBadge";
 import AddressCard from "@/components/account/AddressCard";
+import LogoutButton from "@/components/account/LogoutButton";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -58,13 +59,14 @@ export default async function AccountPage() {
       </div>
 
       {/* Header */}
-      <div className="py-8 border-b" style={{ borderColor: "var(--color-border)" }}>
+      <div className="py-8 border-b flex items-center justify-between" style={{ borderColor: "var(--color-border)" }}>
         <h1
           className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none"
           style={{ color: "var(--color-foreground-dark)" }}
         >
           My Account
         </h1>
+        <LogoutButton />
       </div>
 
       <div className="py-10 flex flex-col gap-12">
