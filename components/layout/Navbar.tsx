@@ -95,7 +95,7 @@ export default function Navbar({
         }}
       >
         {pathname.startsWith("/products/") && (
-          <div className="absolute" style={{ top: 58, left: 40 }}>
+          <div className="absolute hidden md:block" style={{ top: 58, left: 40 }}>
             <BackButton color={currentColor} />
           </div>
         )}
@@ -272,7 +272,7 @@ export default function Navbar({
 
       {/* ── Mobile drawer panel ── */}
       <div
-        className={`fixed top-0 right-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 left-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         style={{ backgroundColor: "var(--color-foreground-strong)" }}
       >
