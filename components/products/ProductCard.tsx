@@ -30,7 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const badge: "sale" | "new" | "sold-out" | undefined = !product.available
     ? "sold-out"
-    : product.compareAtPrice && product.compareAtPrice > product.basePrice
+    : product.compareAtPrice && product.compareAtPrice < product.basePrice
     ? "sale"
     : product.tags?.includes("new")
     ? "new"
@@ -115,8 +115,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Badge */}
         {badge && (
-          <div className="absolute top-3 left-3 z-10">
-            <Badge variant={badge} />
+          <div className="absolute top-3 left-3 z-10 italic">
+            <Badge variant={badge}>{badge}</Badge>
           </div>
         )}
 

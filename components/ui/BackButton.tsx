@@ -22,7 +22,7 @@ export default function BackButton({ fallbackHref = "/products", color }: Props)
   return (
     <button
       onClick={handleBack}
-      className="flex items-center gap-1 text-sm uppercase tracking-widest font-sans uppercase leading-tight"
+      className="flex items-center gap-1 text-sm uppercase tracking-widest font-sans uppercase leading-tight opacity-90 hover:opacity-100 transition-opacity duration-200"
       style={{
         color: color ?? "var(--color-foreground-muted)",
         fontFamily: "var(--font-primary)",
