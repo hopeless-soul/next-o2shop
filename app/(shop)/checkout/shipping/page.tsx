@@ -54,7 +54,7 @@ export default function ShippingPage() {
 
   if (error) {
     return (
-      <p className="font-sans text-[13px]" style={{ color: "#dc2626" }}>
+      <p className="font-sans text-[13px]" style={{ color: "var(--color-destructive)" }}>
         {error}
       </p>
     )

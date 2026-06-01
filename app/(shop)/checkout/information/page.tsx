@@ -13,7 +13,7 @@ type AddressFieldsProps = {
 
 function AddressFields({ value, onChange }: AddressFieldsProps) {
   const input =
-    "w-full border px-3 py-2 font-sans text-[13px] outline-none focus:border-foreground-dark bg-transparent"
+    "w-full border px-3 py-2 font-sans text-[13px] outline-none bg-transparent"
   const style = { borderColor: "var(--color-border)", color: "var(--color-foreground)" }
   const label = "block font-sans text-[11px] uppercase tracking-widest mb-1"
   const labelStyle = { color: "var(--color-foreground-muted)" }
