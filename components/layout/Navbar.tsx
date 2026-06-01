@@ -8,6 +8,7 @@ import { Search, User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
 import SearchPopup from "@/components/layout/SearchPopup";
 import BackButton from "@/components/ui/BackButton";
 import { NAV_CATEGORIES } from "@/lib/nav-config";
+import { useCart } from "@/lib/cart/CartContext";
 
 interface NavbarProps {
   background?: string;
@@ -28,6 +29,7 @@ export default function Navbar({
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { itemCount } = useCart();
 
   const routeConfig: NavbarProps = pathname === "/"
     ? {
@@ -155,24 +157,27 @@ export default function Navbar({
             >
               <User size={19} strokeWidth={1.75} />
             </Link>
-            <button
+            <Link
+              href="/cart"
               className="relative opacity-80 hover:opacity-100"
               style={{ color: currentColor, transition: "var(--transition-nav)" }}
-              aria-label="Cart (3 items)"
+              aria-label={`Cart (${itemCount} items)`}
             >
               <ShoppingBag size={19} strokeWidth={1.75} />
-              <span
-                className="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-white leading-none"
-                style={{
-                  backgroundColor: "var(--color-badge-cart)",
-                  fontSize: "9px",
-                  fontFamily: "var(--font-secondary)",
-                  fontWeight: 700,
-                }}
-              >
-                3
-              </span>
-            </button>
+              {itemCount > 0 && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-white leading-none"
+                  style={{
+                    backgroundColor: "var(--color-badge-cart)",
+                    fontSize: "9px",
+                    fontFamily: "var(--font-secondary)",
+                    fontWeight: 700,
+                  }}
+                >
+                  {itemCount}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
 
