@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, GripVertical, ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -567,6 +567,14 @@ export default function ProductEditClient({
   collections,
 }: ProductEditClientProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeTab = searchParams.get('tab') ?? 'details'
+
+  function handleTabChange(tab: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', tab)
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
 
   // ── Details form state ───────────────────────────────────
   const [displayName, setDisplayName] = useState(product.displayName)
@@ -714,7 +722,7 @@ export default function ProductEditClient({
 
   return (
     <>
-      <Tabs defaultValue="details" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="bg-[var(--admin-sidebar-bg)] border border-[var(--admin-border)] rounded-[6px] p-1 gap-1">
           <TabsTrigger
             value="details"
