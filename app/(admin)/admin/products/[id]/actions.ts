@@ -31,7 +31,11 @@ export async function updatePhotoAction(productId: string, photoId: string, dto:
   return res.data
 }
 
-export async function uploadPhotoAction(productId: string, formData: FormData): Promise<ProductPhoto> {
+export async function uploadPhotoAction(
+  productId: string,
+  formData: FormData,
+  sortOrder?: number,
+): Promise<ProductPhoto> {
   const file = formData.get('file') as File
   const altText = formData.get('altText') as string | null
 
@@ -42,7 +46,10 @@ export async function uploadPhotoAction(productId: string, formData: FormData): 
     `/admin/products/${productId}/photos`,
     upload,
     {
-      params: altText ? { altText } : undefined,
+      params: {
+        ...(altText ? { altText } : {}),
+        ...(sortOrder !== undefined ? { sortOrder } : {}),
+      },
       headers: { 'Content-Type': 'multipart/form-data' },
     }
   )

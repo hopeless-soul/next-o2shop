@@ -96,7 +96,7 @@ export default function ProductCreateClient({ categories, collections }: Product
   const [compareAtPrice, setCompareAtPrice] = useState('')
   const [currency, setCurrency] = useState('USD')
   const [tags, setTags] = useState<string[]>([])
-  // const [description, setDescription] = useState('')
+  const [description, setDescription] = useState('')
   const [isPublished, setIsPublished] = useState(false)
 
   // Pending variants
@@ -142,6 +142,7 @@ export default function ProductCreateClient({ categories, collections }: Product
     setSaveError(null)
 
     try {
+      const trimmedDescription = description.trim()
       const product = await createProductAction({
         name,
         displayName,
@@ -154,6 +155,9 @@ export default function ProductCreateClient({ categories, collections }: Product
         tags: tags.length > 0 ? tags : undefined,
         type: type || null,
         isPublished,
+        description: trimmedDescription
+          ? { blocks: [{ type: 'text', content: trimmedDescription }] }
+          : undefined,
       })
 
       // Batch-create pending variants — best-effort; redirect regardless
@@ -357,6 +361,18 @@ export default function ProductCreateClient({ categories, collections }: Product
                     placeholder="USD"
                   />
                 </div>
+              </div>
+            </FormCard>
+
+            <FormCard title="Description">
+              <div className="mt-3">
+                <textarea
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  rows={5}
+                  placeholder="Product description (optional)"
+                  className="w-full px-2.5 py-2 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30 resize-y"
+                />
               </div>
             </FormCard>
 

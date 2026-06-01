@@ -277,11 +277,8 @@ function PhotosTab({
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const photo = await uploadPhotoAction(productId, formData)
-      setPhotos(prev => {
-        const next = [...prev, { ...photo, sortOrder: prev.length }]
-        return next
-      })
+      const photo = await uploadPhotoAction(productId, formData, photos.length)
+      setPhotos(prev => [...prev, photo])
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed.')
     } finally {

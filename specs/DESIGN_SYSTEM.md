@@ -169,7 +169,6 @@ Confirmed observed spacings:
 | `--radius-md` | 8px | Cart UI (qsc2-border-radius-md) |
 | `--radius-lg` | 12px | Cart btn radius (qsc2-btn-radius) |
 | `--radius-pill` | 32px | `.hero-button` (hero section CTAs) ✅ |
-| `--radius-full` | 50% | Circle swatches |
 
 Key correction from static analysis: The ATC button (`.btn.product-form__cart-submit`) uses **6px** border-radius, not 0. Only the base `.btn` class uses 0.
 
