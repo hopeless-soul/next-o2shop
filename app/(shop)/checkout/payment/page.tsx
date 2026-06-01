@@ -58,6 +58,12 @@ function PaymentForm() {
         ? checkout.shippingAddress
         : checkout.billingAddress
 
+      if (!billingAddress) {
+        setError("Billing address is missing. Please go back to Information.")
+        setProcessing(false)
+        return
+      }
+
       const res = await clientApi.post<Order>("/orders", {
         email: checkout.email,
         firstName: checkout.firstName,

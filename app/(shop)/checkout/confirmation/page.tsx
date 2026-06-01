@@ -1,7 +1,7 @@
 // app/(shop)/checkout/confirmation/page.tsx
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle } from "lucide-react"
@@ -10,7 +10,7 @@ import type { Order } from "@/lib/types"
 import OrderStatusBadge from "@/components/account/OrderStatusBadge"
 import AddressCard from "@/components/account/AddressCard"
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams()
   const orderNumber = searchParams.get("order")
   const [order, setOrder] = useState<Order | null>(null)
@@ -204,5 +204,22 @@ export default function ConfirmationPage() {
         Continue Shopping
       </Link>
     </div>
+  )
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense
+      fallback={
+        <p
+          className="font-sans text-[13px]"
+          style={{ color: "var(--color-foreground-muted)" }}
+        >
+          Loading…
+        </p>
+      }
+    >
+      <ConfirmationContent />
+    </Suspense>
   )
 }
