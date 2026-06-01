@@ -308,7 +308,7 @@ function PhotosTab({
   function moveUp(idx: number) {
     if (idx === 0) return
     const next = [...photos]
-    ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
+      ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
     setPhotos(reassignOrders(next))
     setIsDirty(true)
   }
@@ -316,7 +316,7 @@ function PhotosTab({
   function moveDown(idx: number) {
     if (idx === photos.length - 1) return
     const next = [...photos]
-    ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
+      ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
     setPhotos(reassignOrders(next))
     setIsDirty(true)
   }
@@ -594,6 +594,7 @@ export default function ProductEditClient({
   const [editingVariant, setEditingVariant] = useState<ProductVariant | undefined>()
   const [deleteVariantId, setDeleteVariantId] = useState<string | null>(null)
   const [variantActionErrors, setVariantActionErrors] = useState<Record<string, string>>({})
+  const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null)
 
   // ── Derived data ─────────────────────────────────────────
   const selectedCategory = categories.find(c => c.id === categoryId)
@@ -691,14 +692,18 @@ export default function ProductEditClient({
   }
 
   async function handleSetDefault(variantId: string) {
+    setVariantActionErrors(e => { const n = { ...e }; delete n[variantId]; return n })
+    setPendingDefaultId(variantId)
     try {
-      const updated = await setDefaultVariantAction(product.id, variantId)
-      setDefaultVariantId(updated.defaultVariant?.id ?? null)
+      await setDefaultVariantAction(product.id, variantId)
+      setDefaultVariantId(variantId)
     } catch (err) {
       setVariantActionErrors(e => ({
         ...e,
         [variantId]: err instanceof Error ? err.message : 'Failed.',
       }))
+    } finally {
+      setPendingDefaultId(null)
     }
   }
 
@@ -709,373 +714,387 @@ export default function ProductEditClient({
 
   return (
     <>
-    <Tabs defaultValue="details" className="space-y-6">
-      <TabsList className="bg-[var(--admin-sidebar-bg)] border border-[var(--admin-border)] rounded-[6px] p-1 gap-1">
-        <TabsTrigger
-          value="details"
-          className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
-        >
-          Details
-        </TabsTrigger>
-        <TabsTrigger
-          value="variants"
-          className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
-        >
-          Variants ({variants.length})
-        </TabsTrigger>
-        <TabsTrigger
-          value="photos"
-          className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
-        >
-          Photos ({product.photos?.length ?? 0})
-        </TabsTrigger>
-      </TabsList>
+      <Tabs defaultValue="details" className="space-y-6">
+        <TabsList className="bg-[var(--admin-sidebar-bg)] border border-[var(--admin-border)] rounded-[6px] p-1 gap-1">
+          <TabsTrigger
+            value="details"
+            className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
+          >
+            Details
+          </TabsTrigger>
+          <TabsTrigger
+            value="variants"
+            className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
+          >
+            Variants ({variants.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="photos"
+            className="rounded-[4px] text-[13px] font-medium px-4 py-1.5 text-[var(--admin-text-secondary)] data-[state=active]:bg-white data-[state=active]:text-[var(--admin-text-primary)] data-[state=active]:shadow-sm"
+          >
+            Photos ({product.photos?.length ?? 0})
+          </TabsTrigger>
+        </TabsList>
 
-      {/* ── DETAILS TAB ── */}
-      <TabsContent value="details">
-        <form onSubmit={handleSave} className="space-y-4">
-          {/* Name block */}
-          <FormCard title="Name">
-            <div className="space-y-3 mt-3">
-              <div>
-                <label className={labelCls}>Display Name</label>
-                <input
-                  required
-                  value={displayName}
-                  onChange={e => handleDisplayNameChange(e.target.value)}
-                  className={inputCls}
-                  placeholder="e.g. Blue Widget"
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Slug</label>
-                <input
-                  value={name}
-                  onChange={e => handleNameChange(e.target.value)}
-                  className={inputCls}
-                  placeholder="e.g. blue_widget"
-                  pattern="^[a-z0-9_]+$"
-                  title="Lowercase letters, numbers, and underscores only"
-                />
-                <p className="mt-1 text-[11px] text-[var(--admin-text-muted)]">
-                  Lowercase letters, numbers, and underscores only
-                </p>
-              </div>
-            </div>
-          </FormCard>
-
-          {/* Category block */}
-          <FormCard title="Category">
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <div>
-                <label className={labelCls}>Category</label>
-                <Select value={categoryId} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select category">
-                      {categories.find(c => c.id === categoryId)?.displayName}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(c => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.displayName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Subcategory</label>
-                <Select
-                  value={subCategoryId}
-                  onValueChange={(v) => setSubCategoryId(v ?? '')}
-                  disabled={!categoryId}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select subcategory">
-                      {subCategories.find(s => s.id === subCategoryId)?.displayName}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {subCategories.map(s => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.displayName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Type</label>
-                <input
-                  value={type}
-                  onChange={e => setType(e.target.value)}
-                  className={inputCls}
-                  placeholder="e.g. Ushanka"
-                />
-              </div>
-
-              <div>
-                <label className={labelCls}>Collection</label>
-                <Select value={collectionId} onValueChange={(v) => setCollectionId(v ?? '')}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="No collection">
-                      {collections.find(c => c.id === collectionId)?.displayName}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {collections.map(c => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.displayName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </FormCard>
-
-          {/* Price block */}
-          <FormCard title="Pricing">
-            <div className="grid grid-cols-3 gap-3 mt-3">
-              <div>
-                <label className={labelCls}>Base Price</label>
-                <input
-                  required
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={basePrice}
-                  onChange={e => setBasePrice(e.target.value)}
-                  className={inputCls}
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Compare At Price</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={compareAtPrice}
-                  onChange={e => setCompareAtPrice(e.target.value)}
-                  className={inputCls}
-                  placeholder="Optional"
-                />
-              </div>
-              <div>
-                <label className={labelCls}>Currency</label>
-                <input
-                  value={currency}
-                  onChange={e => setCurrency(e.target.value.toUpperCase().slice(0, 3))}
-                  maxLength={3}
-                  className={inputCls}
-                  placeholder="USD"
-                />
-              </div>
-            </div>
-          </FormCard>
-
-          {/* Tags block */}
-          <FormCard title="Tags">
-            <div className="mt-3">
-              <TagInput tags={tags} onChange={setTags} />
-            </div>
-          </FormCard>
-
-          {/* Published */}
-          <FormCard title="Visibility">
-            <div className="flex items-center gap-3 mt-3">
-              <Switch
-                checked={isPublished}
-                onCheckedChange={setIsPublished}
-              />
-              <span className="text-[14px] text-[var(--admin-text-primary)]">
-                {isPublished ? 'Published' : 'Draft'}
-              </span>
-            </div>
-          </FormCard>
-
-          {/* Error / success */}
-          {saveError && (
-            <p className="text-[13px] text-[var(--admin-destructive)]">{saveError}</p>
-          )}
-          {saveSuccess && (
-            <p className="text-[13px] text-[var(--admin-status-success-fg)]">Changes saved.</p>
-          )}
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-70"
-            >
-              {saving && <Loader2 className="size-4 animate-spin" />}
-              Save Changes
-            </button>
-          </div>
-        </form>
-      </TabsContent>
-
-      {/* ── VARIANTS TAB ── */}
-      <TabsContent value="variants">
-        <div className="space-y-4">
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={openAddVariant}
-              className="flex items-center gap-1.5 h-9 px-4 rounded-[4px] text-[13px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150"
-            >
-              <Plus className="size-4" />
-              Add Variant
-            </button>
-          </div>
-
-          {variants.length === 0 && (
-            <p className="text-[13px] text-[var(--admin-text-muted)] text-center py-8">
-              No variants yet. Add one to define sizes and colors.
-            </p>
-          )}
-
-          <div className="space-y-2">
-            {variants.map(v => (
-              <div
-                key={v.id}
-                className="flex items-center gap-3 p-4 bg-white border border-[var(--admin-border)] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-              >
-                {/* Color swatch */}
-                <div
-                  className="w-4 h-4 rounded-full shrink-0 border border-[var(--admin-border)]"
-                  style={{ background: v.colorValue }}
-                />
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[14px] font-medium text-[var(--admin-text-primary)]">
-                      {v.colorName}
-                    </span>
-                    <span className="text-[13px] text-[var(--admin-text-muted)]">{v.size}</span>
-                    {v.sku && (
-                      <span className="text-[12px] text-[var(--admin-text-muted)]">
-                        SKU: {v.sku}
-                      </span>
-                    )}
-                    <span className="text-[12px] text-[var(--admin-text-muted)]">
-                      Stock: {v.stock}
-                    </span>
-                    {v.priceOverride != null && (
-                      <span className="text-[12px] text-[var(--admin-text-primary)]">
-                        ${v.priceOverride.toFixed(2)}
-                      </span>
-                    )}
-                    {v.id === defaultVariantId && (
-                      <AdminBadge variant="info" label="Default" />
-                    )}
+        {/* ── DETAILS TAB ── */}
+        <TabsContent value="details">
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Name block */}
+              <FormCard title="Name" className="col-span-1">
+                <div className="space-y-3 mt-3">
+                  <div>
+                    <label className={labelCls}>Display Name</label>
+                    <input
+                      required
+                      value={displayName}
+                      onChange={e => handleDisplayNameChange(e.target.value)}
+                      className={inputCls}
+                      placeholder="e.g. Blue Widget"
+                    />
                   </div>
-                  {variantActionErrors[v.id] && (
-                    <p className="text-[11px] text-[var(--admin-destructive)] mt-0.5">
-                      {variantActionErrors[v.id]}
+                  <div>
+                    <label className={labelCls}>Slug</label>
+                    <input
+                      value={name}
+                      onChange={e => handleNameChange(e.target.value)}
+                      className={inputCls}
+                      placeholder="e.g. blue_widget"
+                      pattern="^[a-z0-9_]+$"
+                      title="Lowercase letters, numbers, and underscores only"
+                    />
+                    <p className="mt-1 text-[11px] text-[var(--admin-text-muted)]">
+                      Lowercase letters, numbers, and underscores only
                     </p>
-                  )}
+                  </div>
                 </div>
+              </FormCard>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {v.id !== defaultVariantId && (
+              {/* Category block */}
+              <FormCard title="Category" className="col-span-1">
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div>
+                    <label className={labelCls}>Category</label>
+                    <Select value={categoryId} onValueChange={handleCategoryChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select category">
+                          {categories.find(c => c.id === categoryId)?.displayName}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(c => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.displayName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className={labelCls}>Subcategory</label>
+                    <Select
+                      value={subCategoryId}
+                      onValueChange={(v) => setSubCategoryId(v ?? '')}
+                      disabled={!categoryId}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select subcategory">
+                          {subCategories.find(s => s.id === subCategoryId)?.displayName}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {subCategories.map(s => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.displayName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className={labelCls}>Type</label>
+                    <input
+                      value={type}
+                      onChange={e => setType(e.target.value)}
+                      className={inputCls}
+                      placeholder="e.g. Ushanka"
+                    />
+                  </div>
+
+                  <div>
+                    <label className={labelCls}>Collection</label>
+                    <Select value={collectionId} onValueChange={(v) => setCollectionId(v ?? '')}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="No collection">
+                          {collections.find(c => c.id === collectionId)?.displayName}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {collections.map(c => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.displayName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </FormCard>
+
+              {/* Price block */}
+              <FormCard title="Pricing" className="col-span-1">
+                <div className="grid grid-cols-3 gap-3 mt-3">
+                  <div>
+                    <label className={labelCls}>Base Price</label>
+                    <input
+                      required
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={basePrice}
+                      onChange={e => setBasePrice(e.target.value)}
+                      className={inputCls}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Compare At Price</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={compareAtPrice}
+                      onChange={e => setCompareAtPrice(e.target.value)}
+                      className={inputCls}
+                      placeholder="Optional"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Currency</label>
+                    <input
+                      value={currency}
+                      onChange={e => setCurrency(e.target.value.toUpperCase().slice(0, 3))}
+                      maxLength={3}
+                      className={inputCls}
+                      placeholder="USD"
+                    />
+                  </div>
+                </div>
+              </FormCard>
+
+              {/* Tags block */}
+              <FormCard title="Tags" className="col-span-1">
+                <div className="mt-3">
+                  <TagInput tags={tags} onChange={setTags} />
+                </div>
+              </FormCard>
+
+              {/* Published */}
+              <FormCard title="Visibility" className="col-span-2">
+                <div className="flex items-center gap-3 mt-3">
+                  <Switch
+                    checked={isPublished}
+                    onCheckedChange={setIsPublished}
+                  />
+                  <span className="text-[14px] text-[var(--admin-text-primary)]">
+                    {isPublished ? 'Published' : 'Draft'}
+                  </span>
+                </div>
+                {/* ── DANGER ZONE ── */}
+                <FormCard title="Danger Zone" className="mt-6 border-[var(--admin-destructive)]">
+                  <div className="mt-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-[14px] text-[var(--admin-text-primary)]">Delete this product</p>
+                      <p className="text-[12px] text-[var(--admin-text-muted)] mt-0.5">
+                        The product will no longer be visible to customers.
+                      </p>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => handleSetDefault(v.id)}
+                      onClick={() => { setDeleteProductOpen(true); setDeleteProductError(null) }}
+                      className="h-9 px-4 rounded-[4px] text-[14px] font-medium border border-[var(--admin-destructive)] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors duration-150"
+                    >
+                      Delete Product
+                    </button>
+                  </div>
+                  {deleteProductError && (
+                    <p className="mt-2 text-[13px] text-[var(--admin-destructive)]">{deleteProductError}</p>
+                  )}
+                </FormCard>
+              </FormCard>
+
+
+            </div>
+
+
+            {/* Error / success */}
+            {saveError && (
+              <p className="text-[13px] text-[var(--admin-destructive)]">{saveError}</p>
+            )}
+            {saveSuccess && (
+              <p className="text-[13px] text-[var(--admin-status-success-fg)]">Changes saved.</p>
+            )}
+
+            {/* Submit */}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-70"
+              >
+                {saving && <Loader2 className="size-4 animate-spin" />}
+                Save Changes
+              </button>
+            </div>
+
+          </form>
+
+
+
+        </TabsContent>
+
+        {/* ── VARIANTS TAB ── */}
+        <TabsContent value="variants">
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={openAddVariant}
+                className="flex items-center gap-1.5 h-9 px-4 rounded-[4px] text-[13px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150"
+              >
+                <Plus className="size-4" />
+                Add Variant
+              </button>
+            </div>
+
+            {variants.length === 0 && (
+              <p className="text-[13px] text-[var(--admin-text-muted)] text-center py-8">
+                No variants yet. Add one to define sizes and colors.
+              </p>
+            )}
+
+            <div className="space-y-2">
+              {variants.map(v => (
+                <div
+                  key={v.id}
+                  className="flex items-center gap-3 p-4 bg-white border border-[var(--admin-border)] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                >
+                  {/* Color swatch */}
+                  <div
+                    className="w-4 h-4 rounded-full shrink-0 border border-[var(--admin-border)]"
+                    style={{ background: v.colorValue }}
+                  />
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[14px] font-medium text-[var(--admin-text-primary)]">
+                        {v.colorName}
+                      </span>
+                      <span className="text-[13px] text-[var(--admin-text-muted)]">{v.size}</span>
+                      {v.sku && (
+                        <span className="text-[12px] text-[var(--admin-text-muted)]">
+                          SKU: {v.sku}
+                        </span>
+                      )}
+                      <span className="text-[12px] text-[var(--admin-text-muted)]">
+                        Stock: {v.stock}
+                      </span>
+                      {v.priceOverride != null && (
+                        <span className="text-[12px] text-[var(--admin-text-primary)]">
+                          ${v.priceOverride.toFixed(2)}
+                        </span>
+                      )}
+                      {v.id === defaultVariantId && (
+                        <AdminBadge variant="info" label="Default" />
+                      )}
+                      {v.stock === 0 && (
+                        <AdminBadge variant="warning" label="Out of stock" />
+                      )}
+                    </div>
+                    {variantActionErrors[v.id] && (
+                      <p className="text-[11px] text-[var(--admin-destructive)] mt-0.5">
+                        {variantActionErrors[v.id]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {v.id !== defaultVariantId && (
+                      <button
+                        type="button"
+                        disabled={pendingDefaultId === v.id}
+                        onClick={() => handleSetDefault(v.id)}
+                        className="flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] disabled:opacity-50 transition-colors"
+                      >
+                        {pendingDefaultId === v.id && <Loader2 className="size-3 animate-spin" />}
+                        Set default
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => openEditVariant(v)}
                       className="px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors"
                     >
-                      Set default
+                      Edit
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => openEditVariant(v)}
-                    className="px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDeleteVariantId(v.id)}
-                    className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteVariantId(v.id)}
+                      className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        <VariantDialog
-          productId={product.id}
-          variant={editingVariant}
-          open={variantDialogOpen}
-          onOpenChange={setVariantDialogOpen}
-          onSaved={handleVariantSaved}
-        />
+          <VariantDialog
+            productId={product.id}
+            variant={editingVariant}
+            open={variantDialogOpen}
+            onOpenChange={setVariantDialogOpen}
+            onSaved={handleVariantSaved}
+          />
 
-        <ConfirmDialog
-          open={deleteVariantId !== null}
-          onOpenChange={open => { if (!open) setDeleteVariantId(null) }}
-          title="Delete Variant"
-          description="This variant will be permanently removed."
-          confirmLabel="Delete"
-          destructive
-          onConfirm={handleDeleteVariant}
-        />
-      </TabsContent>
+          <ConfirmDialog
+            open={deleteVariantId !== null}
+            onOpenChange={open => { if (!open) setDeleteVariantId(null) }}
+            title="Delete Variant"
+            description="This variant will be permanently removed."
+            confirmLabel="Delete"
+            destructive
+            onConfirm={handleDeleteVariant}
+          />
+        </TabsContent>
 
-      {/* ── PHOTOS TAB ── */}
-      <TabsContent value="photos">
-        <PhotosTab
-          productId={product.id}
-          initialPhotos={product.photos ?? []}
-          primaryPhotoId={product.primaryPhoto?.id}
-          initialFeaturedPhoto={product.featuredPhoto}
-        />
-      </TabsContent>
-    </Tabs>
+        {/* ── PHOTOS TAB ── */}
+        <TabsContent value="photos">
+          <PhotosTab
+            productId={product.id}
+            initialPhotos={product.photos ?? []}
+            primaryPhotoId={product.primaryPhoto?.id}
+            initialFeaturedPhoto={product.featuredPhoto}
+          />
+        </TabsContent>
+      </Tabs>
 
-    {/* ── DANGER ZONE ── */}
-    <FormCard title="Danger Zone">
-      <div className="mt-3 flex items-center justify-between">
-        <div>
-          <p className="text-[14px] text-[var(--admin-text-primary)]">Delete this product</p>
-          <p className="text-[12px] text-[var(--admin-text-muted)] mt-0.5">
-            The product will no longer be visible to customers.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => { setDeleteProductOpen(true); setDeleteProductError(null) }}
-          className="h-9 px-4 rounded-[4px] text-[14px] font-medium border border-[var(--admin-destructive)] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors duration-150"
-        >
-          Delete Product
-        </button>
-      </div>
-      {deleteProductError && (
-        <p className="mt-2 text-[13px] text-[var(--admin-destructive)]">{deleteProductError}</p>
-      )}
-    </FormCard>
-
-    <ConfirmDialog
-      open={deleteProductOpen}
-      onOpenChange={open => { if (!open) setDeleteProductOpen(false) }}
-      title="Delete Product"
-      description={`Delete "${product.displayName}"? The product will no longer be visible to customers.`}
-      confirmLabel="Delete"
-      destructive
-      onConfirm={handleDeleteProduct}
-    />
+      <ConfirmDialog
+        open={deleteProductOpen}
+        onOpenChange={open => { if (!open) setDeleteProductOpen(false) }}
+        title="Delete Product"
+        description={`Delete "${product.displayName}"? The product will no longer be visible to customers.`}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={handleDeleteProduct}
+      />
     </>
   )
 }
