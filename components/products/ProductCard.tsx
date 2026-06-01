@@ -115,8 +115,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Badge */}
         {badge && (
-          <div className="absolute top-3 left-3 z-10 italic">
-            <Badge variant={badge}>{badge}</Badge>
+          <div className="absolute top-3 left-3 md:scale-120 md:top-4 md:left-4 z-10 capitalize">
+            <Badge variant={badge}> {badge} </Badge>
           </div>
         )}
 
