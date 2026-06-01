@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
-import { GripVertical, Plus, Trash2 } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { GripVertical, Minus, PencilOff, Plus, Trash2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ interface Props {
 
 export default function DescriptionEditor({ blocks, onChange }: Props) {
   const dragIndexRef = useRef<number | null>(null)
+  const [draggingIdx, setDraggingIdx] = useState<number | null>(null)
 
   function addBlock() {
     onChange([...blocks, { type: 'text', content: '' }])
@@ -75,8 +76,21 @@ export default function DescriptionEditor({ blocks, onChange }: Props) {
     )
   }
 
-  function handleDragStart(idx: number) {
+  function handleDragStart(e: React.DragEvent, idx: number) {
     dragIndexRef.current = idx
+    setDraggingIdx(idx)
+    // Replace the browser's default ghost (which captures the whole row including portals)
+    // with a small pill that follows the cursor cleanly.
+    const ghost = document.createElement('div')
+    ghost.style.cssText =
+      'position:fixed;top:-1000px;left:-1000px;padding:5px 10px;' +
+      'background:white;border:1px solid #d1d5db;border-radius:4px;' +
+      'font-size:12px;color:#6b7280;white-space:nowrap;pointer-events:none;' +
+      'box-shadow:0 2px 8px rgba(0,0,0,.12);'
+    ghost.textContent = blocks[idx].type === 'text' ? 'Text section' : 'List section'
+    document.body.appendChild(ghost)
+    e.dataTransfer.setDragImage(ghost, 0, 0)
+    requestAnimationFrame(() => { try { document.body.removeChild(ghost) } catch { /* already removed */ } })
   }
 
   function handleDragOver(e: React.DragEvent, idx: number) {
@@ -94,16 +108,22 @@ export default function DescriptionEditor({ blocks, onChange }: Props) {
     dragIndexRef.current = null
   }
 
+  function handleDragEnd() {
+    dragIndexRef.current = null
+    setDraggingIdx(null)
+  }
+
   return (
     <div className="space-y-2">
       {blocks.map((block, blockIndex) => (
         <div
           key={blockIndex}
           draggable
-          onDragStart={() => handleDragStart(blockIndex)}
+          onDragStart={e => handleDragStart(e, blockIndex)}
           onDragOver={e => handleDragOver(e, blockIndex)}
           onDrop={handleDrop}
-          className="flex gap-3 items-start"
+          onDragEnd={handleDragEnd}
+          className={`flex gap-3 items-start transition-opacity duration-100 ${draggingIdx === blockIndex ? 'opacity-30' : ''}`}
         >
           <GripVertical className="size-4 text-[var(--admin-text-muted)] cursor-grab shrink-0 mt-2.5" />
 
@@ -150,7 +170,7 @@ export default function DescriptionEditor({ blocks, onChange }: Props) {
                         onClick={() => removeItem(blockIndex, itemIndex)}
                         className="p-1 rounded-[4px] text-[var(--admin-text-muted)] hover:text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors shrink-0"
                       >
-                        <Trash2 className="size-3.5" />
+                        <PencilOff className="size-3.5" />
                       </button>
                     )}
                   </div>
