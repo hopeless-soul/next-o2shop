@@ -44,4 +44,14 @@ export const NAV_CATEGORIES: NavCategory[] = [
       { slug: "jackets", displayName: "Jackets",  href: "/products?category=jackets" },
     ],
   },
+  {
+    slug: "accessories",
+    displayName: "Accessories",
+    href: "/products?category=accessories",
+    subCategories: [
+      { slug: "hats", displayName: "Hats", href: "/products?category=hats" },
+      { slug: "bags", displayName: "Bags",  href: "/products?category=bags" },
+      { slug: "jewellery", displayName: "Jewellery",  href: "/products?category=jewellery" },
+    ],  
+  },
 ];

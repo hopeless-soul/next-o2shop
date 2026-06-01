@@ -158,10 +158,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           >
             {product.compareAtPrice && (
               <span className="line-through opacity-50 mr-1.5">
-                ${product.compareAtPrice}
+                ${product.basePrice}
               </span>
             )}
-            ${product.basePrice}
+            ${product.compareAtPrice ? product.compareAtPrice : product.basePrice}
           </span>
         </div>
 
@@ -174,7 +174,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               color: "var(--color-foreground-subtle)",
             }}
           >
-            {product.variants.length} variant{product.variants.length !== 1 ? "s" : ""}
+            {product.type}
           </span>
           <span
             className="text-[12px] tracking-[0.3px]"

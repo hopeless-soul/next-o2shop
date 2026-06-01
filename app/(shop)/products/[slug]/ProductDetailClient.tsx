@@ -304,13 +304,13 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               Add to Cart
             </span>
             <span className="flex gap-2">
-              <span
-                className="font-sans text-[24px] tracking-[0.44px]"
-              >${product.basePrice}</span>
+              <span className="font-sans text-[24px] tracking-[0.44px]">
+                ${product.compareAtPrice ? product.compareAtPrice : product.basePrice}
+              </span>
               {product.compareAtPrice != null && (
                 <span
                   className="atc-compare-price font-sans text-[24px] tracking-[0.44px] line-through opacity-50"
-                >${product.compareAtPrice}</span>
+                >${product.basePrice}</span>
               )}
             </span>
           </button>
