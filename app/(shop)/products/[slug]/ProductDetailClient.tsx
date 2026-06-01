@@ -7,6 +7,7 @@ import VariantPicker from "@/components/products/VariantPicker";
 import StarRating from "@/components/ui/StarRating";
 import ReviewsBlock from "./ReviewsBlock";
 import { Star } from "lucide-react";
+import { useCart } from "@/lib/cart/CartContext";
 
 interface Props {
   product: Product;
@@ -30,6 +31,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
   );
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const { addItem } = useCart();
 
   const uniqueSizes: ProductSize[] = selectedColor
     ? product.variants
@@ -70,6 +72,29 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
   const descBlocks = product.description?.blocks ?? [];
 
   const productType = product.type ?? product.category?.displayName;
+
+  function handleAddToCart() {
+    if (!selectedColor || !selectedSize) return;
+    const variant = product.variants.find(
+      (v) => v.colorName === selectedColor && v.size === selectedSize,
+    );
+    if (!variant || !variant.available) return;
+
+    addItem({
+      variantId: variant.id,
+      productId: product.id,
+      productName: product.displayName,
+      variantSku: variant.sku,
+      colorName: variant.colorName,
+      size: variant.size,
+      unitPrice: variant.priceOverride ?? product.basePrice,
+      quantity: 1,
+      imageUrl:
+        variant.featuredImage?.url ??
+        product.primaryPhoto?.url ??
+        undefined,
+    });
+  }
 
   return (
     <div style={{ paddingTop: "var(--header-height-desktop)", marginTop: 8 }}>
@@ -288,6 +313,8 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           />
 
           <button
+            onClick={handleAddToCart}
+            disabled={!selectedColor || !selectedSize}
             className="atc-button w-full font-sans text-[24px] uppercase tracking-widest text-primary-foreground flex items-center"
             style={{
               justifyContent: 'space-between',
@@ -295,7 +322,8 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               borderRadius: "var(--radius-base)",
               transition: "var(--transition-base)",
               border: "none",
-              cursor: "pointer",
+              cursor: !selectedColor || !selectedSize ? "not-allowed" : "pointer",
+              opacity: !selectedColor || !selectedSize ? 0.6 : 1,
               WebkitTextStroke: '0.6px white',
               padding: '20px'
             }}
