@@ -555,6 +555,35 @@ function PhotosTab({
 type PhotoWithOrder = ProductPhoto & { sortOrder: number }
 
 // ────────────────────────────────────────────────────────────
+// Variant sorting helpers
+// ────────────────────────────────────────────────────────────
+
+const LETTER_SIZE_ORDER = ['2XS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
+
+function compareSizes(a: string, b: string): number {
+  const aNum = Number(a)
+  const bNum = Number(b)
+  const aIsNum = !isNaN(aNum)
+  const bIsNum = !isNaN(bNum)
+  if (aIsNum && bIsNum) return aNum - bNum
+  if (aIsNum) return -1
+  if (bIsNum) return 1
+  const aIdx = LETTER_SIZE_ORDER.indexOf(a.toUpperCase())
+  const bIdx = LETTER_SIZE_ORDER.indexOf(b.toUpperCase())
+  if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx
+  if (aIdx >= 0) return -1
+  if (bIdx >= 0) return 1
+  return a.localeCompare(b)
+}
+
+function sortVariants(vs: ProductVariant[]): ProductVariant[] {
+  return [...vs].sort((a, b) => {
+    const c = a.colorName.localeCompare(b.colorName)
+    return c !== 0 ? c : compareSizes(a.size, b.size)
+  })
+}
+
+// ────────────────────────────────────────────────────────────
 // Main client component
 // ────────────────────────────────────────────────────────────
 
@@ -983,7 +1012,7 @@ export default function ProductEditClient({
             )}
 
             <div className="space-y-2">
-              {variants.map(v => (
+              {sortVariants(variants).map(v => (
                 <div
                   key={v.id}
                   className="flex items-center gap-3 p-4 bg-white border border-[var(--admin-border)] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
