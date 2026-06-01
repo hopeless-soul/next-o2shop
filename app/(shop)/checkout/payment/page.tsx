@@ -14,19 +14,22 @@ import { useCart } from "@/lib/cart/CartContext"
 import { useCheckout } from "@/lib/checkout/CheckoutContext"
 import axios from "axios"
 import clientApi from "@/lib/api/client"
-import { ApiError } from "@/lib/api/errors"
 import type { Order } from "@/lib/types"
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
 )
 
-function PaymentForm() {
+type PaymentFormProps = {
+  orderNumber: string
+}
+
+function PaymentForm({ orderNumber }: PaymentFormProps) {
   const stripe = useStripe()
   const elements = useElements()
   const router = useRouter()
-  const { items, clearCart } = useCart()
-  const { checkout, clearCheckout } = useCheckout()
+  const { clearCart } = useCart()
+  const { clearCheckout } = useCheckout()
   const [error, setError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
 
@@ -48,52 +51,9 @@ function PaymentForm() {
       return
     }
 
-    if (!checkout.shippingAddress) {
-      setError("Shipping address is missing. Please go back and re-enter your details.")
-      setProcessing(false)
-      return
-    }
-
-    try {
-      const billingAddress = checkout.billingIsSameAsShipping
-        ? checkout.shippingAddress
-        : checkout.billingAddress
-
-      if (!billingAddress) {
-        setError("Billing address is missing. Please go back to Information.")
-        setProcessing(false)
-        return
-      }
-
-      const res = await clientApi.post<Order>("/orders", {
-        email: checkout.email,
-        firstName: checkout.firstName,
-        lastName: checkout.lastName,
-        shippingMethodId: checkout.shippingMethodId,
-        shippingAddress: checkout.shippingAddress,
-        billingIsSameAsShipping: checkout.billingIsSameAsShipping,
-        billingAddress,
-        items: items.map((item) => ({
-          productId: item.productId,
-          variantSku: item.variantSku,
-          quantity: item.quantity,
-        })),
-      })
-
-      clearCart()
-      clearCheckout()
-      router.push(`/checkout/confirmation?order=${res.data.orderNumber}`)
-    } catch (err) {
-      const msg =
-        err instanceof ApiError && err.messages.length > 0
-          ? err.messages.join(", ")
-          : err instanceof Error
-            ? err.message
-            : "Payment succeeded but order placement failed. Please contact support."
-      console.error("Order placement failed:", err)
-      setError(msg)
-      setProcessing(false)
-    }
+    clearCart()
+    clearCheckout()
+    router.push(`/checkout/confirmation?order=${orderNumber}`)
   }
 
   return (
@@ -139,8 +99,9 @@ function PaymentForm() {
 export default function PaymentPage() {
   const router = useRouter()
   const { checkout } = useCheckout()
-  const { subtotal } = useCart()
+  const { items } = useCart()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [orderNumber, setOrderNumber] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const intentCreated = useRef(false)
 
@@ -148,18 +109,42 @@ export default function PaymentPage() {
     if (intentCreated.current) return
     intentCreated.current = true
 
-    // Guard: shipping step must be complete
     if (!checkout.shippingMethodId) {
       router.replace("/checkout/shipping")
       return
     }
 
-    const amount = Math.round((subtotal + checkout.shippingPrice) * 100)
+    const billingAddress = checkout.billingIsSameAsShipping
+      ? checkout.shippingAddress
+      : checkout.billingAddress
 
-    axios
-      .post<{ clientSecret: string }>("/api/payments/create-intent", {
-        amount,
-        currency: "usd",
+    if (!checkout.shippingAddress || !billingAddress) {
+      router.replace("/checkout/information")
+      return
+    }
+
+    // Step 1: create the order (pending payment)
+    clientApi
+      .post<Order>("/orders", {
+        email: checkout.email,
+        firstName: checkout.firstName,
+        lastName: checkout.lastName,
+        shippingMethodId: checkout.shippingMethodId,
+        shippingAddress: checkout.shippingAddress,
+        billingIsSameAsShipping: checkout.billingIsSameAsShipping,
+        billingAddress,
+        items: items.map((item) => ({
+          productId: item.productId,
+          variantSku: item.variantSku,
+          quantity: item.quantity,
+        })),
+      })
+      .then((orderRes) => {
+        setOrderNumber(orderRes.data.orderNumber)
+        // Step 2: create payment intent using the order's UUID
+        return axios.post<{ clientSecret: string }>("/api/payments/create-intent", {
+          orderId: orderRes.data.id,
+        })
       })
       .then((res) => setClientSecret(res.data.clientSecret))
       .catch(() => setError("Could not initialise payment. Please go back and try again."))
@@ -173,7 +158,7 @@ export default function PaymentPage() {
     )
   }
 
-  if (!clientSecret) {
+  if (!clientSecret || !orderNumber) {
     return (
       <p
         className="font-sans text-[13px]"
@@ -186,7 +171,7 @@ export default function PaymentPage() {
 
   return (
     <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <PaymentForm />
+      <PaymentForm orderNumber={orderNumber} />
     </Elements>
   )
 }

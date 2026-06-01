@@ -4,16 +4,16 @@ import { ApiError } from "@/lib/api/errors"
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { amount, currency } = body as { amount: number; currency: string }
+  const { orderId } = body as { orderId: string }
 
-  if (typeof amount !== "number" || amount <= 0 || typeof currency !== "string") {
-    return NextResponse.json({ error: "Invalid amount or currency" }, { status: 400 })
+  if (typeof orderId !== "string" || !orderId) {
+    return NextResponse.json({ error: "Invalid orderId" }, { status: 400 })
   }
 
   try {
     const res = await serverApi.post<{ clientSecret: string }>(
       "/payments/stripe/intent",
-      { amount, currency },
+      { orderId },
     )
     return NextResponse.json(res.data)
   } catch (err) {
