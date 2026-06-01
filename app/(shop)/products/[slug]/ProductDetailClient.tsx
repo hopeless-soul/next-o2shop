@@ -163,7 +163,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
 
         {/* ── Right: product info (50%) ── */}
         <div
-          className="md:w-1/2 flex flex-col gap-5 mt-8 md:mt-10 md:pl-10 md:pr-10"
+          className="md:w-1/2 flex flex-col gap-5 mt-8 md:mt-10 px-4 sm:px-10 md:pl-10 md:pr-10"
         >
           {/* {badge && <Badge variant={badge} className="self-start" />} */}
           <div className="flex gap-2">

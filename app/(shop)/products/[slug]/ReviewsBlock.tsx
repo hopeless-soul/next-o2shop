@@ -174,7 +174,7 @@ export default function ReviewsBlock({
       </div>
 
       {/* Summary row: star + score + count inline, Write a review button right */}
-      <div className="flex items-center justify-between gap-3 mb-4">
+      <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2" style={{ fontSize: "32px" }}>
           <Star
             aria-hidden="true"
@@ -223,7 +223,7 @@ export default function ReviewsBlock({
         <button
           type="button"
           onClick={formOpen ? closeForm : openForm}
-          className="shrink-0"
+          className="w-full sm:w-auto sm:shrink-0"
           style={{
             fontFamily: "var(--font-primary)",
             fontSize: "14px",
