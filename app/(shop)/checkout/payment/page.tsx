@@ -12,6 +12,7 @@ import {
 } from "@stripe/react-stripe-js"
 import { useCart } from "@/lib/cart/CartContext"
 import { useCheckout } from "@/lib/checkout/CheckoutContext"
+import axios from "axios"
 import clientApi from "@/lib/api/client"
 import type { Order } from "@/lib/types"
 
@@ -42,6 +43,12 @@ function PaymentForm() {
 
     if (stripeError) {
       setError(stripeError.message ?? "Payment failed. Please try again.")
+      setProcessing(false)
+      return
+    }
+
+    if (!checkout.shippingAddress) {
+      setError("Shipping address is missing. Please go back and re-enter your details.")
       setProcessing(false)
       return
     }
@@ -133,13 +140,12 @@ export default function PaymentPage() {
 
     const amount = Math.round((subtotal + checkout.shippingPrice) * 100)
 
-    fetch("/api/payments/create-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount, currency: "usd" }),
-    })
-      .then((r) => r.json())
-      .then((data: { clientSecret: string }) => setClientSecret(data.clientSecret))
+    axios
+      .post<{ clientSecret: string }>("/api/payments/create-intent", {
+        amount,
+        currency: "usd",
+      })
+      .then((res) => setClientSecret(res.data.clientSecret))
       .catch(() => setError("Could not initialise payment. Please go back and try again."))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
