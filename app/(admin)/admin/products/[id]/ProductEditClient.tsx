@@ -16,7 +16,8 @@ import {
 import FormCard from '@/components/admin/FormCard'
 import AdminBadge from '@/components/admin/AdminBadge'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
-import type { AdminProduct, ProductVariant, ProductPhoto } from '@/lib/api/admin-products'
+import type { AdminProduct, ProductVariant, ProductPhoto, DescriptionBlock } from '@/lib/api/admin-products'
+import DescriptionEditor from '@/components/admin/products/DescriptionEditor'
 import {
   updateProductAction,
   deleteVariantAction,
@@ -616,6 +617,9 @@ export default function ProductEditClient({
   )
   const [currency, setCurrency] = useState(product.currency)
   const [tags, setTags] = useState<string[]>(product.tags ?? [])
+  const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>(
+    product.description?.blocks ?? []
+  )
   const [isPublished, setIsPublished] = useState(product.isPublished)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -670,6 +674,7 @@ export default function ProductEditClient({
         currency,
         tags,
         isPublished,
+        description: { blocks: descriptionBlocks },
       })
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
@@ -924,6 +929,13 @@ export default function ProductEditClient({
               <FormCard title="Tags" className="col-span-1">
                 <div className="mt-3">
                   <TagInput tags={tags} onChange={setTags} />
+                </div>
+              </FormCard>
+
+              {/* Description */}
+              <FormCard title="Description" className="col-span-2">
+                <div className="mt-3">
+                  <DescriptionEditor blocks={descriptionBlocks} onChange={setDescriptionBlocks} />
                 </div>
               </FormCard>
 
