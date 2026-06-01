@@ -1,7 +1,7 @@
 # Frontend Tracking — o2shop
 
 > Pair file: `specs/FRONTEND_PROGRESS.md` (completed work history) · `specs/DESIGN_SYSTEM.md` (visual spec)
-> Last updated: 2026-05-27 (session-21)
+> Last updated: 2026-06-01
 
 ---
 
@@ -67,19 +67,20 @@ Static dark hero (`var(--color-foreground-dark)` bg), "O2SHOP" headline, "Shop N
 
 ### `/products` — Products List
 
-**Status:** `✅ done` | **Files:** `app/products/page.tsx`
+**Status:** `✅ done` | **Files:** `app/(shop)/products/page.tsx`
 
-Async RSC. `searchParams` drives `categorySlug` + `search`. Wired `listProducts()`. Filter strip uses `<Link>` elements. Product count from `result.total`. Skeleton: 8 × `ProductCardSkeleton` in same grid.
+Async RSC. `searchParams` drives `categorySlug` + `subCategorySlug` + `sale` + `search`. Wired `listProducts()`. Filter strip uses `<Link>` elements. Product count from `result.total`. Skeleton: 8 × `ProductCardSkeleton` in same grid. Empty state message when no products match filters.
 
 - Grid: `grid-cols-2 md:grid-cols-4`, `gap-[2px]` desktop / `gap-[1px]` mobile, `p-[2px]`
 - Heading: h1 Fjalla One 32px uppercase — actual category name from URL param
 - Filter strip: active = dark bg + white text; inactive = transparent + border
+- Supports subcategory + `?sale=true` filter params
 
 ---
 
 ### `/products/[slug]` — Product Detail
 
-**Status:** `✅ done` | **Files:** `app/products/[slug]/page.tsx`, `app/products/[slug]/ProductDetailClient.tsx`
+**Status:** `✅ done` | **Files:** `app/(shop)/products/[slug]/page.tsx`, `app/(shop)/products/[slug]/ProductDetailClient.tsx`, `app/(shop)/products/[slug]/ReviewsBlock.tsx`
 
 RSC wrapper + client island. `getProductBySlug()` + `listReviewsByProduct(product.id)`. `notFound()` on 404. Back button above layout (`router.back()`, fallback `/products`). Real `<Image fill>` from `product.photos`; `sortOrder:-1` renders 64×80px accent photo beside title.
 
@@ -251,7 +252,7 @@ interface NavbarProps {
 }
 ```
 
-Fixed header. Route-based theming via `usePathname()`. Logo centered (3-col grid, `/public/logo.svg` CSS-filtered). Nav entries from `lib/nav-config.ts` (`NAV_CATEGORIES: NavCategory[]` — edit there to add/remove/reorder). `/` = dark bg + white always; `/products*` = transparent + dark at top, dark + white on scroll. Category dropdowns with 80ms hover-intent close delay. Mobile slide-in drawer. Cart badge hardcoded at `3` — wire to cart state when `CartDrawer` is built.
+Fixed header. Route-based theming via `usePathname()`. Logo centered (3-col grid, `/public/logo.svg` CSS-filtered). Nav entries from `lib/nav-config.ts` (`NAV_CATEGORIES: NavCategory[]` — edit there to add/remove/reorder). `/` = dark bg + white always; `/products*` = transparent + dark at top, dark + white on scroll. Category dropdowns with 80ms hover-intent close delay. Mobile slide-in drawer (positioning + visibility improved). Cart badge hardcoded at `3` — wire to cart state when `CartDrawer` is built. Accessories category (hats, bags, jewellery subcategories) added to `lib/nav-config.ts`.
 
 ---
 
@@ -331,6 +332,8 @@ interface ProductCardProps { product: Product; }
 
 Client component (hover zone state). Left zone → `sortOrder:1` image; right zone → `sortOrder:2` image — both `<Image fill>` overlays with `transition: var(--transition-nav)` opacity. Falls back to color-tinted divs when `product.photos` is empty. `next/image` remotePatterns wired in `next.config.ts` from `NEXT_PUBLIC_API_URL`.
 
+Badge logic: `sold-out` if `!product.available`; `sale` if `compareAtPrice && compareAtPrice < basePrice`; `new` if `product.tags?.includes("new")`. Price display: `basePrice` crossed out, `compareAtPrice` shown as current price when on sale. Badge positioned `top-3 left-3`, `md:scale-120 md:top-4 md:left-4`.
+
 ---
 
 ### `ProductCardSkeleton`
@@ -368,7 +371,7 @@ Color swatches: 149×30px, `border-radius: var(--radius-swatch)` (2px). Sold-out
 interface ReviewItemProps { review: Review; }
 ```
 
-Three rows: (1) `StarRating` + date right-aligned (Montserrat 12px); (2) author (Montserrat 16px weight-600, no uppercase) + gray-filled "Verified" badge (9px white text); (3) body (Montserrat weight-500, `rgb(115,115,115)`). Card: `borderTop: 0.667px solid rgba(0,0,0,0.1)`, `py-4`. Date: MM/DD/YYYY. Verified shown unconditionally (no API field).
+Three rows: (1) `StarRating` + date right-aligned (Montserrat 12px); (2) author (Montserrat 16px weight-600, no uppercase) + gray-filled "Verified" badge (9px white text, column-adjusted layout); (3) body (Montserrat weight-500, `rgb(115,115,115)`). Card: `borderTop: 0.667px solid rgba(0,0,0,0.1)`, `py-4`. Date: MM/DD/YYYY. Verified shown unconditionally (no API field).
 
 ---
 

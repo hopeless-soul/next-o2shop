@@ -1,8 +1,8 @@
 # Admin Frontend Tracking — o2shop
 
 > Pair file: `specs/ADMIN_DESIGN_SYSTEM.md` (visual spec) · `specs/FRONTEND_TRACKING.md` (storefront)
-> Last updated: 2026-05-28 (session-23)
-> All admin routes live under `/admin/*` — protected by `middleware.ts` RBAC (already in place).
+> Last updated: 2026-06-01
+> All admin routes live under `/admin/*` via route group `app/(admin)/` — protected by `middleware.ts` RBAC (already in place).
 
 ---
 
@@ -33,11 +33,12 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | `AdminPagination` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `AdminBadge` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `ConfirmDialog` | component | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
-| `FormCard` | component | ⬜ todo | — | — |
+| `FormCard` | component | ✅ done | — | 2026-06-01 |
+| `DescriptionEditor` | component | ✅ done | — | 2026-06-01 |
 | `/admin` dashboard | route | ✅ done (placeholder) | session-21 | 2026-05-27 |
-| `/admin/products` list | route | ⬜ todo | — | — |
-| `/admin/products/new` | route | ⬜ todo | — | — |
-| `/admin/products/[id]` edit | route | ⬜ todo | — | — |
+| `/admin/products` list | route | ✅ done | — | 2026-06-01 |
+| `/admin/products/new` | route | ✅ done | — | 2026-06-01 |
+| `/admin/products/[id]` edit | route | ✅ done | — | 2026-06-01 |
 | `/admin/orders` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 | `/admin/orders/[id]` edit | route | ⬜ todo | — | — |
 | `/admin/users` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
@@ -46,11 +47,10 @@ Status key: `⬜ todo` · `🔄 in-progress` · `✅ done` · `🚫 blocked`
 | `/admin/categories` list | route | ✅ done | claude-sonnet-4-6 | 2026-05-29 |
 | `/admin/categories/new` | route | ⬜ todo | — | — |
 | `/admin/categories/[id]` edit | route | ⬜ todo | — | — |
-| `/admin/collections` list | route | ⬜ todo | — | — |
-| `/admin/collections/new` | route | ⬜ todo | — | — |
-| `/admin/collections/[id]` edit | route | ⬜ todo | — | — |
-| `/admin/reviews` list | route | ⬜ todo | — | — |
-| `/admin/shipping` list + CRUD | route | ⬜ todo | — | — |
+| `/admin/collections` list + CRUD | route | ✅ done | — | 2026-06-01 |
+| `/admin/reviews` list | route | ✅ done | — | 2026-06-01 |
+| `/admin/shipping` list + CRUD | route | ✅ done | — | 2026-06-01 |
+| `/admin/changes` | route | ✅ done | — | 2026-06-01 |
 | `lib/api/admin-*.ts` service files | infra | ✅ done | claude-sonnet-4-6 | 2026-05-28 |
 
 ---
@@ -422,7 +422,7 @@ Wraps shadcn `<Dialog>`. Confirm button: spinner + disabled while in-flight. On 
 
 ### `FormCard`
 
-**Status:** `⬜ todo` | **Files:** `components/admin/FormCard.tsx`
+**Status:** `✅ done` | **Files:** `components/admin/FormCard.tsx`
 
 ```ts
 interface FormCardProps {
@@ -439,6 +439,21 @@ White surface card. Visual spec: `ADMIN_DESIGN_SYSTEM.md §10f`.
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-06-01 | — | Implemented |
+
+---
+
+### `DescriptionEditor`
+
+**Status:** `✅ done` | **Files:** `components/admin/products/DescriptionEditor.tsx`
+
+Rich text / block editor for `product.description` (`{ blocks: ProductDescriptionBlock[] }`). Drag-and-drop block reordering with visual feedback. Used in product create and edit pages.
+
+**Change Log**
+
+| Date | Agent | Change |
+|---|---|---|
+| 2026-06-01 | — | Created; drag-and-drop added |
 
 ---
 
@@ -448,7 +463,7 @@ White surface card. Visual spec: `ADMIN_DESIGN_SYSTEM.md §10f`.
 
 ### `/admin` — Dashboard
 
-**Status:** `✅ done (placeholder)` | **Files:** `app/admin/page.tsx`
+**Status:** `✅ done (placeholder)` | **Files:** `app/(admin)/admin/page.tsx`, `app/(admin)/admin/layout.tsx`
 
 Currently: minimal RSC showing user email + role (session-21). Needs to be wrapped by `AdminLayout` once shell is built. Dashboard content: placeholder "Dashboard coming soon" — no stat cards, no API calls.
 
@@ -462,7 +477,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 ### `/admin/products` — Products List
 
-**Status:** `⬜ todo` | **Files:** `app/admin/products/page.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/products/page.tsx`, `app/(admin)/admin/products/ProductsContent.tsx`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/products` — params: `page`, `limit`, `search`, `categoryId`, `collectionId`, `subCategoryId`, `isPublished`, `includeDeleted`, `sortBy` (createdAt|basePrice|name), `sortOrder` (asc|desc)
@@ -492,12 +507,13 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-06-01 | — | Implemented |
 
 ---
 
 ### `/admin/products/new` — Create Product
 
-**Status:** `⬜ todo` | **Files:** `app/admin/products/new/page.tsx`, `app/admin/products/new/ProductCreateClient.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/products/new/page.tsx`, `app/(admin)/admin/products/new/ProductCreateClient.tsx`, `app/(admin)/admin/products/new/actions.ts`
 
 **API resources** *(re-read openapi.json)*
 - `POST /admin/products` — `CreateProductDto`
@@ -533,12 +549,13 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-06-01 | — | Implemented |
 
 ---
 
 ### `/admin/products/[id]` — Edit Product
 
-**Status:** `⬜ todo` | **Files:** `app/admin/products/[id]/page.tsx`, `app/admin/products/[id]/ProductEditClient.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/products/[id]/page.tsx`, `app/(admin)/admin/products/[id]/ProductEditClient.tsx`, `app/(admin)/admin/products/[id]/VariantDialog.tsx`, `app/(admin)/admin/products/[id]/actions.ts`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/products/{id}` — full `AdminProductResponseDto`
@@ -556,20 +573,21 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 **Variants tab:** See `ADMIN_DESIGN_SYSTEM.md §11` for full variant section spec.
 
-**Photos tab:** See `ADMIN_DESIGN_SYSTEM.md §12` for photo upload spec. sortOrder 0=main, 1=left-hover, 2=right-hover, -1=accent (from storefront convention).
+**Photos tab:** See `ADMIN_DESIGN_SYSTEM.md §12` for photo upload spec. sortOrder 0=main, 1=left-hover, 2=right-hover, -1=accent (from storefront convention). `uploadPhotoAction` accepts `sortOrder` param.
 
-**Pattern:** RSC fetches product server-side; client island owns tabs, variant dialogs, photo upload, save mutations.
+**Pattern:** RSC fetches product server-side; client island owns tabs, variant dialogs, photo upload, save mutations. Tab state managed via URL search params. Variants sorted by color + size.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-06-01 | — | Implemented; tab state via search params; variant sorting; photo upload with sortOrder; DescriptionEditor for blocks |
 
 ---
 
 ### `/admin/orders` — Orders List
 
-**Status:** `✅ done` | **Files:** `app/admin/orders/page.tsx`, `app/admin/orders/OrdersContent.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/orders/page.tsx`, `app/(admin)/admin/orders/OrdersContent.tsx`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/orders` — params: `page`, `limit` (check openapi.json for additional filters)
@@ -600,7 +618,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 ### `/admin/orders/[id]` — Edit Order
 
-**Status:** `⬜ todo` | **Files:** `app/admin/orders/[id]/page.tsx`, `app/admin/orders/[id]/OrderEditClient.tsx`
+**Status:** `⬜ todo` | **Files:** `app/(admin)/admin/orders/[id]/page.tsx` *(create)*, `app/(admin)/admin/orders/[id]/OrderEditClient.tsx` *(create)*
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/orders/{id}` — UUID (NOT orderNumber — different from customer-facing endpoint)
@@ -624,7 +642,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 ### `/admin/users` — Users List
 
-**Status:** `✅ done` | **Files:** `app/admin/users/page.tsx`, `app/admin/users/UsersContent.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/users/page.tsx`, `app/(admin)/admin/users/UsersContent.tsx`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/users` — params: `page`, `limit`, `search`, `role` (regular|admin), `isDeleted`, `userId`, `createdAfter`, `createdBefore`
@@ -657,7 +675,7 @@ Currently: minimal RSC showing user email + role (session-21). Needs to be wrapp
 
 ### `/admin/users/[id]` — Edit User
 
-**Status:** `✅ done` | **Files:** `app/admin/users/[id]/page.tsx`, `app/admin/users/[id]/UserEditClient.tsx`, `app/admin/users/[id]/actions.ts`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/users/[id]/page.tsx`, `app/(admin)/admin/users/[id]/UserEditClient.tsx`, `app/(admin)/admin/users/[id]/actions.ts`
 
 **API resources**
 - `GET /admin/users/{id}` — `AdminUserResponseDto`
@@ -680,7 +698,7 @@ Two FormCards: "Account Info" (read-only: email, displayName, member since, stat
 
 Three-section form (Account, Profile, Permissions) backed by `POST /admin/users`. On success redirects to `/admin/users`. Fields: `email` (required), `password` + confirm (required, min 8, client-only match check), `displayName`, `avatarUrl`, `role` select, `isActive` toggle.
 
-**Files:** `app/admin/users/new/page.tsx`, `app/admin/users/new/CreateUserClient.tsx`, `app/admin/users/new/actions.ts`
+**Files:** `app/(admin)/admin/users/new/page.tsx`, `app/(admin)/admin/users/new/CreateUserClient.tsx`, `app/(admin)/admin/users/new/actions.ts`
 
 **Change Log**
 
@@ -692,7 +710,7 @@ Three-section form (Account, Profile, Permissions) backed by `POST /admin/users`
 
 ### `/admin/categories` — Categories List
 
-**Status:** `✅ done` | **Files:** `app/admin/categories/page.tsx`, `app/admin/categories/CategoriesContent.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/categories/page.tsx`, `app/(admin)/admin/categories/CategoriesContent.tsx`, `app/(admin)/admin/categories/CategoriesPageClient.tsx`
 
 **API resources** *(re-read openapi.json)*
 - `GET /admin/categories` — `PaginatedCategoryResponseDto` (page, limit)
@@ -715,7 +733,7 @@ Three-section form (Account, Profile, Permissions) backed by `POST /admin/users`
 
 ### `/admin/categories/new` — Create Category
 
-**Status:** `⬜ todo` | **Files:** `app/admin/categories/new/page.tsx`
+**Status:** `⬜ todo` | **Files:** `app/(admin)/admin/categories/new/page.tsx` *(create)*
 
 **API resources** *(re-read openapi.json)*
 - `POST /admin/categories` — `CreateCategoryDto`: `slug` (pattern `^[a-z0-9]+(?:-[a-z0-9]+)*$`), `displayName`
@@ -733,7 +751,7 @@ On save: redirect to `/admin/categories/[newId]` to add subcategories.
 
 ### `/admin/categories/[id]` — Edit Category
 
-**Status:** `⬜ todo` | **Files:** `app/admin/categories/[id]/page.tsx`, `app/admin/categories/[id]/CategoryEditClient.tsx`
+**Status:** `⬜ todo` | **Files:** `app/(admin)/admin/categories/[id]/page.tsx` *(create)*, `app/(admin)/admin/categories/[id]/CategoryEditClient.tsx` *(create)*
 
 **API resources** *(re-read openapi.json)*
 - `GET /categories/{id}` — `CategoryResponseDto` with `subCategories[]`
@@ -754,116 +772,57 @@ On save: redirect to `/admin/categories/[newId]` to add subcategories.
 
 ---
 
-### `/admin/collections` — Collections List
+### `/admin/collections` — Collections List + CRUD
 
-**Status:** `⬜ todo` | **Files:** `app/admin/collections/page.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/collections/page.tsx`, `app/(admin)/admin/collections/CollectionsContent.tsx`, `app/(admin)/admin/collections/CollectionsPageClient.tsx`
 
-**API resources** *(re-read openapi.json)*
-- `GET /admin/collections` — `PaginatedAdminCollectionResponseDto`
-- `DELETE /admin/collections/{id}` — 204
-
-**Columns:** Name | Slug | Active | Created | Actions
-
-**Row actions:** Edit → `/admin/collections/[id]` | Delete → `<ConfirmDialog>`
+Inline CRUD (no separate new/edit pages). Collections list with create/edit dialogs and delete confirm.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
-
----
-
-### `/admin/collections/new` — Create Collection
-
-**Status:** `⬜ todo` | **Files:** `app/admin/collections/new/page.tsx`
-
-**API resources** *(re-read openapi.json)*
-- `POST /admin/collections` — `CreateCollectionDto`: `slug`, `displayName`, `description?`, `isActive?` (default true)
-
-**Form fields:** displayName, slug (auto-derived, editable), description (textarea), isActive toggle. On save → redirect to `/admin/collections/[id]`.
-
-**Change Log**
-
-| Date | Agent | Change |
-|---|---|---|
-
----
-
-### `/admin/collections/[id]` — Edit Collection
-
-**Status:** `⬜ todo` | **Files:** `app/admin/collections/[id]/page.tsx`
-
-**API resources** *(re-read openapi.json)*
-- `GET /admin/collections/{id}` — `AdminCollectionResponseDto`
-- `PATCH /admin/collections/{id}` — `UpdateCollectionDto`
-- `DELETE /admin/collections/{id}` — 204 (accessible from edit page too, with `<ConfirmDialog>`)
-
-**Form fields:** displayName, slug, description, isActive toggle. Check openapi.json for `bannerImageUrl` — if an upload endpoint exists, include photo upload section.
-
-**Change Log**
-
-| Date | Agent | Change |
-|---|---|---|
+| 2026-06-01 | — | Implemented with inline CRUD |
 
 ---
 
 ### `/admin/reviews` — Reviews List
 
-**Status:** `⬜ todo` | **Files:** `app/admin/reviews/page.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/reviews/page.tsx`, `app/(admin)/admin/reviews/ReviewsContent.tsx`, `app/(admin)/admin/reviews/ReviewDrawer.tsx`
 
-**API resources** *(re-read openapi.json)*
-- `GET /admin/reviews` — params: `page`, `limit`, `productId`, `status` (`ReviewStatus` enum — re-read), `userId`, `search`
-- `PATCH /admin/reviews/{id}/status` — `UpdateReviewStatusDto`
-- `DELETE /admin/reviews/{id}` — hard-delete (204)
-
-**Columns:**
-
-| Column | Source | Notes |
-|---|---|---|
-| Author | `authorName` or user email | Re-check AdminReviewResponseDto |
-| Product | product name | Re-check schema for embedded product |
-| Rating | `rating` | `<StarRating>` at 12px or numeric |
-| Body | `body` | Truncated to 80 chars |
-| Status | `status` | `<AdminBadge variant={reviewVariant[...]}>` |
-| Date | `createdAt` | Formatted |
-| Actions | — | Approve / Reject / Delete |
-
-**Filter bar:** Search | Status (All / Pending / Approved / Rejected)
-
-**Row actions:**
-- Approve (only if pending) — `PATCH .../status` with `{ status: 'approved' }`
-- Reject (only if pending) — `PATCH .../status` with `{ status: 'rejected' }`
-- Delete — `<ConfirmDialog>` then hard-delete
-
-> No edit review page — admin can only change status or delete.
+Review list with status filter (all/pending/approved/rejected). `ReviewDrawer` opens detail + approve/reject/delete actions.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-06-01 | — | Implemented |
 
 ---
 
 ### `/admin/shipping` — Shipping Methods
 
-**Status:** `⬜ todo` | **Files:** `app/admin/shipping/page.tsx`
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/shipping/page.tsx`, `app/(admin)/admin/shipping/ShippingContent.tsx`, `app/(admin)/admin/shipping/ShippingPageClient.tsx`
 
-**API resources** *(re-read openapi.json)*
-- `GET /admin/shipping-methods` — paginated list (re-read for schema)
-- `POST /admin/shipping-methods` — `CreateShippingMethodDto`
-- `PATCH /admin/shipping-methods/{id}` — `CreateShippingMethodDto`
-- `DELETE /admin/shipping-methods/{id}` — 204
-
-**Approach:** Inline CRUD (no separate edit page — shipping methods are simple). Each row has inline Edit (opens dialog) + Delete (`<ConfirmDialog>`). "Add shipping method" button opens same dialog for create.
-
-**Columns:** Name | Price | Active | Actions
-
-Re-read `CreateShippingMethodDto` in openapi.json for exact fields before building the form.
+Inline CRUD — list + create/edit dialog + delete confirm on same page.
 
 **Change Log**
 
 | Date | Agent | Change |
 |---|---|---|
+| 2026-06-01 | — | Implemented with inline CRUD |
+
+---
+
+### `/admin/changes` — Change Log
+
+**Status:** `✅ done` | **Files:** `app/(admin)/admin/changes/page.tsx`, `app/(admin)/admin/changes/ChangesContent.tsx`, `app/(admin)/admin/changes/ChangeDrawer.tsx`
+
+**Change Log**
+
+| Date | Agent | Change |
+|---|---|---|
+| 2026-06-01 | — | Implemented |
 
 ---
 
