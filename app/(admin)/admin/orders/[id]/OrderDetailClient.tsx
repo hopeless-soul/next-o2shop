@@ -197,7 +197,9 @@ export default function OrderDetailClient({ order, initialNotes }: OrderDetailCl
                   onValueChange={(v) => setPaymentStatus(v as PaymentStatus)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {PAYMENT_OPTIONS.find(o => o.value === paymentStatus)?.label}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {PAYMENT_OPTIONS.map((o) => (
@@ -213,7 +215,9 @@ export default function OrderDetailClient({ order, initialNotes }: OrderDetailCl
                   onValueChange={(v) => setFulfillmentStatus(v as FulfillmentStatus)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {FULFILLMENT_OPTIONS.find(o => o.value === fulfillmentStatus)?.label}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {FULFILLMENT_OPTIONS.map((o) => (
@@ -242,48 +246,7 @@ export default function OrderDetailClient({ order, initialNotes }: OrderDetailCl
             </div>
           </FormCard>
 
-          {/* Notes */}
-          <FormCard title="Notes">
-            <div className="mt-3 space-y-3">
-              {/* New note input at top */}
-              <textarea
-                value={noteText}
-                onChange={e => setNoteText(e.target.value)}
-                maxLength={1000}
-                rows={3}
-                placeholder="Add a note…"
-                className={textareaCls}
-              />
-              {noteError && (
-                <p className="text-[13px] text-[var(--admin-destructive)]">{noteError}</p>
-              )}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleAddNote}
-                  disabled={addingNote || !noteText.trim()}
-                  className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-50"
-                >
-                  {addingNote && <Loader2 className="size-4 animate-spin" />}
-                  Add Note
-                </button>
-              </div>
-              {/* Existing notes */}
-              {notes.length > 0 && (
-                <div className="space-y-2 pt-1 border-t border-[var(--admin-border)]">
-                  {notes.map((note, i) => (
-                    <textarea
-                      key={i}
-                      readOnly
-                      rows={3}
-                      value={note}
-                      className={`${textareaCls} bg-[var(--admin-bg)] cursor-default`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </FormCard>
+
         </div>
 
         {/* ── Right column ── */}
@@ -362,6 +325,49 @@ export default function OrderDetailClient({ order, initialNotes }: OrderDetailCl
               </div>
             </FormCard>
           )}
+
+          {/* Notes */}
+          <FormCard title="Notes">
+            <div className="mt-3 space-y-3">
+              {/* New note input at top */}
+              <textarea
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                maxLength={1000}
+                rows={3}
+                placeholder="Add a note…"
+                className={textareaCls}
+              />
+              {noteError && (
+                <p className="text-[13px] text-[var(--admin-destructive)]">{noteError}</p>
+              )}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleAddNote}
+                  disabled={addingNote || !noteText.trim()}
+                  className="flex  items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-50"
+                >
+                  {addingNote && <Loader2 className="size-4 animate-spin" />}
+                  Add Note
+                </button>
+              </div>
+              {/* Existing notes */}
+              {notes.length > 0 && (
+                <div className="pt-1 border-[var(--admin-border)] flex gap-2 flex-col-reverse">
+                  {notes.reverse().map((note, i) => (
+                    <textarea
+                      key={i}
+                      readOnly
+                      rows={3}
+                      value={note}
+                      className={`${textareaCls} bg-[var(--admin-bg)] cursor-default`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </FormCard>
         </div>
       </div>
 

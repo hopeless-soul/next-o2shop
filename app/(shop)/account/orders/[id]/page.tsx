@@ -129,7 +129,8 @@ export default async function OrderPage({
                     className="flex-1 h-0.5 mx-2"
                     style={{
                       backgroundColor:
-                        i < currentStep ? "var(--color-foreground-dark)" : "var(--color-border)",
+                        i < currentStep ? "var(--color-foreground-subtle)" : "var(--color-border)",
+                      transform: "translateY(-15px)", 
                     }}
                   />
                 )}
