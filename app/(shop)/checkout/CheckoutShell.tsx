@@ -1,6 +1,7 @@
 // app/(shop)/checkout/CheckoutShell.tsx
 "use client"
 
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useCart } from "@/lib/cart/CartContext"
 import { useCheckout } from "@/lib/checkout/CheckoutContext"
@@ -97,9 +98,26 @@ export default function CheckoutShell({
               {items.map((item) => (
                 <div
                   key={item.variantId}
-                  className="flex justify-between gap-4"
+                  className="flex items-center gap-3"
                 >
-                  <div>
+                  {/* Thumbnail */}
+                  <div
+                    className="relative size-16 flex-shrink-0 overflow-hidden rounded-sm"
+                    style={{ backgroundColor: "var(--color-surface-subtle)" }}
+                  >
+                    {item.imageUrl ? (
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.productName}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    ) : null}
+                  </div>
+
+                  {/* Text */}
+                  <div className="flex-1 min-w-0">
                     <p
                       className="font-sans text-[12px] uppercase tracking-widest"
                       style={{ color: "var(--color-foreground-dark)" }}
@@ -116,6 +134,8 @@ export default function CheckoutShell({
                       {item.colorName} / {item.size} × {item.quantity}
                     </p>
                   </div>
+
+                  {/* Price */}
                   <span
                     className="font-sans text-[12px] flex-shrink-0"
                     style={{ color: "var(--color-foreground)" }}
