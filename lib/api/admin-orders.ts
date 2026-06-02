@@ -72,7 +72,20 @@ export type UpdateOrderStatusDto = {
   fulfillmentStatus?: FulfillmentStatus
 }
 
+export type UpdateRecipientDto = {
+  email?: string
+  firstName?: string
+  lastName?: string
+  shippingAddress?: AdminOrderAddress
+  billingAddress?: AdminOrderAddress
+}
+
 export async function updateOrderStatus(id: string, dto: UpdateOrderStatusDto): Promise<AdminOrder> {
   const res = await clientApi.patch<AdminOrder>(`/admin/orders/${id}/status`, dto)
   return res.data
+}
+
+export async function addOrderNote(id: string, note: string): Promise<string[]> {
+  const res = await clientApi.post<{ notes: string[] }>(`/admin/orders/${id}/notes`, { note })
+  return res.data.notes
 }

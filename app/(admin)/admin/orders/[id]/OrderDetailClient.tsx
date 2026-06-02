@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, Fragment } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import FormCard from '@/components/admin/FormCard'
+import EditRecipientModal from '@/components/admin/EditRecipientModal'
 import {
   Select,
   SelectContent,
@@ -18,7 +19,7 @@ import type {
   PaymentStatus,
   FulfillmentStatus,
 } from '@/lib/api/admin-orders'
-import { updateOrderStatusAction } from './actions'
+import { updateOrderStatusAction, updateRecipientAction, addNoteAction } from './actions'
 
 // ── Internal helpers ─────────────────────────────────────
 
@@ -72,16 +73,34 @@ const FULFILLMENT_OPTIONS: { label: string; value: FulfillmentStatus }[] = [
 
 interface OrderDetailClientProps {
   order: AdminOrder
+  initialNotes: string[]
 }
 
-export default function OrderDetailClient({ order }: OrderDetailClientProps) {
+export default function OrderDetailClient({ order, initialNotes }: OrderDetailClientProps) {
+  // Status
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(order.paymentStatus)
   const [fulfillmentStatus, setFulfillmentStatus] = useState<FulfillmentStatus>(order.fulfillmentStatus)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
-  async function handleSave() {
+  // Recipient
+  const [recipient, setRecipient] = useState<Pick<AdminOrder, 'email' | 'firstName' | 'lastName' | 'shippingAddress' | 'billingAddress'>>({
+    email: order.email,
+    firstName: order.firstName,
+    lastName: order.lastName,
+    shippingAddress: order.shippingAddress,
+    billingAddress: order.billingAddress,
+  })
+  const [showEditRecipient, setShowEditRecipient] = useState(false)
+
+  // Notes
+  const [notes, setNotes] = useState<string[]>(initialNotes)
+  const [noteText, setNoteText] = useState('')
+  const [addingNote, setAddingNote] = useState(false)
+  const [noteError, setNoteError] = useState<string | null>(null)
+
+  async function handleSaveStatus() {
     setSaving(true)
     setSaveError(null)
     setSaveSuccess(false)
@@ -96,179 +115,274 @@ export default function OrderDetailClient({ order }: OrderDetailClientProps) {
     }
   }
 
+  async function handleAddNote() {
+    const text = noteText.trim()
+    if (!text) return
+    setAddingNote(true)
+    setNoteError(null)
+    try {
+      const updated = await addNoteAction(order.id, text)
+      setNotes(updated)
+      setNoteText('')
+    } catch {
+      setNoteError('Failed to add note. Please try again.')
+    } finally {
+      setAddingNote(false)
+    }
+  }
+
   const labelCls = 'block text-[12px] font-medium text-[var(--admin-text-secondary)] mb-1'
-  const billingIsSame = addressesMatch(order.shippingAddress, order.billingAddress)
+  const billingIsSame = addressesMatch(recipient.shippingAddress, recipient.billingAddress)
+
+  const textareaCls =
+    'w-full border border-[var(--admin-border)] rounded-[4px] px-3 py-2 text-[14px] text-[var(--admin-text-primary)] bg-white outline-none focus:border-[var(--admin-primary)] transition-colors duration-150 resize-none'
 
   return (
-    <div className="flex gap-6 items-start">
+    <>
+      <div className="flex gap-6 items-start">
 
-      {/* ── Left column ── */}
-      <div className="flex-1 space-y-4 min-w-0">
+        {/* ── Left column ── */}
+        <div className="flex-1 space-y-4 min-w-0">
 
-        {/* Order Items */}
-        <FormCard title="Order Items">
-          <div className="mt-3">
-            <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-6 gap-y-2">
-              <span className="text-[12px] text-[var(--admin-text-muted)]">Product</span>
-              <span className="text-[12px] text-[var(--admin-text-muted)]">SKU</span>
-              <span className="text-[12px] text-[var(--admin-text-muted)] text-right">Qty</span>
-              <span className="text-[12px] text-[var(--admin-text-muted)] text-right">Unit Price</span>
-              <span className="text-[12px] text-[var(--admin-text-muted)] text-right">Total</span>
-              <div className="col-span-5 h-px bg-[var(--admin-border)]" />
-              {order.items.map((item) => (
-                <Fragment key={item.id}>
-                  <span className="text-[14px] text-[var(--admin-text-primary)]">{item.productName}</span>
-                  <span className="text-[14px] text-[var(--admin-text-secondary)]">{item.productSku}</span>
-                  <span className="text-[14px] text-[var(--admin-text-primary)] text-right">{item.quantity}</span>
-                  <span className="text-[14px] text-[var(--admin-text-primary)] text-right">
-                    {formatAmount(item.productPrice, item.productCurrency)}
-                  </span>
-                  <span className="text-[14px] font-medium text-[var(--admin-text-primary)] text-right">
-                    {formatAmount(item.total, item.productCurrency)}
-                  </span>
-                </Fragment>
-              ))}
-            </div>
-          </div>
-        </FormCard>
-
-        {/* Summary */}
-        <FormCard title="Summary">
-          <div className="mt-3 space-y-2">
-            <div className="flex justify-between text-[14px]">
-              <span className="text-[var(--admin-text-secondary)]">
-                Shipping — {order.shippingMethodName}
-              </span>
-              <span>{formatAmount(order.shippingPrice, order.shippingCurrency)}</span>
-            </div>
-            <div className="flex justify-between text-[14px] font-semibold border-t border-[var(--admin-border)] pt-2">
-              <span>Total</span>
-              <span>{formatAmount(order.totalAmount, order.totalCurrency)}</span>
-            </div>
-          </div>
-        </FormCard>
-
-        {/* Status */}
-        <FormCard title="Status">
-          <div className="mt-3 space-y-3">
-            <div>
-              <label className={labelCls}>Payment Status</label>
-              <Select
-                value={paymentStatus}
-                onValueChange={(v) => setPaymentStatus(v as PaymentStatus)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAYMENT_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className={labelCls}>Fulfillment Status</label>
-              <Select
-                value={fulfillmentStatus}
-                onValueChange={(v) => setFulfillmentStatus(v as FulfillmentStatus)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {FULFILLMENT_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {saveError && (
-              <p className="text-[13px] text-[var(--admin-destructive)]">{saveError}</p>
-            )}
-            {saveSuccess && (
-              <p className="text-[13px] text-[var(--admin-status-success-fg)]">Status updated.</p>
-            )}
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-70"
-              >
-                {saving && <Loader2 className="size-4 animate-spin" />}
-                Save Status
-              </button>
-            </div>
-          </div>
-        </FormCard>
-      </div>
-
-      {/* ── Right column ── */}
-      <div className="w-[320px] shrink-0 space-y-4">
-
-        {/* Customer */}
-        <FormCard title="Customer">
-          <div className="mt-3 space-y-1">
-            <p className="text-[14px] font-medium text-[var(--admin-text-primary)]">
-              {order.email ?? '—'}
-            </p>
-            {(order.firstName || order.lastName) && (
-              <p className="text-[13px] text-[var(--admin-text-secondary)]">
-                {[order.firstName, order.lastName].filter(Boolean).join(' ')}
-              </p>
-            )}
-            {order.userId && (
-              <Link
-                href={`/admin/users/${order.userId}`}
-                className="text-[12px] text-[var(--admin-text-muted)] underline hover:text-[var(--admin-text-secondary)]"
-              >
-                View user account
-              </Link>
-            )}
-          </div>
-        </FormCard>
-
-        {/* Shipping Address */}
-        <FormCard title="Shipping Address">
-          <div className="mt-3">
-            <AddressBlock address={order.shippingAddress} />
-          </div>
-        </FormCard>
-
-        {/* Billing Address */}
-        <FormCard title="Billing Address">
-          <div className="mt-3">
-            {billingIsSame ? (
-              <p className="text-[13px] text-[var(--admin-text-muted)]">Same as shipping address</p>
-            ) : (
-              <AddressBlock address={order.billingAddress} />
-            )}
-          </div>
-        </FormCard>
-
-        {/* Payment refs — only if provider info is present */}
-        {order.paymentProviderId && (
-          <FormCard title="Payment">
-            <div className="mt-3 space-y-2">
-              <div>
-                <p className="text-[12px] text-[var(--admin-text-muted)]">Provider ID</p>
-                <p className="text-[14px] text-[var(--admin-text-primary)] break-all">
-                  {order.paymentProviderId}
-                </p>
+          {/* Order Items */}
+          <FormCard title="Order Items">
+            <div className="mt-3">
+              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-6 gap-y-2">
+                <span className="text-[12px] text-[var(--admin-text-muted)]">Product</span>
+                <span className="text-[12px] text-[var(--admin-text-muted)]">SKU</span>
+                <span className="text-[12px] text-[var(--admin-text-muted)] text-right">Qty</span>
+                <span className="text-[12px] text-[var(--admin-text-muted)] text-right">Unit Price</span>
+                <span className="text-[12px] text-[var(--admin-text-muted)] text-right">Total</span>
+                <div className="col-span-5 h-px bg-[var(--admin-border)]" />
+                {order.items.map((item) => (
+                  <Fragment key={item.id}>
+                    <span className="text-[14px] text-[var(--admin-text-primary)]">{item.productName}</span>
+                    <span className="text-[14px] text-[var(--admin-text-secondary)]">{item.productSku}</span>
+                    <span className="text-[14px] text-[var(--admin-text-primary)] text-right">{item.quantity}</span>
+                    <span className="text-[14px] text-[var(--admin-text-primary)] text-right">
+                      {formatAmount(item.productPrice, item.productCurrency)}
+                    </span>
+                    <span className="text-[14px] font-medium text-[var(--admin-text-primary)] text-right">
+                      {formatAmount(item.total, item.productCurrency)}
+                    </span>
+                  </Fragment>
+                ))}
               </div>
-              {order.paymentProviderRef && (
-                <div>
-                  <p className="text-[12px] text-[var(--admin-text-muted)]">Reference</p>
-                  <p className="text-[14px] text-[var(--admin-text-primary)] break-all">
-                    {order.paymentProviderRef}
-                  </p>
+            </div>
+          </FormCard>
+
+          {/* Summary */}
+          <FormCard title="Summary">
+            <div className="mt-3 space-y-2">
+              <div className="flex justify-between text-[14px]">
+                <span className="text-[var(--admin-text-secondary)]">
+                  Shipping — {order.shippingMethodName}
+                </span>
+                <span>{formatAmount(order.shippingPrice, order.shippingCurrency)}</span>
+              </div>
+              <div className="flex justify-between text-[14px] font-semibold border-t border-[var(--admin-border)] pt-2">
+                <span>Total</span>
+                <span>{formatAmount(order.totalAmount, order.totalCurrency)}</span>
+              </div>
+            </div>
+          </FormCard>
+
+          {/* Status */}
+          <FormCard title="Status">
+            <div className="mt-3 space-y-3">
+              <div>
+                <label className={labelCls}>Payment Status</label>
+                <Select
+                  value={paymentStatus}
+                  onValueChange={(v) => setPaymentStatus(v as PaymentStatus)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAYMENT_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className={labelCls}>Fulfillment Status</label>
+                <Select
+                  value={fulfillmentStatus}
+                  onValueChange={(v) => setFulfillmentStatus(v as FulfillmentStatus)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FULFILLMENT_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {saveError && (
+                <p className="text-[13px] text-[var(--admin-destructive)]">{saveError}</p>
+              )}
+              {saveSuccess && (
+                <p className="text-[13px] text-[var(--admin-status-success-fg)]">Status updated.</p>
+              )}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveStatus}
+                  disabled={saving}
+                  className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-70"
+                >
+                  {saving && <Loader2 className="size-4 animate-spin" />}
+                  Save Status
+                </button>
+              </div>
+            </div>
+          </FormCard>
+
+          {/* Notes */}
+          <FormCard title="Notes">
+            <div className="mt-3 space-y-3">
+              {/* New note input at top */}
+              <textarea
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                maxLength={1000}
+                rows={3}
+                placeholder="Add a note…"
+                className={textareaCls}
+              />
+              {noteError && (
+                <p className="text-[13px] text-[var(--admin-destructive)]">{noteError}</p>
+              )}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleAddNote}
+                  disabled={addingNote || !noteText.trim()}
+                  className="flex items-center gap-2 h-9 px-5 rounded-[4px] text-[14px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150 disabled:opacity-50"
+                >
+                  {addingNote && <Loader2 className="size-4 animate-spin" />}
+                  Add Note
+                </button>
+              </div>
+              {/* Existing notes */}
+              {notes.length > 0 && (
+                <div className="space-y-2 pt-1 border-t border-[var(--admin-border)]">
+                  {notes.map((note, i) => (
+                    <textarea
+                      key={i}
+                      readOnly
+                      rows={3}
+                      value={note}
+                      className={`${textareaCls} bg-[var(--admin-bg)] cursor-default`}
+                    />
+                  ))}
                 </div>
               )}
             </div>
           </FormCard>
-        )}
+        </div>
+
+        {/* ── Right column ── */}
+        <div className="w-[420px] shrink-0 space-y-4">
+
+          {/* Customer */}
+          <FormCard
+            title="Customer"
+            action={
+              <button
+                type="button"
+                onClick={() => setShowEditRecipient(true)}
+                className="flex items-center gap-1 h-7 px-2 rounded text-[12px] font-medium text-[var(--admin-text-secondary)] border border-[var(--admin-border)] hover:bg-[var(--admin-border)] transition-colors duration-150"
+              >
+                <Pencil className="size-3" />
+                Edit
+              </button>
+            }
+          >
+            <div className="mt-3 space-y-1">
+              <p className="text-[14px] font-medium text-[var(--admin-text-primary)]">
+                {recipient.email ?? '—'}
+              </p>
+              {(recipient.firstName || recipient.lastName) && (
+                <p className="text-[13px] text-[var(--admin-text-secondary)]">
+                  {[recipient.firstName, recipient.lastName].filter(Boolean).join(' ')}
+                </p>
+              )}
+              {order.userId && (
+                <Link
+                  href={`/admin/users/${order.userId}`}
+                  className="text-[12px] text-[var(--admin-text-muted)] underline hover:text-[var(--admin-text-secondary)]"
+                >
+                  View user account
+                </Link>
+              )}
+            </div>
+          </FormCard>
+
+          {/* Shipping Address */}
+          <FormCard title="Shipping Address">
+            <div className="mt-3">
+              <AddressBlock address={recipient.shippingAddress} />
+            </div>
+          </FormCard>
+
+          {/* Billing Address */}
+          <FormCard title="Billing Address">
+            <div className="mt-3">
+              {billingIsSame ? (
+                <p className="text-[13px] text-[var(--admin-text-muted)]">Same as shipping address</p>
+              ) : (
+                <AddressBlock address={recipient.billingAddress} />
+              )}
+            </div>
+          </FormCard>
+
+          {/* Payment refs — only if provider info is present */}
+          {order.paymentProviderId && (
+            <FormCard title="Payment">
+              <div className="mt-3 space-y-2">
+                <div>
+                  <p className="text-[12px] text-[var(--admin-text-muted)]">Provider ID</p>
+                  <p className="text-[14px] text-[var(--admin-text-primary)] break-all">
+                    {order.paymentProviderId}
+                  </p>
+                </div>
+                {order.paymentProviderRef && (
+                  <div>
+                    <p className="text-[12px] text-[var(--admin-text-muted)]">Reference</p>
+                    <p className="text-[14px] text-[var(--admin-text-primary)] break-all">
+                      {order.paymentProviderRef}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </FormCard>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Edit Recipient Modal */}
+      {showEditRecipient && (
+        <EditRecipientModal
+          order={{ ...order, ...recipient }}
+          onSubmit={updateRecipientAction}
+          onSave={(updated) => {
+            setRecipient({
+              email: updated.email,
+              firstName: updated.firstName,
+              lastName: updated.lastName,
+              shippingAddress: updated.shippingAddress,
+              billingAddress: updated.billingAddress,
+            })
+            setShowEditRecipient(false)
+          }}
+          onClose={() => setShowEditRecipient(false)}
+        />
+      )}
+    </>
   )
 }

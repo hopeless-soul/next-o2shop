@@ -8,7 +8,7 @@ import { listAddresses } from "@/lib/api/addresses-server";
 import { AuthError } from "@/lib/api/errors";
 import OrderStatusBadge from "@/components/account/OrderStatusBadge";
 import PaymentStatusBadge from "@/components/account/PaymentStatusBadge";
-import AddressCard from "@/components/account/AddressCard";
+import AddressesSection from "@/components/account/AddressesSection";
 import LogoutButton from "@/components/account/LogoutButton";
 
 function formatDate(dateStr: string) {
@@ -159,29 +159,7 @@ export default async function AccountPage() {
 
         {/* ── Saved Addresses ── */}
         <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2
-              className="font-sans text-[18px] uppercase tracking-[0.36px]"
-              style={{ color: "var(--color-foreground-dark)" }}
-            >
-              Saved Addresses
-            </h2>
-            <button
-              className="font-sans text-[11px] uppercase tracking-widest px-4 py-2 border hover:opacity-70"
-              style={{
-                borderColor: "var(--color-border)",
-                color: "var(--color-foreground-muted)",
-                transition: "var(--transition-base)",
-              }}
-            >
-              + Add Address
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-            {addresses.map((addr) => (
-              <AddressCard key={addr.id} address={addr.shippingAddress} heading={addr.name} editable={true} />
-            ))}
-          </div>
+          <AddressesSection initialAddresses={addresses} />
         </section>
       </div>
     </div>

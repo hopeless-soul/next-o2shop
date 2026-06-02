@@ -4,9 +4,11 @@ interface AddressCardProps {
   address: AddressDto;
   heading?: string;
   editable?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export default function AddressCard({ address, heading, editable = false }: AddressCardProps) {
+export default function AddressCard({ address, heading, editable = false, onEdit, onDelete }: AddressCardProps) {
   return (
     <div
       className="p-5 border flex flex-col"
@@ -40,6 +42,7 @@ export default function AddressCard({ address, heading, editable = false }: Addr
       {editable && (
         <div className="flex-1 flex items-end gap-2 pt-4">
           <button
+            onClick={onEdit}
             className="font-sans text-[11px] uppercase tracking-widest border px-3 py-1 hover:opacity-70"
             style={{
               borderColor: "var(--color-border)",
@@ -50,6 +53,7 @@ export default function AddressCard({ address, heading, editable = false }: Addr
             Edit
           </button>
           <button
+            onClick={onDelete}
             className="font-sans text-[11px] uppercase tracking-widest border px-3 py-1 hover:opacity-70"
             style={{
               borderColor: "var(--color-destructive)",

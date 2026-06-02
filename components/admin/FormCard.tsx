@@ -6,9 +6,10 @@ interface FormCardProps {
   description?: string
   children: ReactNode
   className?: string
+  action?: ReactNode
 }
 
-export default function FormCard({ title, description, children, className }: FormCardProps) {
+export default function FormCard({ title, description, children, className, action }: FormCardProps) {
   return (
     <div
       className={cn(
@@ -17,7 +18,10 @@ export default function FormCard({ title, description, children, className }: Fo
         className
       )}
     >
-      <h2 className="text-[16px] font-semibold text-[var(--admin-text-primary)] mb-1">{title}</h2>
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-[16px] font-semibold text-[var(--admin-text-primary)]">{title}</h2>
+        {action}
+      </div>
       {description && (
         <p className="text-[14px] text-[var(--admin-text-muted)] mb-4">{description}</p>
       )}

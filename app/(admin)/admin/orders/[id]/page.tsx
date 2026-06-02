@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminOrder } from '@/lib/api/admin-orders-server'
+import { getAdminOrder, getOrderNotes } from '@/lib/api/admin-orders-server'
 import { NotFoundError, AuthError } from '@/lib/api/errors'
 import OrderDetailClient from './OrderDetailClient'
 
@@ -21,6 +21,8 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     throw err
   }
 
+  const notes = await getOrderNotes(id).catch(() => [])
+
   return (
     <>
       <AdminPageHeader
@@ -39,7 +41,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
           </Link>
         }
       />
-      <OrderDetailClient order={order} />
+      <OrderDetailClient order={order} initialNotes={notes} />
     </>
   )
 }
