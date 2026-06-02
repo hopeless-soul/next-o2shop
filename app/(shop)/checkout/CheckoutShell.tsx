@@ -25,16 +25,12 @@ export default function CheckoutShell({
   const activeStepIndex = STEPS.findIndex((s) => s.path === pathname)
 
   return (
-    <div style={{ paddingTop: "var(--header-height-desktop)" }}>
+    <div className="pt-[var(--header-height-mobile)] lg:pt-[var(--header-height-desktop)]">
       {/* Breadcrumb */}
       {!isConfirmation && (
         <div
-          className="py-4 border-b"
-          style={{
-            borderColor: "var(--color-border-light)",
-            paddingLeft: "var(--header-px-desktop)",
-            paddingRight: "var(--header-px-desktop)",
-          }}
+          className="py-4 border-b px-[var(--header-px-mobile)] lg:px-[var(--header-px-desktop)]"
+          style={{ borderColor: "var(--color-border-light)" }}
         >
           <div className="flex items-center gap-3">
             {STEPS.map((step, i) => {
@@ -71,15 +67,17 @@ export default function CheckoutShell({
       )}
 
       {/* Two-column body */}
-      <div
-        className="flex flex-col lg:flex-row"
-        style={{
-          paddingLeft: "var(--header-px-desktop)",
-          paddingRight: "var(--header-px-desktop)",
-        }}
-      >
+      <div className="flex flex-col lg:flex-row px-[var(--header-px-mobile)] lg:px-[var(--header-px-desktop)]">
         {/* Left: active step */}
-        <div className="flex-1 py-10 lg:pr-16">{children}</div>
+        <div
+          className={
+            isConfirmation
+              ? "w-full flex justify-center py-10"
+              : "flex-1 py-10 lg:pr-16"
+          }
+        >
+          {children}
+        </div>
 
         {/* Right: order summary (hidden on confirmation) */}
         {!isConfirmation && (

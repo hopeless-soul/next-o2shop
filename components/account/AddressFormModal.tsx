@@ -38,7 +38,7 @@ function AddressFields({
     'block font-sans text-[10px] uppercase tracking-widest mb-1'
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
         <label
           htmlFor={`${prefix}-firstName`}

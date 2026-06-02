@@ -20,6 +20,141 @@ const STATUS_STEPS: OrderStatus[] = [
   "fulfilled",
 ];
 
+type OrderDetail = Awaited<ReturnType<typeof getOrderByNumber>>
+
+function MobileOrderView({
+  order,
+  subtotal,
+}: {
+  order: OrderDetail
+  subtotal: number
+}) {
+  return (
+    <div className="flex sm:hidden flex-col gap-10 py-8">
+      {/* Items */}
+      <section>
+        <h2
+          className="font-sans text-[15px] uppercase tracking-widest mb-4"
+          style={{ color: "var(--color-foreground-dark)" }}
+        >
+          Items
+        </h2>
+        <div className="flex flex-col gap-3">
+          {order.items.map((item) => (
+            <div
+              key={item.id}
+              className="border p-4"
+              style={{
+                borderColor: "var(--color-border)",
+                boxShadow: "var(--shadow-1)",
+              }}
+            >
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <span
+                  className="font-sans text-[13px] uppercase tracking-widest leading-tight"
+                  style={{ color: "var(--color-foreground-dark)" }}
+                >
+                  {item.productName}
+                </span>
+                <span
+                  className="font-sans text-[13px] shrink-0"
+                  style={{ color: "var(--color-foreground-dark)" }}
+                >
+                  ${item.total}
+                </span>
+              </div>
+              <p
+                className="text-[11px] mb-1"
+                style={{
+                  fontFamily: "var(--font-secondary)",
+                  color: "var(--color-foreground-muted)",
+                }}
+              >
+                {item.productSku}
+              </p>
+              <p
+                className="text-[11px]"
+                style={{
+                  fontFamily: "var(--font-secondary)",
+                  color: "var(--color-foreground-muted)",
+                }}
+              >
+                ${item.productPrice} × {item.quantity}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Totals */}
+      <div
+        className="flex flex-col gap-1.5 border-t pt-4"
+        style={{ borderColor: "var(--color-border-light)" }}
+      >
+        <div className="flex justify-between">
+          <span
+            className="text-sm"
+            style={{
+              fontFamily: "var(--font-secondary)",
+              color: "var(--color-foreground-muted)",
+            }}
+          >
+            Subtotal
+          </span>
+          <span className="font-sans text-[13px]" style={{ color: "var(--color-foreground)" }}>
+            ${subtotal}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span
+            className="text-sm"
+            style={{
+              fontFamily: "var(--font-secondary)",
+              color: "var(--color-foreground-muted)",
+            }}
+          >
+            Shipping
+          </span>
+          <span className="font-sans text-[13px]" style={{ color: "var(--color-foreground)" }}>
+            {order.shippingPrice === 0 ? "Free" : `$${order.shippingPrice}`}
+          </span>
+        </div>
+        <div
+          className="flex justify-between pt-2 border-t"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <span
+            className="font-sans text-[13px] uppercase tracking-widest"
+            style={{ color: "var(--color-foreground-dark)" }}
+          >
+            Total
+          </span>
+          <span
+            className="font-sans text-[16px]"
+            style={{ color: "var(--color-foreground-dark)" }}
+          >
+            ${order.totalAmount}
+          </span>
+        </div>
+      </div>
+
+      {/* Addresses */}
+      <section>
+        <h2
+          className="font-sans text-[15px] uppercase tracking-widest mb-4"
+          style={{ color: "var(--color-foreground-dark)" }}
+        >
+          Addresses
+        </h2>
+        <div className="flex flex-col gap-4">
+          <AddressCard address={order.shippingAddress} heading="Shipping Address" />
+          <AddressCard address={order.billingAddress} heading="Billing Address" />
+        </div>
+      </section>
+    </div>
+  )
+}
+
 export default async function OrderPage({
   params,
 }: {
@@ -27,7 +162,7 @@ export default async function OrderPage({
 }) {
   const { id } = await params;
 
-  let order;
+  let order: OrderDetail;
   try {
     order = await getOrderByNumber(id);
   } catch (err) {
@@ -42,13 +177,7 @@ export default async function OrderPage({
   const subtotal = order.items.reduce((s, item) => s + item.total, 0);
 
   return (
-    <div
-      style={{
-        paddingTop: "var(--header-height-desktop)",
-        paddingLeft: "var(--header-px-desktop)",
-        paddingRight: "var(--header-px-desktop)",
-      }}
-    >
+    <div className="pt-[var(--header-height-mobile)] lg:pt-[var(--header-height-desktop)] px-[var(--header-px-mobile)] lg:px-[var(--header-px-desktop)]">
       {/* Breadcrumbs */}
       <div className="py-4 border-b" style={{ borderColor: "var(--color-border-light)" }}>
         <p
@@ -72,12 +201,12 @@ export default async function OrderPage({
         </p>
       </div>
 
-      {/* ── Order header ── */}
+      {/* Order header — shared */}
       <div className="py-8 border-b" style={{ borderColor: "var(--color-border)" }}>
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <h1
-              className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none mb-2"
+              className="font-sans text-[22px] sm:text-[32px] uppercase tracking-[0.64px] leading-none mb-2"
               style={{ color: "var(--color-foreground-dark)" }}
             >
               Order #{order.orderNumber}
@@ -96,10 +225,10 @@ export default async function OrderPage({
         </div>
       </div>
 
-      {/* ── Status timeline ── */}
+      {/* Status timeline — shared */}
       {order.fulfillmentStatus !== "cancelled" && (
         <div className="py-8 border-b" style={{ borderColor: "var(--color-border-light)" }}>
-          <div className="flex items-center gap-0 max-w-xl">
+          <div className="flex items-center gap-0 w-full max-w-xl">
             {STATUS_STEPS.map((step, i) => (
               <div key={step} className="flex items-center flex-1">
                 <div className="flex flex-col items-center">
@@ -130,7 +259,7 @@ export default async function OrderPage({
                     style={{
                       backgroundColor:
                         i < currentStep ? "var(--color-foreground-subtle)" : "var(--color-border)",
-                      transform: "translateY(-15px)", 
+                      transform: "translateY(-15px)",
                     }}
                   />
                 )}
@@ -140,8 +269,11 @@ export default async function OrderPage({
         </div>
       )}
 
-      <div className="py-10 flex flex-col gap-10">
-        {/* ── Line items table ── */}
+      {/* Mobile */}
+      <MobileOrderView order={order} subtotal={subtotal} />
+
+      {/* Desktop */}
+      <div className="hidden sm:flex flex-col gap-10 py-10">
         <section>
           <h2
             className="font-sans text-[15px] uppercase tracking-widest mb-5"
@@ -149,7 +281,6 @@ export default async function OrderPage({
           >
             Items
           </h2>
-
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
@@ -221,7 +352,6 @@ export default async function OrderPage({
             </table>
           </div>
 
-          {/* Order totals */}
           <div className="mt-4 flex flex-col items-end gap-1.5 max-w-xs ml-auto">
             <div className="flex justify-between w-full">
               <span
@@ -271,7 +401,6 @@ export default async function OrderPage({
           </div>
         </section>
 
-        {/* ── Addresses ── */}
         <section>
           <h2
             className="font-sans text-[15px] uppercase tracking-widest mb-5"

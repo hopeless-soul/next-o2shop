@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { useCheckout } from "@/lib/checkout/CheckoutContext"
 import type { AddressDto, SavedAddress } from "@/lib/types"
 
+// ── Shared field components ────────────────────────────────────────────────────
+
 type AddressFieldsProps = {
   value: Partial<AddressDto>
   onChange: (field: keyof AddressDto, val: string) => void
@@ -19,7 +21,7 @@ function AddressFields({ value, onChange }: AddressFieldsProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className={label} style={labelStyle}>First Name *</label>
           <input className={input} style={style} value={value.firstName ?? ""} onChange={(e) => onChange("firstName", e.target.value)} required />
@@ -41,7 +43,7 @@ function AddressFields({ value, onChange }: AddressFieldsProps) {
         <label className={label} style={labelStyle}>Apt, suite, etc.</label>
         <input className={input} style={style} value={value.address2 ?? ""} onChange={(e) => onChange("address2", e.target.value)} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className={label} style={labelStyle}>City *</label>
           <input className={input} style={style} value={value.city ?? ""} onChange={(e) => onChange("city", e.target.value)} required />
@@ -51,7 +53,7 @@ function AddressFields({ value, onChange }: AddressFieldsProps) {
           <input className={input} style={style} value={value.province ?? ""} onChange={(e) => onChange("province", e.target.value)} required />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className={label} style={labelStyle}>Postal Code *</label>
           <input className={input} style={style} value={value.postalCode ?? ""} onChange={(e) => onChange("postalCode", e.target.value)} required />
@@ -129,6 +131,238 @@ function SavedAddressCard({
   )
 }
 
+// ── Layout props ───────────────────────────────────────────────────────────────
+
+type LayoutProps = {
+  email: string
+  setEmail: (v: string) => void
+  shipping: Partial<AddressDto>
+  setShipping: React.Dispatch<React.SetStateAction<Partial<AddressDto>>>
+  billingIsSame: boolean
+  setBillingIsSame: (v: boolean) => void
+  billing: Partial<AddressDto>
+  setBilling: React.Dispatch<React.SetStateAction<Partial<AddressDto>>>
+  addresses: SavedAddress[]
+  selectedId: string | null
+  onUse: (addr: SavedAddress) => void
+}
+
+// ── Mobile layout ──────────────────────────────────────────────────────────────
+
+function MobileInformationLayout({
+  email, setEmail,
+  shipping, setShipping,
+  billingIsSame, setBillingIsSame,
+  billing, setBilling,
+  addresses, selectedId, onUse,
+}: LayoutProps) {
+  const heading = "font-sans text-[18px] uppercase tracking-widest mb-5"
+  const headingStyle = { color: "var(--color-foreground-dark)" }
+
+  return (
+    <div className="flex sm:hidden flex-col gap-8">
+      {/* Saved addresses first — quickest path for returning users */}
+      {addresses.length > 0 && (
+        <div>
+          <h3
+            className="font-sans text-[11px] uppercase tracking-widest mb-3"
+            style={{ color: "var(--color-foreground-muted)" }}
+          >
+            Saved Addresses
+          </h3>
+          <div className="flex flex-col gap-2">
+            {addresses.map((addr) => (
+              <SavedAddressCard
+                key={addr.id}
+                address={addr}
+                selected={selectedId === addr.id}
+                onUse={() => onUse(addr)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Contact */}
+      <div>
+        <h2 className={heading} style={headingStyle}>Contact</h2>
+        <label
+          className="block font-sans text-[11px] uppercase tracking-widest mb-1"
+          style={{ color: "var(--color-foreground-muted)" }}
+        >
+          Email *
+        </label>
+        <input
+          type="email"
+          required
+          className="w-full border px-3 py-2 font-sans text-[13px] outline-none bg-transparent"
+          style={{ borderColor: "var(--color-border)", color: "var(--color-foreground)" }}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+
+      {/* Shipping */}
+      <div>
+        <h2 className={heading} style={headingStyle}>Shipping Address</h2>
+        <AddressFields
+          value={shipping}
+          onChange={(field, val) => setShipping((prev) => ({ ...prev, [field]: val }))}
+        />
+      </div>
+
+      {/* Billing */}
+      <div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={billingIsSame}
+            onChange={(e) => setBillingIsSame(e.target.checked)}
+            className="w-4 h-4"
+          />
+          <span
+            className="font-sans text-[12px] uppercase tracking-widest"
+            style={{ color: "var(--color-foreground)" }}
+          >
+            Billing same as shipping
+          </span>
+        </label>
+        {!billingIsSame && (
+          <div className="mt-6">
+            <h3
+              className="font-sans text-[14px] uppercase tracking-widest mb-4"
+              style={{ color: "var(--color-foreground-dark)" }}
+            >
+              Billing Address
+            </h3>
+            <AddressFields
+              value={billing}
+              onChange={(field, val) => setBilling((prev) => ({ ...prev, [field]: val }))}
+            />
+          </div>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        className="w-full font-sans text-[11px] uppercase tracking-widest px-10 py-4 transition-opacity hover:opacity-80"
+        style={{ background: "var(--color-foreground-dark)", color: "var(--color-on-dark)" }}
+      >
+        Continue to Shipping
+      </button>
+    </div>
+  )
+}
+
+// ── Desktop layout ─────────────────────────────────────────────────────────────
+
+function DesktopInformationLayout({
+  email, setEmail,
+  shipping, setShipping,
+  billingIsSame, setBillingIsSame,
+  billing, setBilling,
+  addresses, selectedId, onUse,
+}: LayoutProps) {
+  const heading = "font-sans text-[20px] uppercase tracking-widest mb-6"
+  const headingStyle = { color: "var(--color-foreground-dark)" }
+
+  return (
+    <div className="hidden sm:flex flex-row gap-8 lg:items-start">
+      <div className="flex-1 max-w-xl">
+        <h2 className={heading} style={headingStyle}>Contact</h2>
+
+        <div className="mb-8">
+          <label
+            className="block font-sans text-[11px] uppercase tracking-widest mb-1"
+            style={{ color: "var(--color-foreground-muted)" }}
+          >
+            Email *
+          </label>
+          <input
+            type="email"
+            required
+            className="w-full border px-3 py-2 font-sans text-[13px] outline-none bg-transparent"
+            style={{ borderColor: "var(--color-border)", color: "var(--color-foreground)" }}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <h2 className={heading} style={headingStyle}>Shipping Address</h2>
+
+        <div className="mb-8">
+          <AddressFields
+            value={shipping}
+            onChange={(field, val) => setShipping((prev) => ({ ...prev, [field]: val }))}
+          />
+        </div>
+
+        <div className="mb-8">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={billingIsSame}
+              onChange={(e) => setBillingIsSame(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span
+              className="font-sans text-[12px] uppercase tracking-widest"
+              style={{ color: "var(--color-foreground)" }}
+            >
+              Billing same as shipping
+            </span>
+          </label>
+          {!billingIsSame && (
+            <div className="mt-6">
+              <h3
+                className="font-sans text-[14px] uppercase tracking-widest mb-4"
+                style={{ color: "var(--color-foreground-dark)" }}
+              >
+                Billing Address
+              </h3>
+              <AddressFields
+                value={billing}
+                onChange={(field, val) => setBilling((prev) => ({ ...prev, [field]: val }))}
+              />
+            </div>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="w-full sm:w-auto font-sans text-[11px] uppercase tracking-widest px-10 py-4 transition-opacity hover:opacity-80"
+          style={{ background: "var(--color-foreground-dark)", color: "var(--color-on-dark)" }}
+        >
+          Continue to Shipping
+        </button>
+      </div>
+
+      {addresses.length > 0 && (
+        <div className="w-full lg:w-64 shrink-0">
+          <h3
+            className="font-sans text-[11px] uppercase tracking-widest mb-3"
+            style={{ color: "var(--color-foreground-muted)" }}
+          >
+            Saved Addresses
+          </h3>
+          <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: "360px" }}>
+            {addresses.map((addr) => (
+              <SavedAddressCard
+                key={addr.id}
+                address={addr}
+                selected={selectedId === addr.id}
+                onUse={() => onUse(addr)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Root component ─────────────────────────────────────────────────────────────
+
 type Props = {
   addresses: SavedAddress[]
 }
@@ -169,115 +403,20 @@ export default function InformationClient({ addresses }: Props) {
     router.push("/checkout/shipping")
   }
 
-  const heading = "font-sans text-[20px] uppercase tracking-widest mb-6"
-  const headingStyle = { color: "var(--color-foreground-dark)" }
+  const layoutProps: LayoutProps = {
+    email, setEmail,
+    shipping, setShipping,
+    billingIsSame, setBillingIsSame,
+    billing, setBilling,
+    addresses,
+    selectedId,
+    onUse: handleUse,
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-start">
-      <form onSubmit={handleSubmit} className="flex-1 max-w-xl">
-        <h2 className={heading} style={headingStyle}>
-          Contact
-        </h2>
-
-        <div className="mb-8">
-          <label
-            className="block font-sans text-[11px] uppercase tracking-widest mb-1"
-            style={{ color: "var(--color-foreground-muted)" }}
-          >
-            Email *
-          </label>
-          <input
-            type="email"
-            required
-            className="w-full border px-3 py-2 font-sans text-[13px] outline-none bg-transparent"
-            style={{
-              borderColor: "var(--color-border)",
-              color: "var(--color-foreground)",
-            }}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-
-        <h2 className={heading} style={headingStyle}>
-          Shipping Address
-        </h2>
-
-        <div className="mb-8">
-          <AddressFields
-            value={shipping}
-            onChange={(field, val) =>
-              setShipping((prev) => ({ ...prev, [field]: val }))
-            }
-          />
-        </div>
-
-        <div className="mb-8">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={billingIsSame}
-              onChange={(e) => setBillingIsSame(e.target.checked)}
-              className="w-4 h-4"
-            />
-            <span
-              className="font-sans text-[12px] uppercase tracking-widest"
-              style={{ color: "var(--color-foreground)" }}
-            >
-              Billing same as shipping
-            </span>
-          </label>
-
-          {!billingIsSame && (
-            <div className="mt-6">
-              <h3
-                className="font-sans text-[14px] uppercase tracking-widest mb-4"
-                style={{ color: "var(--color-foreground-dark)" }}
-              >
-                Billing Address
-              </h3>
-              <AddressFields
-                value={billing}
-                onChange={(field, val) =>
-                  setBilling((prev) => ({ ...prev, [field]: val }))
-                }
-              />
-            </div>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          className="font-sans text-[11px] uppercase tracking-widest px-10 py-4 transition-opacity hover:opacity-80"
-          style={{
-            background: "var(--color-foreground-dark)",
-            color: "var(--color-on-dark)",
-          }}
-        >
-          Continue to Shipping
-        </button>
-      </form>
-
-      {addresses.length > 0 && (
-        <div className="w-full lg:w-64 shrink-0">
-          <h3
-            className="font-sans text-[11px] uppercase tracking-widest mb-3"
-            style={{ color: "var(--color-foreground-muted)" }}
-          >
-            Saved Addresses
-          </h3>
-          <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: "360px" }}>
-            {addresses.map((addr) => (
-              <SavedAddressCard
-                key={addr.id}
-                address={addr}
-                selected={selectedId === addr.id}
-                onUse={() => handleUse(addr)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <form onSubmit={handleSubmit}>
+      <MobileInformationLayout {...layoutProps} />
+      <DesktopInformationLayout {...layoutProps} />
+    </form>
   )
 }

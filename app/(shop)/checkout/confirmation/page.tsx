@@ -45,7 +45,7 @@ function ConfirmationContent() {
   }
 
   return (
-    <div className="max-w-2xl py-10">
+    <div className="w-full max-w-2xl py-10">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <CheckCircle

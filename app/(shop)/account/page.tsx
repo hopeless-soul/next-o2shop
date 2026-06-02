@@ -6,6 +6,7 @@ import { getMe } from "@/lib/api/auth";
 import { listMyOrders } from "@/lib/api/orders";
 import { listAddresses } from "@/lib/api/addresses-server";
 import { AuthError } from "@/lib/api/errors";
+import type { Order, SavedAddress } from "@/lib/types";
 import OrderStatusBadge from "@/components/account/OrderStatusBadge";
 import PaymentStatusBadge from "@/components/account/PaymentStatusBadge";
 import AddressesSection from "@/components/account/AddressesSection";
@@ -17,6 +18,91 @@ function formatDate(dateStr: string) {
     month: "short",
     day: "numeric",
   });
+}
+
+function MobileAccountView({
+  orders,
+  addresses,
+}: {
+  orders: Order[]
+  addresses: SavedAddress[]
+}) {
+  return (
+    <div className="flex sm:hidden flex-col gap-10 py-8">
+      <section>
+        <h2
+          className="font-sans text-[16px] uppercase tracking-widest mb-4"
+          style={{ color: "var(--color-foreground-dark)" }}
+        >
+          Order History
+        </h2>
+
+        {orders.length === 0 ? (
+          <p
+            className="text-sm"
+            style={{
+              fontFamily: "var(--font-secondary)",
+              color: "var(--color-foreground-subtle)",
+            }}
+          >
+            No orders yet.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {orders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/account/orders/${order.orderNumber}`}
+                className="block border p-4 transition-opacity hover:opacity-80"
+                style={{
+                  borderColor: "var(--color-border)",
+                  boxShadow: "var(--shadow-1)",
+                }}
+              >
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <span
+                    className="font-sans text-[14px] uppercase tracking-widest leading-tight"
+                    style={{ color: "var(--color-foreground-dark)" }}
+                  >
+                    #{order.orderNumber}
+                  </span>
+                  <span
+                    className="font-sans text-[20px] leading-none shrink-0"
+                    style={{ color: "var(--color-foreground-subtle)" }}
+                  >
+                    ›
+                  </span>
+                </div>
+                <p
+                  className="text-[11px] mb-3"
+                  style={{
+                    fontFamily: "var(--font-secondary)",
+                    color: "var(--color-foreground-muted)",
+                  }}
+                >
+                  {formatDate(order.createdAt)}
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <PaymentStatusBadge status={order.paymentStatus} />
+                  <OrderStatusBadge status={order.fulfillmentStatus} />
+                </div>
+                <p
+                  className="font-sans text-[15px] tracking-widest"
+                  style={{ color: "var(--color-foreground-dark)" }}
+                >
+                  ${order.totalAmount}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <AddressesSection initialAddresses={addresses} />
+      </section>
+    </div>
+  )
 }
 
 export default async function AccountPage() {
@@ -34,13 +120,7 @@ export default async function AccountPage() {
   const orders = ordersResult.data;
 
   return (
-    <div
-      style={{
-        paddingTop: "var(--header-height-desktop)",
-        paddingLeft: "var(--header-px-desktop)",
-        paddingRight: "var(--header-px-desktop)",
-      }}
-    >
+    <div className="pt-[var(--header-height-mobile)] lg:pt-[var(--header-height-desktop)] px-[var(--header-px-mobile)] lg:px-[var(--header-px-desktop)]">
       {/* Breadcrumbs */}
       <div className="py-4 border-b" style={{ borderColor: "var(--color-border-light)" }}>
         <p
@@ -69,8 +149,11 @@ export default async function AccountPage() {
         <LogoutButton />
       </div>
 
-      <div className="py-10 flex flex-col gap-12">
-        {/* ── Order History ── */}
+      {/* Mobile */}
+      <MobileAccountView orders={orders} addresses={addresses} />
+
+      {/* Desktop */}
+      <div className="hidden sm:flex flex-col gap-12 py-10">
         <section>
           <h2
             className="font-sans text-[18px] uppercase tracking-[0.36px] mb-6"
@@ -78,23 +161,19 @@ export default async function AccountPage() {
           >
             Order History
           </h2>
-
-          {/* Desktop table */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr style={{ borderBottom: "2px solid var(--color-border)" }}>
-                  {["Order", "Date", "Payment", "Fulfillment", "Total", ""].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="pb-3 text-left font-sans text-[11px] uppercase tracking-widest"
-                        style={{ color: "var(--color-foreground-subtle)" }}
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
+                  {["Order", "Date", "Payment", "Fulfillment", "Total", ""].map((h) => (
+                    <th
+                      key={h}
+                      className="pb-3 text-left font-sans text-[11px] uppercase tracking-widest"
+                      style={{ color: "var(--color-foreground-subtle)" }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -157,7 +236,6 @@ export default async function AccountPage() {
           </div>
         </section>
 
-        {/* ── Saved Addresses ── */}
         <section>
           <AddressesSection initialAddresses={addresses} />
         </section>
