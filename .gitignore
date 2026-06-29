@@ -46,9 +46,6 @@ CLAUDE*
 .agent*
 .agents*
 .playwright-mcp
-/specs/reference/
-/specs/research/
-/specs/screenshots/
-/specs/*
-!/specs/*.md
+/specs/
 .superpowers
+/docs/superpowers
