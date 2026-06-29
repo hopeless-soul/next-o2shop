@@ -38,10 +38,7 @@ function MobileAccountView({
 
         {orders.length === 0 ? (
           <p
-            className="text-sm text-foreground-subtle"
-            style={{
-              fontFamily: "var(--font-secondary)",
-            }}
+            className="font-secondary text-sm text-foreground-subtle"
           >
             No orders yet.
           </p>
@@ -66,10 +63,7 @@ function MobileAccountView({
                   </span>
                 </div>
                 <p
-                  className="text-[11px] mb-3 text-foreground-muted"
-                  style={{
-                    fontFamily: "var(--font-secondary)",
-                  }}
+                  className="font-secondary text-[11px] mb-3 text-foreground-muted"
                 >
                   {formatDate(order.createdAt)}
                 </p>
@@ -114,10 +108,7 @@ export default async function AccountPage() {
       {/* Breadcrumbs */}
       <div className="py-4 border-b border-border-light">
         <p
-          className="text-[12px] uppercase tracking-widest text-foreground-subtle"
-          style={{
-            fontFamily: "var(--font-secondary)",
-          }}
+          className="font-secondary text-[12px] uppercase tracking-widest text-foreground-subtle"
         >
           <Link href="/" className="hover:opacity-70" style={{ transition: "var(--transition-nav)" }}>
             Home
@@ -177,10 +168,7 @@ export default async function AccountPage() {
                     </td>
                     <td className="py-4">
                       <span
-                        className="text-sm text-foreground-muted"
-                        style={{
-                          fontFamily: "var(--font-secondary)",
-                        }}
+                        className="font-secondary text-sm text-foreground-muted"
                       >
                         {formatDate(order.createdAt)}
                       </span>

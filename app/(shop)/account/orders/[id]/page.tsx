@@ -58,18 +58,12 @@ function MobileOrderView({
                 </span>
               </div>
               <p
-                className="text-[11px] mb-1 text-foreground-muted"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                }}
+                className="font-secondary text-[11px] mb-1 text-foreground-muted"
               >
                 {item.productSku}
               </p>
               <p
-                className="text-[11px] text-foreground-muted"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                }}
+                className="font-secondary text-[11px] text-foreground-muted"
               >
                 ${item.productPrice} × {item.quantity}
               </p>
@@ -84,10 +78,7 @@ function MobileOrderView({
       >
         <div className="flex justify-between">
           <span
-            className="text-sm text-foreground-muted"
-            style={{
-              fontFamily: "var(--font-secondary)",
-            }}
+            className="font-secondary text-sm text-foreground-muted"
           >
             Subtotal
           </span>
@@ -97,10 +88,7 @@ function MobileOrderView({
         </div>
         <div className="flex justify-between">
           <span
-            className="text-sm text-foreground-muted"
-            style={{
-              fontFamily: "var(--font-secondary)",
-            }}
+            className="font-secondary text-sm text-foreground-muted"
           >
             Shipping
           </span>
@@ -166,10 +154,7 @@ export default async function OrderPage({
       {/* Breadcrumbs */}
       <div className="py-4 border-b border-border-light">
         <p
-          className="text-[12px] uppercase tracking-widest text-foreground-subtle"
-          style={{
-            fontFamily: "var(--font-secondary)",
-          }}
+          className="font-secondary text-[12px] uppercase tracking-widest text-foreground-subtle"
         >
           <Link href="/" className="hover:opacity-70" style={{ transition: "var(--transition-nav)" }}>
             Home
@@ -195,10 +180,7 @@ export default async function OrderPage({
               Order #{order.orderNumber}
             </h1>
             <p
-              className="text-sm text-foreground-muted"
-              style={{
-                fontFamily: "var(--font-secondary)",
-              }}
+              className="font-secondary text-sm text-foreground-muted"
             >
               Placed {formatDate(order.createdAt)}
             </p>
@@ -284,10 +266,7 @@ export default async function OrderPage({
                     </td>
                     <td className="py-4 pr-6">
                       <span
-                        className="text-sm text-foreground-muted"
-                        style={{
-                          fontFamily: "var(--font-secondary)",
-                        }}
+                        className="font-secondary text-sm text-foreground-muted"
                       >
                         {item.productSku}
                       </span>
@@ -322,10 +301,7 @@ export default async function OrderPage({
           <div className="mt-4 flex flex-col items-end gap-1.5 max-w-xs ml-auto">
             <div className="flex justify-between w-full">
               <span
-                className="text-sm text-foreground-muted"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                }}
+                className="font-secondary text-sm text-foreground-muted"
               >
                 Subtotal
               </span>
@@ -335,10 +311,7 @@ export default async function OrderPage({
             </div>
             <div className="flex justify-between w-full">
               <span
-                className="text-sm text-foreground-muted"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                }}
+                className="font-secondary text-sm text-foreground-muted"
               >
                 Shipping
               </span>
