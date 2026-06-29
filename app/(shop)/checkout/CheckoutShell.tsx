@@ -5,6 +5,7 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useCart } from "@/lib/cart/CartContext"
 import { useCheckout } from "@/lib/checkout/CheckoutContext"
+import { cn } from "@/lib/utils"
 
 const STEPS = [
   { label: "Information", path: "/checkout/information" },
@@ -29,8 +30,7 @@ export default function CheckoutShell({
       {/* Breadcrumb */}
       {!isConfirmation && (
         <div
-          className="py-4 border-b px-[var(--header-px-mobile)] lg:px-[var(--header-px-desktop)]"
-          style={{ borderColor: "var(--color-border-light)" }}
+          className="py-4 border-b border-border-light px-[var(--header-px-mobile)] lg:px-[var(--header-px-desktop)]"
         >
           <div className="flex items-center gap-3">
             {STEPS.map((step, i) => {
@@ -40,22 +40,16 @@ export default function CheckoutShell({
                 <span key={step.path} className="flex items-center gap-3">
                   {i > 0 && (
                     <span
-                      className="font-sans text-[11px]"
-                      style={{ color: "var(--color-foreground-subtle)" }}
+                      className="font-sans text-[11px] text-foreground-subtle"
                     >
                       ›
                     </span>
                   )}
                   <span
-                    className="font-sans text-[11px] uppercase tracking-widest"
-                    style={{
-                      color: isActive
-                        ? "var(--color-foreground-dark)"
-                        : isDone
-                          ? "var(--color-foreground)"
-                          : "var(--color-foreground-subtle)",
-                      fontWeight: isActive ? 700 : 400,
-                    }}
+                    className={cn(
+                      "font-sans text-[11px] uppercase tracking-widest",
+                      isActive ? "text-foreground-dark font-bold" : isDone ? "text-foreground" : "text-foreground-subtle"
+                    )}
                   >
                     {step.label}
                   </span>
@@ -70,11 +64,9 @@ export default function CheckoutShell({
       <div className="flex flex-col lg:flex-row px-[var(--header-px-mobile)] lg:px-[var(--header-px-desktop)]">
         {/* Left: active step */}
         <div
-          className={
-            isConfirmation
-              ? "w-full flex justify-center py-10"
-              : "flex-1 py-10 lg:pr-16"
-          }
+          className={cn(
+            isConfirmation ? "w-full flex justify-center py-10" : "flex-1 py-10 lg:pr-16"
+          )}
         >
           {children}
         </div>
@@ -82,12 +74,10 @@ export default function CheckoutShell({
         {/* Right: order summary (hidden on confirmation) */}
         {!isConfirmation && (
           <div
-            className="lg:w-96 flex-shrink-0 py-10 border-l lg:pl-10"
-            style={{ borderColor: "var(--color-border-light)" }}
+            className="lg:w-96 flex-shrink-0 py-10 border-l border-border-light lg:pl-10"
           >
             <h3
-              className="font-sans text-[13px] uppercase tracking-widest mb-5"
-              style={{ color: "var(--color-foreground-dark)" }}
+              className="font-sans text-[13px] uppercase tracking-widest mb-5 text-foreground-dark"
             >
               Order Summary
             </h3>
@@ -117,17 +107,12 @@ export default function CheckoutShell({
                   {/* Text */}
                   <div className="flex-1 min-w-0">
                     <p
-                      className="font-sans text-[12px] uppercase tracking-widest"
-                      style={{ color: "var(--color-foreground-dark)" }}
+                      className="font-sans text-[12px] uppercase tracking-widest text-foreground-dark"
                     >
                       {item.productName}
                     </p>
                     <p
-                      className="text-xs mt-0.5"
-                      style={{
-                        fontFamily: "var(--font-secondary)",
-                        color: "var(--color-foreground-muted)",
-                      }}
+                      className="text-xs mt-0.5 font-secondary text-foreground-muted"
                     >
                       {item.colorName} / {item.size} × {item.quantity}
                     </p>
@@ -135,8 +120,7 @@ export default function CheckoutShell({
 
                   {/* Price */}
                   <span
-                    className="font-sans text-[12px] flex-shrink-0"
-                    style={{ color: "var(--color-foreground)" }}
+                    className="font-sans text-[12px] flex-shrink-0 text-foreground"
                   >
                     ${(item.unitPrice * item.quantity).toFixed(2)}
                   </span>
@@ -145,40 +129,29 @@ export default function CheckoutShell({
             </div>
 
             <div
-              className="border-t pt-4 flex flex-col gap-2"
-              style={{ borderColor: "var(--color-border-light)" }}
+              className="border-t border-border-light pt-4 flex flex-col gap-2"
             >
               <div className="flex justify-between">
                 <span
-                  className="text-sm"
-                  style={{
-                    fontFamily: "var(--font-secondary)",
-                    color: "var(--color-foreground-muted)",
-                  }}
+                  className="text-sm font-secondary text-foreground-muted"
                 >
                   Subtotal
                 </span>
                 <span
-                  className="font-sans text-[13px]"
-                  style={{ color: "var(--color-foreground)" }}
+                  className="font-sans text-[13px] text-foreground"
                 >
                   ${subtotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span
-                  className="text-sm"
-                  style={{
-                    fontFamily: "var(--font-secondary)",
-                    color: "var(--color-foreground-muted)",
-                  }}
+                  className="text-sm font-secondary text-foreground-muted"
                 >
                   Shipping
                 </span>
                 <span
                   suppressHydrationWarning
-                  className="font-sans text-[13px]"
-                  style={{ color: "var(--color-foreground)" }}
+                  className="font-sans text-[13px] text-foreground"
                 >
                   {checkout.shippingMethodId
                     ? checkout.shippingPrice === 0
@@ -189,18 +162,15 @@ export default function CheckoutShell({
               </div>
               {checkout.shippingMethodId && (
                 <div
-                  className="flex justify-between border-t pt-2"
-                  style={{ borderColor: "var(--color-border)" }}
+                  className="flex justify-between border-t border-border pt-2"
                 >
                   <span
-                    className="font-sans text-[13px] uppercase tracking-widest"
-                    style={{ color: "var(--color-foreground-dark)" }}
+                    className="font-sans text-[13px] uppercase tracking-widest text-foreground-dark"
                   >
                     Total
                   </span>
                   <span
-                    className="font-sans text-[15px]"
-                    style={{ color: "var(--color-foreground-dark)" }}
+                    className="font-sans text-[15px] text-foreground-dark"
                   >
                     ${(subtotal + checkout.shippingPrice).toFixed(2)}
                   </span>
