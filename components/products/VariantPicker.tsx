@@ -66,7 +66,13 @@ export default function VariantPicker({
                 key={color.name}
                 onClick={() => color.available && onColorChange(color.name)}
                 title={color.name}
-                className={cn("relative flex items-center justify-center font-sans text-[12px] uppercase tracking-widest font-secondary", selectedColor === color.name && "color-swatch-selected")}
+                className={cn(
+                  "relative flex items-center justify-center font-sans text-[12px] uppercase tracking-widest font-secondary",
+                  selectedColor === color.name && "color-swatch-selected",
+                  color.hex === "#f5f5f5" || color.hex === "#f5f5dc" || color.hex === "#d2b48c"
+                    ? "text-foreground"
+                    : "text-on-dark"
+                )}
                 style={{
                   flex: 1,
                   height: "30px",
@@ -75,10 +81,6 @@ export default function VariantPicker({
                   opacity: color.available ? 1 : 0.65,
                   cursor: color.available ? "pointer" : "no-drop",
                   transition: "var(--transition-base)",
-                  color:
-                    color.hex === "#f5f5f5" || color.hex === "#f5f5dc" || color.hex === "#d2b48c"
-                      ? "var(--color-foreground)"
-                      : "var(--color-on-dark)",
                   fontWeight: '800',
                   fontSize: "10px",
                   fontStyle: 'italic',
@@ -128,7 +130,10 @@ export default function VariantPicker({
                 <button
                   key={size.label}
                   onClick={() => size.available && onSizeChange(size.label)}
-                  className="relative font-sans text-[12px] uppercase tracking-widest flex items-center justify-center overflow-hidden"
+                  className={cn(
+                    "relative font-sans text-[12px] uppercase tracking-widest flex items-center justify-center overflow-hidden",
+                    isSelected ? "text-foreground-dark" : "text-foreground"
+                  )}
                   style={{
                     height: "44px",
                     padding: "5px 8px",
@@ -138,9 +143,6 @@ export default function VariantPicker({
                     borderBottom: isLastRow || cellBelowEmpty ? "1px solid #2b272a" : "none",
                     borderRadius: `${tl}px ${tr}px ${br}px ${bl}px`,
                     backgroundColor: isSelected ? highlightColor : "transparent",
-                    color: isSelected
-                      ? "var(--color-foreground-dark)"
-                      : "var(--color-foreground)",
                     opacity: size.available ? 1 : 0.65,
                     cursor: size.available ? "pointer" : "no-drop",
                     transition: "var(--transition-base)",
