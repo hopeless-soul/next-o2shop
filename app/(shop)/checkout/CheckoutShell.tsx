@@ -90,8 +90,7 @@ export default function CheckoutShell({
                 >
                   {/* Thumbnail */}
                   <div
-                    className="relative size-16 flex-shrink-0 overflow-hidden rounded-sm"
-                    style={{ backgroundColor: "var(--color-surface-subtle)" }}
+                    className="relative size-16 flex-shrink-0 overflow-hidden rounded-sm bg-muted"
                   >
                     {item.imageUrl ? (
                       <Image
