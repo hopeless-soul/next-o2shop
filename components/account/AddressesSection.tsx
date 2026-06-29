@@ -42,33 +42,20 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <h2
-          className="font-sans text-[18px] uppercase tracking-[0.36px]"
-          style={{ color: 'var(--color-foreground-dark)' }}
-        >
+        <h2 className="font-sans text-[18px] uppercase tracking-[0.36px] text-foreground-dark">
           Saved Addresses
         </h2>
         <button
           onClick={() => setModal('new')}
-          className="font-sans text-[11px] uppercase tracking-widest px-4 py-2 border hover:opacity-70"
-          style={{
-            borderColor: 'var(--color-border)',
-            color: 'var(--color-foreground-muted)',
-            transition: 'var(--transition-base)',
-          }}
+          className="font-sans text-[11px] uppercase tracking-widest px-4 py-2 border border-border text-foreground-muted hover:opacity-70"
+          style={{ transition: 'var(--transition-base)' }}
         >
           + Add Address
         </button>
       </div>
 
       {addresses.length === 0 && (
-        <p
-          className="text-sm"
-          style={{
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground-subtle)',
-          }}
-        >
+        <p className="text-sm font-secondary text-foreground-subtle">
           No saved addresses yet.
         </p>
       )}
@@ -88,37 +75,23 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
                 className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4"
                 style={{ backgroundColor: 'rgba(255,255,255,0.96)' }}
               >
-                <p
-                  className="text-sm text-center"
-                  style={{
-                    fontFamily: 'var(--font-secondary)',
-                    color: 'var(--color-foreground)',
-                  }}
-                >
+                <p className="text-sm text-center font-secondary text-foreground">
                   Remove this address?
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleDelete(addr.id)}
                     disabled={deletePending === addr.id}
-                    className="font-sans text-[11px] uppercase tracking-widest px-3 py-1.5 hover:opacity-80 disabled:opacity-40"
-                    style={{
-                      backgroundColor: 'var(--color-destructive)',
-                      color: '#fff',
-                      transition: 'var(--transition-base)',
-                    }}
+                    className="font-sans text-[11px] uppercase tracking-widest px-3 py-1.5 bg-destructive text-white hover:opacity-80 disabled:opacity-40"
+                    style={{ transition: 'var(--transition-base)' }}
                   >
                     {deletePending === addr.id ? 'Removing…' : 'Remove'}
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(null)}
                     disabled={deletePending === addr.id}
-                    className="font-sans text-[11px] uppercase tracking-widest px-3 py-1.5 border hover:opacity-70 disabled:opacity-40"
-                    style={{
-                      borderColor: 'var(--color-border)',
-                      color: 'var(--color-foreground-muted)',
-                      transition: 'var(--transition-base)',
-                    }}
+                    className="font-sans text-[11px] uppercase tracking-widest px-3 py-1.5 border border-border text-foreground-muted hover:opacity-70 disabled:opacity-40"
+                    style={{ transition: 'var(--transition-base)' }}
                   >
                     Cancel
                   </button>

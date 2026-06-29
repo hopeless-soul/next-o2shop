@@ -33,18 +33,14 @@ function AddressFields({
   onChange: (field: keyof AddressDto, value: string) => void
 }) {
   const inputClass =
-    'w-full border px-3 py-2 text-sm outline-none focus:border-current'
+    'w-full border border-border px-3 py-2 text-sm outline-none focus:border-current font-secondary text-foreground bg-background'
   const labelClass =
-    'block font-sans text-[10px] uppercase tracking-widest mb-1'
+    'block font-sans text-[10px] uppercase tracking-widest mb-1 text-foreground-subtle'
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
-        <label
-          htmlFor={`${prefix}-firstName`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-firstName`} className={labelClass}>
           First name *
         </label>
         <input
@@ -53,20 +49,10 @@ function AddressFields({
           onChange={e => onChange('firstName', e.target.value)}
           required
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div>
-        <label
-          htmlFor={`${prefix}-lastName`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-lastName`} className={labelClass}>
           Last name *
         </label>
         <input
@@ -75,20 +61,10 @@ function AddressFields({
           onChange={e => onChange('lastName', e.target.value)}
           required
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div className="col-span-2">
-        <label
-          htmlFor={`${prefix}-company`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-company`} className={labelClass}>
           Company
         </label>
         <input
@@ -96,20 +72,10 @@ function AddressFields({
           value={values.company ?? ''}
           onChange={e => onChange('company', e.target.value)}
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div className="col-span-2">
-        <label
-          htmlFor={`${prefix}-address1`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-address1`} className={labelClass}>
           Address *
         </label>
         <input
@@ -118,20 +84,10 @@ function AddressFields({
           onChange={e => onChange('address1', e.target.value)}
           required
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div className="col-span-2">
-        <label
-          htmlFor={`${prefix}-address2`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-address2`} className={labelClass}>
           Apartment, suite, etc.
         </label>
         <input
@@ -139,20 +95,10 @@ function AddressFields({
           value={values.address2 ?? ''}
           onChange={e => onChange('address2', e.target.value)}
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div>
-        <label
-          htmlFor={`${prefix}-city`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-city`} className={labelClass}>
           City *
         </label>
         <input
@@ -161,20 +107,10 @@ function AddressFields({
           onChange={e => onChange('city', e.target.value)}
           required
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div>
-        <label
-          htmlFor={`${prefix}-province`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-province`} className={labelClass}>
           State / Province *
         </label>
         <input
@@ -183,20 +119,10 @@ function AddressFields({
           onChange={e => onChange('province', e.target.value)}
           required
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div>
-        <label
-          htmlFor={`${prefix}-country`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-country`} className={labelClass}>
           Country *
         </label>
         <input
@@ -205,20 +131,10 @@ function AddressFields({
           onChange={e => onChange('country', e.target.value)}
           required
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div>
-        <label
-          htmlFor={`${prefix}-postalCode`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-postalCode`} className={labelClass}>
           Postal code *
         </label>
         <input
@@ -227,20 +143,10 @@ function AddressFields({
           onChange={e => onChange('postalCode', e.target.value)}
           required
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
       <div className="col-span-2">
-        <label
-          htmlFor={`${prefix}-phone`}
-          className={labelClass}
-          style={{ color: 'var(--color-foreground-subtle)' }}
-        >
+        <label htmlFor={`${prefix}-phone`} className={labelClass}>
           Phone
         </label>
         <input
@@ -249,12 +155,6 @@ function AddressFields({
           value={values.phone ?? ''}
           onChange={e => onChange('phone', e.target.value)}
           className={inputClass}
-          style={{
-            borderColor: 'var(--color-border)',
-            fontFamily: 'var(--font-secondary)',
-            color: 'var(--color-foreground)',
-            backgroundColor: 'var(--color-background)',
-          }}
         />
       </div>
     </div>
@@ -317,32 +217,17 @@ export default function AddressFormModal({
       style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div
-        className="relative h-full w-full max-w-md overflow-y-auto flex flex-col"
-        style={{ backgroundColor: 'var(--color-background)' }}
-      >
+      <div className="relative h-full w-full max-w-md overflow-y-auto flex flex-col bg-background">
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-6 py-5 border-b sticky top-0 z-10"
-          style={{
-            borderColor: 'var(--color-border)',
-            backgroundColor: 'var(--color-background)',
-          }}
-        >
-          <h2
-            className="font-sans text-[16px] uppercase tracking-[0.48px]"
-            style={{ color: 'var(--color-foreground-dark)' }}
-          >
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-background sticky top-0 z-10">
+          <h2 className="font-sans text-[16px] uppercase tracking-[0.48px] text-foreground-dark">
             {isEditing ? 'Edit Address' : 'Add Address'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-[20px] leading-none hover:opacity-60"
-            style={{
-              color: 'var(--color-foreground-muted)',
-              transition: 'var(--transition-base)',
-            }}
+            className="text-[20px] leading-none hover:opacity-60 text-foreground-muted"
+            style={{ transition: 'var(--transition-base)' }}
           >
             ×
           </button>
@@ -353,8 +238,7 @@ export default function AddressFormModal({
           <div>
             <label
               htmlFor="addr-name"
-              className="block font-sans text-[10px] uppercase tracking-widest mb-1"
-              style={{ color: 'var(--color-foreground-subtle)' }}
+              className="block font-sans text-[10px] uppercase tracking-widest mb-1 text-foreground-subtle"
             >
               Address label *
             </label>
@@ -364,22 +248,13 @@ export default function AddressFormModal({
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Home, Office"
               required
-              className="w-full border px-3 py-2 text-sm outline-none focus:border-current"
-              style={{
-                borderColor: 'var(--color-border)',
-                fontFamily: 'var(--font-secondary)',
-                color: 'var(--color-foreground)',
-                backgroundColor: 'var(--color-background)',
-              }}
+              className="w-full border border-border px-3 py-2 text-sm outline-none focus:border-current font-secondary text-foreground bg-background"
             />
           </div>
 
           {/* Shipping address */}
           <div>
-            <p
-              className="font-sans text-[12px] uppercase tracking-widest mb-4"
-              style={{ color: 'var(--color-foreground-dark)' }}
-            >
+            <p className="font-sans text-[12px] uppercase tracking-widest mb-4 text-foreground-dark">
               Shipping Address
             </p>
             <AddressFields prefix="ship" values={shipping} onChange={patchShipping} />
@@ -394,13 +269,7 @@ export default function AddressFormModal({
               className="w-4 h-4 accent-current"
               style={{ accentColor: 'var(--color-foreground-dark)' }}
             />
-            <span
-              className="text-sm"
-              style={{
-                fontFamily: 'var(--font-secondary)',
-                color: 'var(--color-foreground-muted)',
-              }}
-            >
+            <span className="text-sm font-secondary text-foreground-muted">
               Billing address same as shipping
             </span>
           </label>
@@ -408,10 +277,7 @@ export default function AddressFormModal({
           {/* Billing address */}
           {!billingSame && (
             <div>
-              <p
-                className="font-sans text-[12px] uppercase tracking-widest mb-4"
-                style={{ color: 'var(--color-foreground-dark)' }}
-              >
+              <p className="font-sans text-[12px] uppercase tracking-widest mb-4 text-foreground-dark">
                 Billing Address
               </p>
               <AddressFields prefix="bill" values={billing} onChange={patchBilling} />
@@ -419,13 +285,7 @@ export default function AddressFormModal({
           )}
 
           {error && (
-            <p
-              className="text-sm"
-              style={{
-                fontFamily: 'var(--font-secondary)',
-                color: 'var(--color-destructive)',
-              }}
-            >
+            <p className="text-sm font-secondary text-destructive">
               {error}
             </p>
           )}
@@ -435,12 +295,8 @@ export default function AddressFormModal({
             <button
               type="submit"
               disabled={pending}
-              className="flex-1 font-sans text-[11px] uppercase tracking-widest px-4 py-3 hover:opacity-80 disabled:opacity-40"
-              style={{
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-primary-foreground)',
-                transition: 'var(--transition-base)',
-              }}
+              className="flex-1 font-sans text-[11px] uppercase tracking-widest px-4 py-3 hover:opacity-80 disabled:opacity-40 bg-primary text-primary-foreground"
+              style={{ transition: 'var(--transition-base)' }}
             >
               {pending ? 'Saving…' : 'Save Address'}
             </button>
@@ -448,12 +304,8 @@ export default function AddressFormModal({
               type="button"
               onClick={onClose}
               disabled={pending}
-              className="font-sans text-[11px] uppercase tracking-widest px-4 py-3 border hover:opacity-70 disabled:opacity-40"
-              style={{
-                borderColor: 'var(--color-border)',
-                color: 'var(--color-foreground-muted)',
-                transition: 'var(--transition-base)',
-              }}
+              className="font-sans text-[11px] uppercase tracking-widest px-4 py-3 border border-border text-foreground-muted hover:opacity-70 disabled:opacity-40"
+              style={{ transition: 'var(--transition-base)' }}
             >
               Cancel
             </button>
