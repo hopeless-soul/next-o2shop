@@ -97,7 +97,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
   }
 
   return (
-    <div style={{ paddingTop: "var(--header-height-desktop)", marginTop: 8 }}>
+    <div className="pt-[var(--header-height-desktop)]" style={{ marginTop: 8 }}>
       {/* Main layout */}
       <div
         className="flex flex-col md:flex-row"
@@ -175,8 +175,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                 />
               ) : (
                 <span
-                  className="font-sans text-[13px] uppercase tracking-widest opacity-50 absolute"
-                  style={{ color: "var(--color-foreground)" }}
+                  className="font-sans text-[13px] uppercase tracking-widest opacity-50 absolute text-foreground"
                 >
                   {product.displayName}
                 </span>
@@ -205,11 +204,10 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                 {productType}
               </p>
               <h1
-                className="font-sans uppercase leading-tight"
+                className="font-sans uppercase leading-tight text-foreground-strong"
                 style={{
                   fontSize: "clamp(1.5rem, 3vw, 2.6rem)",
                   letterSpacing: "0.84px",
-                  color: "var(--color-foreground-strong)",
                   textTransform: "capitalize",
                   WebkitTextStroke: '1.4px var(--color-foreground-strong)'
                 }}
@@ -235,13 +233,11 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               <StarRating rating={avgRating} size={18} />
               <a
                 href='#reviewBlock'
-                className="text-[14px] underline"
+                className="text-[14px] underline font-secondary text-foreground-subtle"
                 style={{
                   lineHeight: '16px',
                   fontWeight: '500',
                   textUnderlineOffset: '3px',
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground-subtle)",
                 }}
               >
                 {reviews.length} reviews
@@ -255,11 +251,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                 return (
                   <p
                     key={i}
-                    className="text-xs leading-6"
-                    style={{
-                      fontFamily: "var(--font-secondary)",
-                      color: "var(--color-foreground)",
-                    }}
+                    className="text-xs leading-6 font-secondary text-foreground"
                   >
                     {desc.content}
                   </p>
@@ -279,11 +271,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                     desc.items.map((point) => (
                       <li
                         key={point}
-                        className="text-sm flex gap-4"
-                        style={{
-                          fontFamily: "var(--font-secondary)",
-                          color: "var(--color-foreground-muted)",
-                        }}
+                        className="text-sm flex gap-4 font-secondary text-foreground-muted"
                       >
                         <Star
                           aria-hidden="true"

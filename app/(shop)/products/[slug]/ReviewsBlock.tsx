@@ -129,27 +129,23 @@ export default function ReviewsBlock({
   }
 
   const inputStyle: React.CSSProperties = {
-    fontFamily: "var(--font-secondary)",
     fontSize: "13px",
-    border: "1px solid var(--color-border)",
     borderRadius: "var(--radius-sm)",
     padding: "8px 10px",
     width: "100%",
-    color: "var(--color-foreground-dark)",
-    backgroundColor: "var(--color-input)",
     outline: "none",
   };
 
+  const inputClassName = "font-secondary border border-border text-foreground-dark bg-input";
+
   return (
     <div
-      className="mt-6 border-t pt-6"
-      style={{ borderColor: "var(--color-border)" }}
+      className="mt-6 border-t pt-6 border-border"
     >
       {/* Header row: "REVIEWS" left + aggregate stars + chevron right */}
       <div className="flex items-center justify-between mb-4">
         <h2
-          className="font-sans text-[13px] uppercase tracking-[0.3px]"
-          style={{ color: "var(--color-foreground-dark)" }}
+          className="font-sans text-[13px] uppercase tracking-[0.3px] text-foreground-dark"
         >
           Reviews
         </h2>
@@ -185,12 +181,11 @@ export default function ReviewsBlock({
           {displayedReviews.length > 0 ? (
             <>
               <span
+                className="font-sans text-foreground-strong"
                 style={{
-                  fontFamily: "var(--font-primary)",
                   fontSize: "32px",
                   fontWeight: 600,
                   letterSpacing: "0.3px",
-                  color: "var(--color-foreground-strong)",
                   marginLeft: "8px",
                   lineHeight: 1,
                 }}
@@ -198,8 +193,8 @@ export default function ReviewsBlock({
                 {avgRating.toFixed(1)} / 5
               </span>
               <span
+                className="font-sans"
                 style={{
-                  fontFamily: "var(--font-primary)",
                   fontSize: "12px",
                   letterSpacing: "0.3px",
                   color: "rgb(156,156,156)",
@@ -210,8 +205,8 @@ export default function ReviewsBlock({
             </>
           ) : (
             <span
+              className="font-sans"
               style={{
-                fontFamily: "var(--font-primary)",
                 fontSize: "12px",
                 color: "rgb(156,156,156)",
               }}
@@ -223,15 +218,12 @@ export default function ReviewsBlock({
         <button
           type="button"
           onClick={formOpen ? closeForm : openForm}
-          className="w-full sm:w-auto sm:shrink-0"
+          className="w-full sm:w-auto sm:shrink-0 font-sans bg-primary border-2 border-primary"
           style={{
-            fontFamily: "var(--font-primary)",
             fontSize: "14px",
             fontWeight: 600,
             letterSpacing: "0.3px",
-            backgroundColor: "var(--color-primary)",
             color: "#ffffff",
-            border: "2px solid var(--color-primary)",
             borderRadius: "4px",
             padding: "8px 32px",
             cursor: "pointer",
@@ -252,13 +244,13 @@ export default function ReviewsBlock({
 
       {/* Sort dropdown */}
       {displayedReviews.length > 0 && (
-        <div className="flex items-center gap-1 mb-2 pt-2 border-t" style={{ borderColor: "var(--color-border)" }}>
+        <div className="flex items-center gap-1 mb-2 pt-2 border-t border-border">
           <div className="relative inline-flex items-center">
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+              className="font-sans"
               style={{
-                fontFamily: "var(--font-primary)",
                 fontSize: "14px",
                 letterSpacing: "normal",
                 color: "rgb(0,0,0)",
@@ -296,13 +288,7 @@ export default function ReviewsBlock({
       {/* Success message */}
       {formSuccess && (
         <div
-          className="mb-4 px-4 py-3 text-[13px]"
-          style={{
-            fontFamily: "var(--font-secondary)",
-            backgroundColor: "var(--color-status-success-bg)",
-            color: "var(--color-status-success-fg)",
-            border: "1px solid var(--color-border)",
-          }}
+          className="mb-4 px-4 py-3 text-[13px] font-secondary border border-border bg-[var(--color-status-success-bg)] text-[var(--color-status-success-fg)]"
         >
           Thanks! Your review has been submitted and is pending approval.
         </div>
@@ -312,12 +298,11 @@ export default function ReviewsBlock({
       {formOpen && (
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 mb-6 pt-4 border-t"
-          style={{ borderColor: "var(--color-border-light)", borderRadius: '24px' }}
+          className="flex flex-col gap-4 mb-6 pt-4 border-t border-border-light"
+          style={{ borderRadius: '24px' }}
         >
           <p
-            className="text-[14px] uppercase tracking-[0.3px] font-sans"
-            style={{ color: "var(--color-foreground-dark)" }}
+            className="text-[14px] uppercase tracking-[0.3px] font-sans text-foreground-dark"
           >
             Write a Review
           </p>
@@ -325,11 +310,7 @@ export default function ReviewsBlock({
           {/* Star picker */}
           <div className="flex flex-col gap-1.5">
             <label
-              className="text-[12px] uppercase tracking-wider"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground-muted)",
-              }}
+              className="text-[12px] uppercase tracking-wider font-secondary text-foreground-muted"
             >
               Rating
             </label>
@@ -356,11 +337,7 @@ export default function ReviewsBlock({
           {/* Review content */}
           <div className="flex flex-col gap-1.5">
             <label
-              className="text-[12px] uppercase tracking-wider"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground-muted)",
-              }}
+              className="text-[12px] uppercase tracking-wider font-secondary text-foreground-muted"
             >
               Review
             </label>
@@ -370,6 +347,7 @@ export default function ReviewsBlock({
               placeholder="Share your experience..."
               value={formContent}
               onChange={(e) => setFormContent(e.target.value)}
+              className={inputClassName}
               style={{ ...inputStyle, resize: "vertical" }}
             />
           </div>
@@ -377,11 +355,7 @@ export default function ReviewsBlock({
           {/* Display name */}
           <div className="flex flex-col gap-1.5">
             <label
-              className="text-[12px] uppercase tracking-wider"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground-muted)",
-              }}
+              className="text-[12px] uppercase tracking-wider font-secondary text-foreground-muted"
             >
               Display Name
             </label>
@@ -391,6 +365,7 @@ export default function ReviewsBlock({
               placeholder="Jane D."
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
+              className={inputClassName}
               style={inputStyle}
             />
           </div>
@@ -398,11 +373,7 @@ export default function ReviewsBlock({
           {/* Email */}
           <div className="flex flex-col gap-1.5">
             <label
-              className="text-[12px] uppercase tracking-wider"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground-muted)",
-              }}
+              className="text-[12px] uppercase tracking-wider font-secondary text-foreground-muted"
             >
               Email
             </label>
@@ -412,17 +383,14 @@ export default function ReviewsBlock({
               placeholder="you@example.com"
               value={formEmail}
               onChange={(e) => setFormEmail(e.target.value)}
+              className={inputClassName}
               style={inputStyle}
             />
           </div>
 
           {formError && (
             <p
-              className="text-[12px]"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-destructive)",
-              }}
+              className="text-[12px] font-secondary text-destructive"
             >
               {formError}
             </p>

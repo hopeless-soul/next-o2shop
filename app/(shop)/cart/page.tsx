@@ -12,23 +12,20 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center gap-6"
-        style={{ paddingTop: "var(--header-height-desktop)" }}
+        className="min-h-screen flex flex-col items-center justify-center gap-6 pt-[var(--header-height-desktop)]"
       >
         <ShoppingBag
           size={48}
-          style={{ color: "var(--color-foreground-subtle)" }}
+          className="text-foreground-subtle"
         />
         <p
-          className="font-sans text-[15px] uppercase tracking-widest"
-          style={{ color: "var(--color-foreground-muted)" }}
+          className="font-sans text-[15px] uppercase tracking-widest text-foreground-muted"
         >
           Your cart is empty
         </p>
         <Link
           href="/products"
-          className="font-sans text-[11px] uppercase tracking-widest underline"
-          style={{ color: "var(--color-foreground-dark)" }}
+          className="font-sans text-[11px] uppercase tracking-widest underline text-foreground-dark"
         >
           Continue Shopping
         </Link>
@@ -38,20 +35,14 @@ export default function CartPage() {
 
   return (
     <div
-      style={{
-        paddingTop: "var(--header-height-desktop)",
-        paddingLeft: "var(--header-px-desktop)",
-        paddingRight: "var(--header-px-desktop)",
-      }}
+      className="pt-[var(--header-height-desktop)] px-[var(--header-px-desktop)]"
     >
       {/* Page heading */}
       <div
-        className="py-8 border-b"
-        style={{ borderColor: "var(--color-border-light)" }}
+        className="py-8 border-b border-border-light"
       >
         <h1
-          className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none"
-          style={{ color: "var(--color-foreground-dark)" }}
+          className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none text-foreground-dark"
         >
           Your Cart
         </h1>
@@ -62,12 +53,11 @@ export default function CartPage() {
         <div className="flex-1 overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: "2px solid var(--color-border)" }}>
+              <tr className="border-b-2 border-border">
                 {["Product", "Price", "Quantity", "Total", ""].map((h) => (
                   <th
                     key={h}
-                    className="pb-3 text-left font-sans text-[11px] uppercase tracking-widest"
-                    style={{ color: "var(--color-foreground-subtle)" }}
+                    className="pb-3 text-left font-sans text-[11px] uppercase tracking-widest text-foreground-subtle"
                   >
                     {h}
                   </th>
@@ -78,13 +68,12 @@ export default function CartPage() {
               {items.map((item) => (
                 <tr
                   key={item.variantId}
-                  className="border-b"
-                  style={{ borderColor: "var(--color-border-light)" }}
+                  className="border-b border-border-light"
                 >
                   <td className="py-5 pr-6">
                     <div className="flex items-center gap-4">
                       {item.imageUrl && (
-                        <div className="w-16 h-16 relative flex-shrink-0 overflow-hidden" style={{ backgroundColor: "var(--color-muted)" }}>
+                        <div className="w-16 h-16 relative flex-shrink-0 overflow-hidden bg-muted">
                           <Image
                             src={item.imageUrl}
                             alt={item.productName}
@@ -96,17 +85,12 @@ export default function CartPage() {
                       )}
                       <div>
                         <p
-                          className="font-sans text-[13px] uppercase tracking-widest"
-                          style={{ color: "var(--color-foreground-dark)" }}
+                          className="font-sans text-[13px] uppercase tracking-widest text-foreground-dark"
                         >
                           {item.productName}
                         </p>
                         <p
-                          className="text-xs mt-0.5"
-                          style={{
-                            fontFamily: "var(--font-secondary)",
-                            color: "var(--color-foreground-muted)",
-                          }}
+                          className="text-xs mt-0.5 font-secondary text-foreground-muted"
                         >
                           {item.colorName} / {item.size}
                         </p>
@@ -115,16 +99,14 @@ export default function CartPage() {
                   </td>
                   <td className="py-5 pr-6">
                     <span
-                      className="font-sans text-[13px]"
-                      style={{ color: "var(--color-foreground)" }}
+                      className="font-sans text-[13px] text-foreground"
                     >
                       ${item.unitPrice.toFixed(2)}
                     </span>
                   </td>
                   <td className="py-5 pr-6">
                     <div
-                      className="inline-flex items-center border"
-                      style={{ borderColor: "var(--color-border)" }}
+                      className="inline-flex items-center border border-border"
                     >
                       <button
                         onClick={() =>
@@ -136,8 +118,7 @@ export default function CartPage() {
                         <Minus size={12} />
                       </button>
                       <span
-                        className="w-8 text-center font-sans text-[13px]"
-                        style={{ color: "var(--color-foreground)" }}
+                        className="w-8 text-center font-sans text-[13px] text-foreground"
                       >
                         {item.quantity}
                       </span>
@@ -154,8 +135,7 @@ export default function CartPage() {
                   </td>
                   <td className="py-5 pr-6">
                     <span
-                      className="font-sans text-[13px]"
-                      style={{ color: "var(--color-foreground-dark)" }}
+                      className="font-sans text-[13px] text-foreground-dark"
                     >
                       ${(item.unitPrice * item.quantity).toFixed(2)}
                     </span>
@@ -168,7 +148,7 @@ export default function CartPage() {
                     >
                       <X
                         size={16}
-                        style={{ color: "var(--color-foreground-muted)" }}
+                        className="text-foreground-muted"
                       />
                     </button>
                   </td>
@@ -181,68 +161,45 @@ export default function CartPage() {
         {/* Order summary */}
         <div className="lg:w-80 flex-shrink-0">
           <div
-            className="border p-6"
-            style={{ borderColor: "var(--color-border)" }}
+            className="border p-6 border-border"
           >
             <h2
-              className="font-sans text-[13px] uppercase tracking-widest mb-5"
-              style={{ color: "var(--color-foreground-dark)" }}
+              className="font-sans text-[13px] uppercase tracking-widest mb-5 text-foreground-dark"
             >
               Order Summary
             </h2>
             <div className="flex justify-between mb-3">
               <span
-                className="text-sm"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground-muted)",
-                }}
+                className="text-sm font-secondary text-foreground-muted"
               >
                 Subtotal
               </span>
               <span
-                className="font-sans text-[13px]"
-                style={{ color: "var(--color-foreground)" }}
+                className="font-sans text-[13px] text-foreground"
               >
                 ${subtotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between mb-6">
               <span
-                className="text-sm"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground-muted)",
-                }}
+                className="text-sm font-secondary text-foreground-muted"
               >
                 Shipping
               </span>
               <span
-                className="text-sm"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground-subtle)",
-                }}
+                className="text-sm font-secondary text-foreground-subtle"
               >
                 Calculated at checkout
               </span>
             </div>
             <Link
               href="/checkout/information"
-              className="block w-full text-center font-sans text-[11px] uppercase tracking-widest py-4 transition-opacity hover:opacity-80"
-              style={{
-                background: "var(--color-foreground-dark)",
-                color: "var(--color-on-dark)",
-              }}
+              className="block w-full text-center font-sans text-[11px] uppercase tracking-widest py-4 transition-opacity hover:opacity-80 bg-foreground-dark text-on-dark"
             >
               Proceed to Checkout
             </Link>
             <p
-              className="mt-3 text-center text-[11px]"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground-subtle)",
-              }}
+              className="mt-3 text-center text-[11px] font-secondary text-foreground-subtle"
             >
               Taxes and shipping calculated at checkout
             </p>

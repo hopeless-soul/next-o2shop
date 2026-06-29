@@ -31,23 +31,14 @@ export default async function ProductsPage({
           : "All Products";
 
   return (
-    <div style={{ paddingTop: "var(--header-height-desktop)" }}>
+    <div className="pt-[var(--header-height-desktop)]">
       {/* Page header */}
       <div
-        className="flex items-end justify-between py-6 border-b"
-        style={{
-          paddingLeft: "var(--header-px-desktop)",
-          paddingRight: "var(--header-px-desktop)",
-          borderColor: "var(--color-border)",
-        }}
+        className="flex items-end justify-between py-6 border-b px-[var(--header-px-desktop)] border-border"
       >
         <div>
           <p
-            className="text-[12px] uppercase tracking-widest mb-1"
-            style={{
-              fontFamily: "var(--font-secondary)",
-              color: "var(--color-foreground-subtle)",
-            }}
+            className="text-[12px] uppercase tracking-widest mb-1 font-secondary text-foreground-subtle"
           >
             <Link href="/" className="hover:opacity-70" style={{ transition: "var(--transition-nav)" }}>
               Home
@@ -56,18 +47,13 @@ export default async function ProductsPage({
             <span>{pageTitle}</span>
           </p>
           <h1
-            className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none"
-            style={{ color: "var(--color-foreground-dark)" }}
+            className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none text-foreground-dark"
           >
             {pageTitle}
           </h1>
         </div>
         <span
-          className="text-[13px]"
-          style={{
-            fontFamily: "var(--font-secondary)",
-            color: "var(--color-foreground-subtle)",
-          }}
+          className="text-[13px] font-secondary text-foreground-subtle"
         >
           {total} products
         </span>
@@ -76,18 +62,15 @@ export default async function ProductsPage({
       {/* Product grid */}
       {result !== null && products.length === 0 ? (
         <div
-          className="flex flex-col items-center justify-center py-24 gap-3"
-          style={{ paddingLeft: "var(--header-px-desktop)", paddingRight: "var(--header-px-desktop)" }}
+          className="flex flex-col items-center justify-center py-24 gap-3 px-[var(--header-px-desktop)]"
         >
           <p
-            className="text-[28px] uppercase tracking-[0.56px] leading-none"
-            style={{ fontFamily: "var(--font-primary)", color: "var(--color-foreground-dark)" }}
+            className="text-[28px] uppercase tracking-[0.56px] leading-none font-sans text-foreground-dark"
           >
             No products found
           </p>
           <p
-            className="text-[13px]"
-            style={{ fontFamily: "var(--font-secondary)", color: "var(--color-foreground-subtle)" }}
+            className="text-[13px] font-secondary text-foreground-subtle"
           >
             Try adjusting your search or filters.
           </p>

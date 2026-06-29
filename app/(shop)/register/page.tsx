@@ -4,17 +4,11 @@ import { Button } from "@/components/ui/Button";
 export default function RegisterPage() {
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 py-16"
-      style={{
-        paddingTop: "calc(var(--header-height-desktop) + 3rem)",
-        backgroundColor: "var(--color-muted)",
-      }}
+      className="min-h-screen flex items-center justify-center px-4 py-16 pt-[calc(var(--header-height-desktop)+3rem)] bg-muted"
     >
       <div
-        className="w-full max-w-md"
+        className="w-full max-w-md bg-card shadow-2"
         style={{
-          backgroundColor: "var(--color-card)",
-          boxShadow: "var(--shadow-2)",
           padding: "var(--space-10)",
         }}
       >
@@ -22,16 +16,14 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link
             href="/"
-            className="font-sans text-2xl tracking-[0.15em] uppercase"
-            style={{ color: "var(--color-foreground-dark)" }}
+            className="font-sans text-2xl tracking-[0.15em] uppercase text-foreground-dark"
           >
             O2SHOP
           </Link>
         </div>
 
         <h1
-          className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none mb-8 text-center"
-          style={{ color: "var(--color-foreground-strong)" }}
+          className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none mb-8 text-center text-foreground-strong"
         >
           Create Account
         </h1>
@@ -42,11 +34,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="firstName"
-                className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground)",
-                }}
+                className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
               >
                 First Name
               </label>
@@ -55,13 +43,9 @@ export default function RegisterPage() {
                 type="text"
                 autoComplete="given-name"
                 placeholder="Alex"
-                className="w-full px-4 py-3 text-sm outline-none"
+                className="w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground"
                 style={{
-                  fontFamily: "var(--font-secondary)",
-                  border: "1px solid var(--color-border-input)",
                   borderRadius: "var(--radius-base)",
-                  backgroundColor: "var(--color-input)",
-                  color: "var(--color-foreground)",
                   transition: "var(--transition-base)",
                 }}
               />
@@ -69,11 +53,7 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="lastName"
-                className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold"
-                style={{
-                  fontFamily: "var(--font-secondary)",
-                  color: "var(--color-foreground)",
-                }}
+                className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
               >
                 Last Name
               </label>
@@ -82,13 +62,9 @@ export default function RegisterPage() {
                 type="text"
                 autoComplete="family-name"
                 placeholder="Turner"
-                className="w-full px-4 py-3 text-sm outline-none"
+                className="w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground"
                 style={{
-                  fontFamily: "var(--font-secondary)",
-                  border: "1px solid var(--color-border-input)",
                   borderRadius: "var(--radius-base)",
-                  backgroundColor: "var(--color-input)",
-                  color: "var(--color-foreground)",
                   transition: "var(--transition-base)",
                 }}
               />
@@ -99,11 +75,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="email"
-              className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground)",
-              }}
+              className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
             >
               Email
             </label>
@@ -112,13 +84,9 @@ export default function RegisterPage() {
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
-              className="w-full px-4 py-3 text-sm outline-none"
+              className="w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground"
               style={{
-                fontFamily: "var(--font-secondary)",
-                border: "1px solid var(--color-border-input)",
                 borderRadius: "var(--radius-base)",
-                backgroundColor: "var(--color-input)",
-                color: "var(--color-foreground)",
                 transition: "var(--transition-base)",
               }}
             />
@@ -128,11 +96,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="password"
-              className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground)",
-              }}
+              className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
             >
               Password
             </label>
@@ -141,13 +105,9 @@ export default function RegisterPage() {
               type="password"
               autoComplete="new-password"
               placeholder="Min. 8 characters"
-              className="w-full px-4 py-3 text-sm outline-none"
+              className="w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground"
               style={{
-                fontFamily: "var(--font-secondary)",
-                border: "1px solid var(--color-border-input)",
                 borderRadius: "var(--radius-base)",
-                backgroundColor: "var(--color-input)",
-                color: "var(--color-foreground)",
                 transition: "var(--transition-base)",
               }}
             />
@@ -157,11 +117,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground)",
-              }}
+              className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
             >
               Confirm Password
             </label>
@@ -170,13 +126,9 @@ export default function RegisterPage() {
               type="password"
               autoComplete="new-password"
               placeholder="Repeat password"
-              className="w-full px-4 py-3 text-sm outline-none"
+              className="w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground"
               style={{
-                fontFamily: "var(--font-secondary)",
-                border: "1px solid var(--color-border-input)",
                 borderRadius: "var(--radius-base)",
-                backgroundColor: "var(--color-input)",
-                color: "var(--color-foreground)",
                 transition: "var(--transition-base)",
               }}
             />
@@ -188,18 +140,13 @@ export default function RegisterPage() {
         </form>
 
         <p
-          className="text-center mt-6 text-sm"
-          style={{
-            fontFamily: "var(--font-secondary)",
-            color: "var(--color-foreground-muted)",
-          }}
+          className="text-center mt-6 text-sm font-secondary text-foreground-muted"
         >
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-semibold hover:opacity-70"
+            className="font-semibold hover:opacity-70 text-foreground-dark"
             style={{
-              color: "var(--color-foreground-dark)",
               transition: "var(--transition-base)",
             }}
           >

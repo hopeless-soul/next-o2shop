@@ -49,10 +49,8 @@ export default function LoginForm() {
 
   return (
     <div
-      className="w-full max-w-md"
+      className="w-full max-w-md bg-card shadow-2"
       style={{
-        backgroundColor: "var(--color-card)",
-        boxShadow: "var(--shadow-2)",
         padding: "var(--space-10)",
       }}
     >
@@ -60,16 +58,14 @@ export default function LoginForm() {
       <div className="text-center mb-8">
         <Link
           href="/"
-          className="font-sans text-2xl tracking-[0.15em] uppercase"
-          style={{ color: "var(--color-foreground-dark)" }}
+          className="font-sans text-2xl tracking-[0.15em] uppercase text-foreground-dark"
         >
           O2SHOP
         </Link>
       </div>
 
       <h1
-        className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none mb-8 text-center"
-        style={{ color: "var(--color-foreground-strong)" }}
+        className="font-sans text-[32px] uppercase tracking-[0.64px] leading-none mb-8 text-center text-foreground-strong"
       >
         Sign In
       </h1>
@@ -79,11 +75,7 @@ export default function LoginForm() {
         <div>
           <label
             htmlFor="email"
-            className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold"
-            style={{
-              fontFamily: "var(--font-secondary)",
-              color: "var(--color-foreground)",
-            }}
+            className="block mb-1.5 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
           >
             Email
           </label>
@@ -95,13 +87,9 @@ export default function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 text-sm outline-none"
+            className="w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground"
             style={{
-              fontFamily: "var(--font-secondary)",
-              border: "1px solid var(--color-border-input)",
               borderRadius: "var(--radius-base)",
-              backgroundColor: "var(--color-input)",
-              color: "var(--color-foreground)",
               transition: "var(--transition-base)",
             }}
           />
@@ -112,20 +100,14 @@ export default function LoginForm() {
           <div className="flex items-center justify-between mb-1.5">
             <label
               htmlFor="password"
-              className="text-[12px] uppercase tracking-widest font-bold"
-              style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground)",
-              }}
+              className="text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
             >
               Password
             </label>
             <a
               href="#"
-              className="text-[12px] hover:opacity-70"
+              className="text-[12px] hover:opacity-70 font-secondary text-foreground-subtle"
               style={{
-                fontFamily: "var(--font-secondary)",
-                color: "var(--color-foreground-subtle)",
                 transition: "var(--transition-base)",
               }}
             >
@@ -140,13 +122,9 @@ export default function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 text-sm outline-none"
+            className="w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground"
             style={{
-              fontFamily: "var(--font-secondary)",
-              border: "1px solid var(--color-border-input)",
               borderRadius: "var(--radius-base)",
-              backgroundColor: "var(--color-input)",
-              color: "var(--color-foreground)",
               transition: "var(--transition-base)",
             }}
           />
@@ -165,11 +143,7 @@ export default function LoginForm() {
 
         {error && (
           <p
-            className="text-[13px] text-center"
-            style={{
-              fontFamily: "var(--font-secondary)",
-              color: "var(--color-destructive)",
-            }}
+            className="text-[13px] text-center font-secondary text-destructive"
           >
             {error}
           </p>
@@ -177,18 +151,13 @@ export default function LoginForm() {
       </form>
 
       <p
-        className="text-center mt-6 text-sm"
-        style={{
-          fontFamily: "var(--font-secondary)",
-          color: "var(--color-foreground-muted)",
-        }}
+        className="text-center mt-6 text-sm font-secondary text-foreground-muted"
       >
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="font-semibold hover:opacity-70"
+          className="font-semibold hover:opacity-70 text-foreground-dark"
           style={{
-            color: "var(--color-foreground-dark)",
             transition: "var(--transition-base)",
           }}
         >
