@@ -9,6 +9,7 @@ import SearchPopup from "@/components/layout/SearchPopup";
 import BackButton from "@/components/ui/BackButton";
 import { NAV_CATEGORIES } from "@/lib/nav-config";
 import { useCart } from "@/lib/cart/CartContext";
+import { cn } from "@/lib/utils";
 
 interface NavbarProps {
   background?: string;
@@ -166,11 +167,10 @@ export default function Navbar({
               <ShoppingBag size={19} strokeWidth={1.75} />
               {itemCount > 0 && (
                 <span
-                  className="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-white leading-none"
+                  className="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-white leading-none font-secondary"
                   style={{
                     backgroundColor: "var(--color-badge-cart)",
                     fontSize: "9px",
-                    fontFamily: "var(--font-secondary)",
                     fontWeight: 700,
                   }}
                 >
@@ -218,11 +218,7 @@ export default function Navbar({
               {/* Dropdown panel */}
               {activeDropdown === cat.slug && (
                 <div
-                  className="absolute top-full left-0 min-w-[190px] py-3"
-                  style={{
-                    backgroundColor: "var(--color-foreground-strong)",
-                    boxShadow: "var(--shadow-4)",
-                  }}
+                  className="absolute top-full left-0 min-w-[190px] py-3 bg-foreground-strong shadow-4"
                   onMouseEnter={() => openDropdown(cat.slug)}
                   onMouseLeave={closeDropdown}
                 >
@@ -230,11 +226,8 @@ export default function Navbar({
                     <Link
                       key={subCat.slug}
                       href={subCat.href}
-                      className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100"
-                      style={{
-                        color: "var(--color-on-dark)",
-                        transition: "var(--transition-nav)",
-                      }}
+                      className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100 text-on-dark"
+                      style={{ transition: "var(--transition-nav)" }}
                     >
                       {subCat.displayName}
                     </Link>
@@ -261,8 +254,7 @@ export default function Navbar({
 
       {/* ── Mobile drawer overlay ── */}
       <div
-        className={`fixed inset-0 z-[60] transition-opacity duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          }`}
+        className={cn("fixed inset-0 z-[60] transition-opacity duration-300", mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none")}
         style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
         onClick={() => setMobileOpen(false)}
       />
@@ -277,24 +269,21 @@ export default function Navbar({
 
       {/* ── Mobile drawer panel ── */}
       <div
-        className={`fixed top-0 left-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        style={{ backgroundColor: "var(--color-foreground-strong)" }}
+        className={cn("fixed top-0 left-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col transition-transform duration-300 ease-in-out bg-foreground-strong", mobileOpen ? "translate-x-0" : "-translate-x-full")}
       >
         <div
           className="flex items-center justify-between px-5 py-5 border-b"
           style={{ borderColor: "rgba(255,255,255,0.1)" }}
         >
           <span
-            className="font-sans text-[18px] tracking-widest uppercase"
-            style={{ color: "var(--color-on-dark)" }}
+            className="font-sans text-[18px] tracking-widest uppercase text-on-dark"
           >
             Menu
           </span>
           <button
             onClick={() => setMobileOpen(false)}
-            className="opacity-70 hover:opacity-100"
-            style={{ color: "var(--color-on-dark)", transition: "var(--transition-nav)" }}
+            className="opacity-70 hover:opacity-100 text-on-dark"
+            style={{ transition: "var(--transition-nav)" }}
             aria-label="Close menu"
           >
             <X size={22} strokeWidth={1.75} />
@@ -306,8 +295,7 @@ export default function Navbar({
             cat.subCategories.length ? (
               <div key={cat.slug} className="mb-7">
                 <p
-                  className="font-sans text-[11px] uppercase tracking-widest mb-3"
-                  style={{ color: "var(--color-on-dark)", opacity: 0.4 }}
+                  className="font-sans text-[11px] uppercase tracking-widest mb-3 text-on-dark opacity-40"
                 >
                   {cat.displayName}
                 </p>
@@ -315,11 +303,8 @@ export default function Navbar({
                   <Link
                     key={subCat.slug}
                     href={subCat.href}
-                    className="block py-2 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
-                    style={{
-                      color: "var(--color-on-dark)",
-                      transition: "var(--transition-nav)",
-                    }}
+                    className="block py-2 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100 text-on-dark"
+                    style={{ transition: "var(--transition-nav)" }}
                     onClick={() => setMobileOpen(false)}
                   >
                     {subCat.displayName}
@@ -330,11 +315,8 @@ export default function Navbar({
               <Link
                 key={cat.slug}
                 href={cat.href}
-                className="block py-2 mb-4 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100"
-                style={{
-                  color: "var(--color-on-dark)",
-                  transition: "var(--transition-nav)",
-                }}
+                className="block py-2 mb-4 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100 text-on-dark"
+                style={{ transition: "var(--transition-nav)" }}
                 onClick={() => setMobileOpen(false)}
               >
                 {cat.displayName}
@@ -346,8 +328,8 @@ export default function Navbar({
         <div className="px-5 py-6 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
           <Link
             href="/account"
-            className="flex items-center gap-3 opacity-70 hover:opacity-100"
-            style={{ color: "var(--color-on-dark)", transition: "var(--transition-nav)" }}
+            className="flex items-center gap-3 opacity-70 hover:opacity-100 text-on-dark"
+            style={{ transition: "var(--transition-nav)" }}
             onClick={() => setMobileOpen(false)}
           >
             <User size={17} strokeWidth={1.75} />

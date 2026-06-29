@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SearchPopupProps {
   open: boolean;
@@ -47,9 +48,7 @@ export default function SearchPopup({ open, onClose, background, textColor }: Se
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[70] transition-opacity duration-300 ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={cn("fixed inset-0 z-[70] transition-opacity duration-300", open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none")}
         style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
         onClick={handleClose}
         aria-hidden="true"
@@ -60,9 +59,7 @@ export default function SearchPopup({ open, onClose, background, textColor }: Se
         role="dialog"
         aria-modal="true"
         aria-label="Search"
-        className={`fixed top-0 left-0 right-0 z-[80] transition-transform duration-300 ease-in-out ${
-          open ? "translate-y-0 pointer-events-auto" : "-translate-y-full pointer-events-none"
-        }`}
+        className={cn("fixed top-0 left-0 right-0 z-[80] transition-transform duration-300 ease-in-out", open ? "translate-y-0 pointer-events-auto" : "-translate-y-full pointer-events-none")}
         style={{
           backgroundColor: background,
           boxShadow: "var(--shadow-4)",
@@ -92,9 +89,8 @@ export default function SearchPopup({ open, onClose, background, textColor }: Se
 
           {/* Heading */}
           <h4
-            className="uppercase tracking-widest mb-6"
+            className="uppercase tracking-widest mb-6 font-sans"
             style={{
-              fontFamily: "var(--font-primary)",
               fontSize: "var(--space-8)",
               color: textColor,
             }}
@@ -116,11 +112,8 @@ export default function SearchPopup({ open, onClose, background, textColor }: Se
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search for products, brands and more"
                 autoComplete="off"
-                className="flex-1 bg-transparent outline-none text-[15px] py-3 pr-3 placeholder:opacity-50"
-                style={{
-                  fontFamily: "var(--font-primary)",
-                  color: textColor,
-                }}
+                className="flex-1 bg-transparent outline-none text-[15px] py-3 pr-3 placeholder:opacity-50 font-sans"
+                style={{ color: textColor }}
               />
               <button
                 type="submit"
