@@ -8,6 +8,7 @@ import StarRating from "@/components/ui/StarRating";
 import ReviewsBlock from "./ReviewsBlock";
 import { Star } from "lucide-react";
 import { useCart } from "@/lib/cart/CartContext";
+import { cn } from "@/lib/utils";
 
 interface Props {
   product: Product;
@@ -120,11 +121,11 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                   <button
                     key={photo.id}
                     onClick={() => setSelectedImage(i)}
-                    className="w-full aspect-[4/5] relative overflow-hidden"
+                    className={cn(
+                      "w-full aspect-[4/5] relative overflow-hidden",
+                      selectedImage === i ? "border-2 border-foreground-dark" : "border-2 border-transparent"
+                    )}
                     style={{
-                      border: selectedImage === i
-                        ? "2px solid var(--color-foreground-dark)"
-                        : "2px solid transparent",
                       transition: "var(--transition-base)",
                       cursor: "pointer",
                     }}
@@ -144,13 +145,13 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
-                    className="w-full aspect-[4/5]"
+                    className={cn(
+                      "w-full aspect-[4/5]",
+                      selectedImage === i ? "border-2 border-foreground-dark" : "border-2 border-transparent"
+                    )}
                     style={{
                       backgroundColor: bg,
                       opacity: selectedImage === i ? 1 : 0.5,
-                      border: selectedImage === i
-                        ? "2px solid var(--color-foreground-dark)"
-                        : "2px solid transparent",
                       transition: "var(--transition-base)",
                       cursor: "pointer",
                     }}
@@ -193,12 +194,12 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           <div className="flex gap-2">
             <div>
               <p
+                className="font-secondary"
                 style={{
                   fontSize: "16px",
                   fontWeight: '600',
                   lineHeight: '24px',
                   color: '#9c9c9c',
-                  fontFamily: 'Montserrat',
                 }}
               >
                 {productType}
