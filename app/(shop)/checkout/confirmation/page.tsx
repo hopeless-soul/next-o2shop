@@ -136,11 +136,7 @@ function ConfirmationContent() {
 
       <Link
         href="/products"
-        className="inline-block font-sans text-[11px] uppercase tracking-widest px-8 py-4 transition-opacity hover:opacity-80"
-        style={{
-          background: "var(--color-foreground-dark)",
-          color: "var(--color-on-dark)",
-        }}
+        className="inline-block font-sans text-[11px] uppercase tracking-widest px-8 py-4 transition-opacity hover:opacity-80 bg-foreground-dark text-on-dark"
       >
         Continue Shopping
       </Link>

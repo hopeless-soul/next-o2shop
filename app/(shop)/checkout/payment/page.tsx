@@ -75,11 +75,7 @@ function PaymentForm({ orderNumber }: PaymentFormProps) {
       <button
         type="submit"
         disabled={!stripe || processing}
-        className="font-sans text-[11px] uppercase tracking-widest px-10 py-4 transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{
-          background: "var(--color-foreground-dark)",
-          color: "var(--color-on-dark)",
-        }}
+        className="font-sans text-[11px] uppercase tracking-widest px-10 py-4 transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed bg-foreground-dark text-on-dark"
       >
         {processing ? "Processing…" : "Place Order"}
       </button>

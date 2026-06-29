@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useCheckout } from "@/lib/checkout/CheckoutContext"
 import { listShippingMethods, type ShippingMethod } from "@/lib/api/shipping"
+import { cn } from "@/lib/utils"
 
 export default function ShippingPage() {
   const router = useRouter()
@@ -67,7 +68,10 @@ export default function ShippingPage() {
         {methods.map((method) => (
           <label
             key={method.id}
-            className={`flex items-center justify-between border p-4 cursor-pointer transition-colors ${selected === method.id ? "border-foreground-dark" : "border-border"}`}
+            className={cn(
+              "flex items-center justify-between border p-4 cursor-pointer transition-colors",
+              selected === method.id ? "border-foreground-dark" : "border-border"
+            )}
           >
             <div className="flex items-center gap-3">
               <input
@@ -99,11 +103,7 @@ export default function ShippingPage() {
       <button
         type="submit"
         disabled={!selected}
-        className="font-sans text-[11px] uppercase tracking-widest px-10 py-4 transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{
-          background: "var(--color-foreground-dark)",
-          color: "var(--color-on-dark)",
-        }}
+        className="font-sans text-[11px] uppercase tracking-widest px-10 py-4 transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed bg-foreground-dark text-on-dark"
       >
         Continue to Payment
       </button>
