@@ -266,7 +266,7 @@ export default function AddressFormModal({
               type="checkbox"
               checked={billingSame}
               onChange={e => setBillingSame(e.target.checked)}
-              className="w-4 h-4 accent-current"
+              className="w-4 h-4"
               style={{ accentColor: 'var(--color-foreground-dark)' }}
             />
             <span className="text-sm font-secondary text-foreground-muted">
