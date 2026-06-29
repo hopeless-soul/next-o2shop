@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type { ProductColor, ProductSize } from "@/lib/types";
 
 const LETTER_SIZE_ORDER = ["2xs", "xs", "s", "m", "l", "xl", "2xl", "3xl"];
@@ -50,8 +51,7 @@ export default function VariantPicker({
       {colors.length > 0 && (
         <div>
           <p
-            className="mb-2 text-[12px] uppercase tracking-widest font-bold"
-            style={{ fontFamily: "var(--font-secondary)", color: "var(--color-foreground)" }}
+            className="mb-2 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
           >
             Color
             {selectedColor && (
@@ -60,13 +60,13 @@ export default function VariantPicker({
               </span>
             )}
           </p>
-          <div className="flex items-center w-full" style={{ gap: "12px", marginBottom: "var(--space-4)" }}>
+          <div className="flex items-center w-full gap-3 mb-[var(--space-4)]">
             {colors.map((color) => (
               <button
                 key={color.name}
                 onClick={() => color.available && onColorChange(color.name)}
                 title={color.name}
-                className={`relative flex items-center justify-center font-sans text-[12px] uppercase tracking-widest${selectedColor === color.name ? " color-swatch-selected" : ""}`}
+                className={cn("relative flex items-center justify-center font-sans text-[12px] uppercase tracking-widest font-secondary", selectedColor === color.name && "color-swatch-selected")}
                 style={{
                   flex: 1,
                   height: "30px",
@@ -80,7 +80,6 @@ export default function VariantPicker({
                       ? "var(--color-foreground)"
                       : "var(--color-on-dark)",
                   fontWeight: '800',
-                  fontFamily: "var(--font-secondary)",
                   fontSize: "10px",
                   fontStyle: 'italic',
                 }}
@@ -97,11 +96,7 @@ export default function VariantPicker({
       {sortedSizes.length > 0 && (
         <div>
           <p
-            className="mb-2 text-[12px] uppercase tracking-widest font-bold"
-            style={{ 
-              fontFamily: "var(--font-secondary)", 
-              color: "var(--color-foreground)",
-            }}
+            className="mb-2 text-[12px] uppercase tracking-widest font-bold font-secondary text-foreground"
           >
             Size
             {selectedSize && (

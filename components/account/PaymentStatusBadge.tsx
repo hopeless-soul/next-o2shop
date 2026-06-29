@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import type { PaymentStatus } from "@/lib/types";
 
 interface PaymentStatusBadgeProps {
@@ -38,7 +39,7 @@ export default function PaymentStatusBadge({
   const cfg = STATUS_CONFIG[status];
   return (
     <span
-      className={`inline-flex items-center justify-center h-6 min-w-[72px] text-[11px] uppercase tracking-widest font-sans rounded-none ${className}`}
+      className={cn("inline-flex items-center justify-center h-6 min-w-[72px] text-[11px] uppercase tracking-widest font-sans rounded-none", className)}
       style={{ backgroundColor: cfg.bg, color: cfg.color }}
     >
       {cfg.label}

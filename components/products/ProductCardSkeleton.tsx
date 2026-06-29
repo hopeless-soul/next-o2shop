@@ -8,8 +8,7 @@ export default function ProductCardSkeleton() {
 
       {/* Details area */}
       <div
-        className="flex flex-col gap-[var(--space-2)]"
-        style={{ padding: "var(--space-5)" }}
+        className="flex flex-col gap-[var(--space-2)] p-[var(--space-5)]"
       >
         {/* Title + price row */}
         <div className="flex items-center justify-between gap-4">

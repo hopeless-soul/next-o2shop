@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 interface SkeletonProps {
   className?: string;
   style?: React.CSSProperties;
@@ -5,6 +7,6 @@ interface SkeletonProps {
 
 export default function Skeleton({ className = "", style }: SkeletonProps) {
   return (
-    <div className={`skeleton ${className}`} style={style} aria-hidden="true" />
+    <div className={cn("skeleton", className)} style={style} aria-hidden="true" />
   );
 }

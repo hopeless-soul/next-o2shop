@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "outline";
 type ButtonSize = "sm" | "base" | "lg" | "icon-sm";
@@ -37,16 +38,16 @@ function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`
-        inline-flex items-center justify-center
-        font-sans tracking-widest uppercase
-        border-2 rounded-none
-        cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
-        ${VARIANT_STYLES[variant]}
-        ${SIZE_STYLES[size]}
-        ${fullWidth ? "w-full" : ""}
-        ${className}
-      `}
+      className={cn(
+        "inline-flex items-center justify-center",
+        "font-sans tracking-widest uppercase",
+        "border-2 rounded-none",
+        "cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+        VARIANT_STYLES[variant],
+        SIZE_STYLES[size],
+        fullWidth && "w-full",
+        className
+      )}
       style={{ transition: "var(--transition-nav)" }}
       {...props}
     >

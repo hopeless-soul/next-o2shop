@@ -57,8 +57,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <span
-                className="font-sans text-[11px] uppercase tracking-widest opacity-30"
-                style={{ color: "var(--color-foreground)" }}
+                className="font-sans text-[11px] uppercase tracking-widest opacity-30 text-foreground"
               >
                 {product.currency}
               </span>
@@ -135,26 +134,19 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Product details */}
       <div
-        className="flex flex-col gap-[2px]"
-        style={{ padding: "var(--space-5)" }}
+        className="flex flex-col gap-[2px] p-[var(--space-5)]"
       >
         {/* Title + price row */}
         <div className="flex items-start justify-between gap-2">
           <h3
-            className="font-sans text-[16px] font-medium uppercase tracking-[0.32px] leading-tight flex-1"
-            style={{
-              color: "var(--color-foreground-dark)",
-              transition: "var(--transition-slow)",
-            }}
+            className="font-sans text-[16px] font-medium uppercase tracking-[0.32px] leading-tight flex-1 text-foreground-dark"
+            style={{ transition: "var(--transition-slow)" }}
           >
             {product.displayName}
           </h3>
           <span
-            className="font-sans text-[16px] font-medium uppercase tracking-[0.3px] whitespace-nowrap"
-            style={{
-              color: "var(--color-foreground-dark)",
-              transition: "var(--transition-slow)",
-            }}
+            className="font-sans text-[16px] font-medium uppercase tracking-[0.3px] whitespace-nowrap text-foreground-dark"
+            style={{ transition: "var(--transition-slow)" }}
           >
             {product.compareAtPrice && (
               <span className="line-through opacity-50 mr-1.5">
@@ -168,20 +160,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Sub row */}
         <div className="flex items-center justify-between">
           <span
-            className="text-[12px] tracking-[0.3px]"
-            style={{
-              fontFamily: "var(--font-secondary)",
-              color: "var(--color-foreground-subtle)",
-            }}
+            className="text-[12px] tracking-[0.3px] font-secondary text-foreground-subtle"
           >
             {product.type}
           </span>
           <span
-            className="text-[12px] tracking-[0.3px]"
-            style={{
-              fontFamily: "var(--font-secondary)",
-              color: "var(--color-foreground-subtle)",
-            }}
+            className="text-[12px] tracking-[0.3px] font-secondary text-foreground-subtle"
           >
             {product.currency}
           </span>

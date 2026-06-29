@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 interface StarRatingProps {
   rating: number;
   max?: number;
@@ -15,7 +17,7 @@ export default function StarRating({
 }: StarRatingProps) {
   return (
     <div
-      className={`flex items-center gap-0.5 ${className}`}
+      className={cn("flex items-center gap-0.5", className)}
       aria-label={`${rating} out of ${max} stars`}
       role="img"
     >
