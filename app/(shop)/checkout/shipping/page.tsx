@@ -43,10 +43,7 @@ export default function ShippingPage() {
 
   if (loading) {
     return (
-      <p
-        className="font-sans text-[13px]"
-        style={{ color: "var(--color-foreground-muted)" }}
-      >
+      <p className="font-sans text-[13px] text-foreground-muted">
         Loading shipping methods…
       </p>
     )
@@ -54,7 +51,7 @@ export default function ShippingPage() {
 
   if (error) {
     return (
-      <p className="font-sans text-[13px]" style={{ color: "var(--color-destructive)" }}>
+      <p className="font-sans text-[13px] text-destructive">
         {error}
       </p>
     )
@@ -62,10 +59,7 @@ export default function ShippingPage() {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-xl">
-      <h2
-        className="font-sans text-[20px] uppercase tracking-widest mb-8"
-        style={{ color: "var(--color-foreground-dark)" }}
-      >
+      <h2 className="font-sans text-[20px] uppercase tracking-widest mb-8 text-foreground-dark">
         Shipping Method
       </h2>
 
@@ -73,13 +67,7 @@ export default function ShippingPage() {
         {methods.map((method) => (
           <label
             key={method.id}
-            className="flex items-center justify-between border p-4 cursor-pointer transition-colors"
-            style={{
-              borderColor:
-                selected === method.id
-                  ? "var(--color-foreground-dark)"
-                  : "var(--color-border)",
-            }}
+            className={`flex items-center justify-between border p-4 cursor-pointer transition-colors ${selected === method.id ? "border-foreground-dark" : "border-border"}`}
           >
             <div className="flex items-center gap-3">
               <input
@@ -91,29 +79,17 @@ export default function ShippingPage() {
                 className="w-4 h-4 flex-shrink-0"
               />
               <div>
-                <p
-                  className="font-sans text-[13px] uppercase tracking-widest"
-                  style={{ color: "var(--color-foreground-dark)" }}
-                >
+                <p className="font-sans text-[13px] uppercase tracking-widest text-foreground-dark">
                   {method.name}
                 </p>
                 {method.estimatedDays && (
-                  <p
-                    className="text-xs mt-0.5"
-                    style={{
-                      fontFamily: "var(--font-secondary)",
-                      color: "var(--color-foreground-muted)",
-                    }}
-                  >
+                  <p className="text-xs mt-0.5 font-secondary text-foreground-muted">
                     {method.estimatedDays} business days
                   </p>
                 )}
               </div>
             </div>
-            <span
-              className="font-sans text-[13px] flex-shrink-0"
-              style={{ color: "var(--color-foreground)" }}
-            >
+            <span className="font-sans text-[13px] flex-shrink-0 text-foreground">
               {method.price === 0 ? "Free" : `$${method.price.toFixed(2)}`}
             </span>
           </label>

@@ -58,10 +58,7 @@ function PaymentForm({ orderNumber }: PaymentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-xl">
-      <h2
-        className="font-sans text-[20px] uppercase tracking-widest mb-8"
-        style={{ color: "var(--color-foreground-dark)" }}
-      >
+      <h2 className="font-sans text-[20px] uppercase tracking-widest mb-8 text-foreground-dark">
         Payment
       </h2>
 
@@ -70,13 +67,7 @@ function PaymentForm({ orderNumber }: PaymentFormProps) {
       </div>
 
       {error && (
-        <p
-          className="mb-4 text-sm"
-          style={{
-            fontFamily: "var(--font-secondary)",
-            color: "var(--color-destructive)",
-          }}
-        >
+        <p className="mb-4 text-sm font-secondary text-destructive">
           {error}
         </p>
       )}
@@ -152,7 +143,7 @@ export default function PaymentPage() {
 
   if (error) {
     return (
-      <p className="font-sans text-[13px]" style={{ color: "var(--color-destructive)" }}>
+      <p className="font-sans text-[13px] text-destructive">
         {error}
       </p>
     )
@@ -160,10 +151,7 @@ export default function PaymentPage() {
 
   if (!clientSecret || !orderNumber) {
     return (
-      <p
-        className="font-sans text-[13px]"
-        style={{ color: "var(--color-foreground-muted)" }}
-      >
+      <p className="font-sans text-[13px] text-foreground-muted">
         Loading payment…
       </p>
     )
