@@ -23,6 +23,7 @@ clientApi.interceptors.response.use(
     // Skip refresh for non-401s, already-retried requests, login calls
     // (login 401 = wrong credentials, not expired session), and logout calls.
     if (
+      !original ||
       err.response?.status !== 401 ||
       original._retried ||
       original.url?.includes('/auth/login') ||
