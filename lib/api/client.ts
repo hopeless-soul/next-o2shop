@@ -21,13 +21,15 @@ clientApi.interceptors.response.use(
     const original = err.config as InternalAxiosRequestConfig & { _retried?: boolean }
 
     // Skip refresh for non-401s, already-retried requests, login calls
-    // (login 401 = wrong credentials, not expired session), and logout calls.
+    // (login 401 = wrong credentials, not expired session), logout calls,
+    // and refresh calls (prevents retry loop if the call ever moves to clientApi).
     if (
       !original ||
       err.response?.status !== 401 ||
       original._retried ||
       original.url?.includes('/auth/login') ||
-      original.url?.includes('/auth/logout')
+      original.url?.includes('/auth/logout') ||
+      original.url === '/auth/refresh'
     ) {
       return Promise.reject(parseApiError(err))
     }
