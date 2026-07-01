@@ -51,14 +51,18 @@ clientApi.interceptors.response.use(
       waitQueue.forEach((q) => q.resolve())
       waitQueue = []
       return clientApi(original)
-    } catch {
+    } catch (refreshErr) {
+      console.error('[clientApi] token refresh failed:', refreshErr)
       isRefreshing = false
       waitQueue.forEach((q) =>
         q.reject(new AuthError('Session expired', ['Session expired'], 'Unauthorized')),
       )
       waitQueue = []
-      if (typeof window !== 'undefined') window.location.href = '/login'
-      return Promise.reject(parseApiError(err))
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+        return new Promise(() => {})
+      }
+      return Promise.reject(new AuthError('Session expired', ['Session expired'], 'Unauthorized'))
     }
   },
 )
