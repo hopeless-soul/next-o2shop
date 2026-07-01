@@ -60,8 +60,11 @@ clientApi.interceptors.response.use(
         q.reject(new AuthError('Session expired', ['Session expired'], 'Unauthorized')),
       )
       waitQueue = []
+      // `import 'client-only'` guarantees this module never runs on the server,
+      // so the else branch below is unreachable — kept for belt-and-suspenders clarity.
       if (typeof window !== 'undefined') {
         window.location.href = '/login'
+        // Stays pending intentionally — suppresses any rejection handler during page navigation.
         return new Promise(() => {})
       }
       return Promise.reject(new AuthError('Session expired', ['Session expired'], 'Unauthorized'))
