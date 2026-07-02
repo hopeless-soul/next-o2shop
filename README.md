@@ -4,20 +4,7 @@
 
 A full-stack e-commerce clone (storefront + admin panel) built to practice production-grade Next.js patterns: App Router with a strict RSC/Client Component split, HttpOnly-cookie JWT auth with silent refresh, role-gated admin access, and Stripe payments. Connects to the companion [nest-o2shop](../nest-o2shop) NestJS backend API.
 
-## Technology Stack
-
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5 |
-| Styling | Tailwind CSS v4 |
-| UI Components | Shadcn/ui, Base UI, Radix UI |
-| HTTP Client | Axios |
-| Forms | React Hook Form + Zod |
-| Tables | TanStack Table v8 |
-| Payments | Stripe |
-| Icons | Lucide React |
-| Runtime | React 19 |
+---
 
 ## How it works
 
@@ -34,19 +21,61 @@ A full-stack e-commerce clone (storefront + admin panel) built to practice produ
 2. `middleware.ts` allows `/admin/*` only when `role === "admin"`; anyone else is redirected to `/`.
 3. From the admin dashboard: manage products (with a variant dialog for color/size), categories, collections, orders (fulfillment status), users, shipping methods, review moderation, and an audit log ("changes" feed).
 
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS v4 |
+| UI Components | Shadcn/ui, Base UI, Radix UI |
+| HTTP Client | Axios |
+| Forms | React Hook Form + Zod |
+| Tables | TanStack Table v8 |
+| Payments | Stripe |
+| Icons | Lucide React |
+| Runtime | React 19 |
+
+---
+
 ## Screenshots
 
-| Storefront — Home | Product Detail |
+**Storefront**
+| Home | All Products |
 |---|---|
-| <img width="400" src="docs/ui/storefront_home.png" alt="Storefront home"> | <img width="400" src="docs/ui/product_detail.png" alt="Product detail"> |
+| <img width="400" src="docs/ui/home.png" alt="Storefront home"> | <img width="400" src="docs/ui/products.png" alt="Product catalog"> |
 
-| Cart | Checkout — Payment |
+| Product Detail | Cart |
 |---|---|
-| <img width="400" src="docs/ui/cart.png" alt="Cart"> | <img width="400" src="docs/ui/checkout_payment.png" alt="Checkout payment"> |
+| <img width="400" src="docs/ui/product_desc.png" alt="Product detail"> | <img width="400" src="docs/ui/cart.png" alt="Cart"> |
 
-| Admin — Products | Admin — Orders |
+**Checkout**
+
+| Information | Shipping Method |
+|---|---|
+| <img width="400" src="docs/ui/checkout_address.png" alt="Checkout information step"> | <img width="400" src="docs/ui/checkout_shipping.png" alt="Checkout shipping step"> |
+
+| Payment | Confirmation |
+|---|---|
+| <img width="400" src="docs/ui/checkout_payment.png" alt="Checkout payment step"> | <img width="400" src="docs/ui/checkout_order_created.png" alt="Order confirmation"> |
+
+**Account**
+
+| Login | Order Detail |
+|---|---|
+| <img width="400" src="docs/ui/login.png" alt="Login"> | <img width="400" src="docs/ui/order_detail.png" alt="Order detail"> |
+
+**Admin**
+
+| Products | Orders |
 |---|---|
 | <img width="400" src="docs/ui/admin_products.png" alt="Admin products"> | <img width="400" src="docs/ui/admin_orders.png" alt="Admin orders"> |
+
+| Reviews | Changes History |
+|---|---|
+| <img width="400" src="docs/ui/admin_reviews.png" alt="Admin review moderation"> | <img width="400" src="docs/ui/admin_changes.png" alt="Admin audit log"> |
 
 ## Architecture
 
@@ -79,8 +108,7 @@ Create `.env`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 ### Development
@@ -211,10 +239,6 @@ All visual tokens are defined as CSS custom properties in `app/globals.css` and 
 2. `serverApi` reads `access_token` cookie server-side and forwards as `Authorization: Bearer`
 3. `clientApi` sends cookies via `withCredentials: true`; on 401 it calls `/auth/refresh`, retries once, then redirects to `/login`
 4. The frontend never reads or stores tokens directly
-
-## Testing
-
-No test runner is configured yet.
 
 ## Backend
 
