@@ -63,8 +63,8 @@ function AddressFields({ value, onChange }: AddressFieldsProps) {
         </div>
       </div>
       <div>
-        <label className={label}>Phone</label>
-        <input className={input} type="tel" value={value.phone ?? ""} onChange={(e) => onChange("phone", e.target.value)} />
+        <label className={label}>Phone *</label>
+        <input className={input} type="tel" value={value.phone ?? ""} onChange={(e) => onChange("phone", e.target.value)} required />
       </div>
     </div>
   )

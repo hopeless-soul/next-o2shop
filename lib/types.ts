@@ -39,7 +39,7 @@ export type AddressDto = {
   country: string;
   province: string;
   postalCode: string;
-  phone?: string;
+  phone: string;
 };
 
 export type SavedAddress = {

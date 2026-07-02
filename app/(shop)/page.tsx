@@ -8,7 +8,7 @@ export default function Home() {
       <p
         className="text-sm tracking-[0.4em] uppercase mb-6 opacity-50 font-secondary text-on-dark"
       >
-        New Arrivals 2025
+        New Arrivals 2026
       </p>
       <h1
         className="leading-none tracking-widest uppercase mb-8 font-sans text-on-dark"

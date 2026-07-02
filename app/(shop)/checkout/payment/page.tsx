@@ -131,6 +131,7 @@ export default function PaymentPage() {
         // Step 2: create payment intent using the order's UUID
         return axios.post<{ clientSecret: string }>("/api/payments/create-intent", {
           orderId: orderRes.data.id,
+          email: checkout.email,
         })
       })
       .then((res) => setClientSecret(res.data.clientSecret))

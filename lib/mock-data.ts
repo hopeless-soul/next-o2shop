@@ -327,6 +327,7 @@ const ADDR_HOME_SHIPPING: AddressDto = {
   province: "NY",
   postalCode: "10001",
   country: "US",
+  phone: "+1 555 000 0000",
 };
 
 const ADDR_WORK_SHIPPING: AddressDto = {
@@ -337,6 +338,7 @@ const ADDR_WORK_SHIPPING: AddressDto = {
   province: "NY",
   postalCode: "10013",
   country: "US",
+  phone: "+1 555 000 0000",
 };
 
 export const MOCK_ADDRESSES: SavedAddress[] = [
