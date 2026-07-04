@@ -1,28 +1,44 @@
-import 'client-only'
+// `client-only` will throw a build error if this module is ever imported into
+// a Server Component — this instance must stay browser-side since it relies
+// on the browser automatically attaching cookies to same-origin requests.import 'client-only'
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { parseApiError, AuthError } from './errors'
 
-// Proxy through Next.js (/api/* → NEXT_PUBLIC_API_URL/*) so cookies are set on
-// the same origin and the middleware/serverApi can read them via next/headers.
+// Proxies through Next.js (/api/* → NEXT_PUBLIC_API_URL/*) so cookies stay same-origin.
 const clientApi = axios.create({
   baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })
 
-// Cookies are sent automatically — no manual Bearer header needed.
-
+// Coalesces concurrent 401s into a single /auth/refresh call; others wait in waitQueue.
 let isRefreshing = false
 let waitQueue: Array<{ resolve: () => void; reject: (e: unknown) => void }> = []
 
+/**
+ * Response interceptor: 401 refresh-and-retry pipeline.
+ * 1. Success responses pass through untouched.
+ * 2. On error: non-401s, and 401s from login/logout/refresh themselves, are
+ *    normalized via parseApiError and rejected immediately (no refresh attempt).
+ * 3. Otherwise mark the request `_retried` (so it's only ever retried once) and
+ *    either queue it (if a refresh is already in flight) or trigger the refresh.
+ * 4. On refresh success: flush the queue, then retry the original request.
+ * 5. On refresh failure: reject the queue, redirect to /login, and reject this request.
+ *
+ * Status codes:
+ * - 401 Unauthorized: the access_token cookie is missing/expired. Triggers the
+ *   refresh flow below (except on /auth/login, /auth/logout, /auth/refresh — see step 2).
+ * - 403 Forbidden: caller is authenticated but not allowed to access the resource.
+ *   Left untouched here; normalized to ForbiddenError by parseApiError instead.
+ * - 404 Not Found: normalized to NotFoundError by parseApiError; not handled here.
+ * - 422/400: validation errors; normalized to ValidationError by parseApiError; not handled here.
+ */
 clientApi.interceptors.response.use(
   (res) => res,
   async (err: AxiosError) => {
     const original = err.config as InternalAxiosRequestConfig & { _retried?: boolean }
 
-    // Skip refresh for non-401s, already-retried requests, login calls
-    // (login 401 = wrong credentials, not expired session), logout calls,
-    // and refresh calls (prevents retry loop if the call ever moves to clientApi).
+    // login 401 = wrong credentials, not expired session; skip refresh for auth endpoints too.
     if (
       !original ||
       err.response?.status !== 401 ||
@@ -44,10 +60,8 @@ clientApi.interceptors.response.use(
 
     isRefreshing = true
     try {
-      // Call /auth/refresh (not /api/auth/refresh): the backend sets
-      // refresh_token with Path=/auth/refresh so the browser only sends it
-      // for this exact path. The Route Handler at app/auth/refresh/route.ts
-      // reads the cookie and proxies to the backend.
+      // Hits /auth/refresh directly (not /api/auth/refresh) — the refresh_token
+      // cookie is scoped to Path=/auth/refresh.
       await axios.post('/auth/refresh', null, { withCredentials: true })
       isRefreshing = false
       waitQueue.forEach((q) => q.resolve())
@@ -60,11 +74,9 @@ clientApi.interceptors.response.use(
         q.reject(new AuthError('Session expired', ['Session expired'], 'Unauthorized')),
       )
       waitQueue = []
-      // `import 'client-only'` guarantees this module never runs on the server,
-      // so the else branch below is unreachable — kept for belt-and-suspenders clarity.
       if (typeof window !== 'undefined') {
         window.location.href = '/login'
-        // Stays pending intentionally — suppresses any rejection handler during page navigation.
+        // Stays pending so no rejection handler fires during navigation.
         return new Promise(() => {})
       }
       return Promise.reject(new AuthError('Session expired', ['Session expired'], 'Unauthorized'))
