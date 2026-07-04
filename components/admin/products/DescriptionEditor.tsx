@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { GripVertical, Minus, PencilOff, Plus, Trash2 } from 'lucide-react'
+import { GripVertical, PencilOff, Plus, Trash2 } from 'lucide-react'
 import {
   Select,
   SelectContent,

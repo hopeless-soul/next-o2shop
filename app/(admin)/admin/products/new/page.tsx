@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { AuthError } from '@/lib/api/errors'
 import { getAdminCategories } from '@/lib/api/admin/admin-categories-server'
