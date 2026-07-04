@@ -12,23 +12,23 @@ const STATUS_CONFIG: Record<
 > = {
   unfulfilled: {
     label: "Unfulfilled",
-    bg: "var(--color-muted-2)",
-    color: "var(--color-foreground-muted)",
+    bg: "var(--color-fulfillment-unfulfilled-bg)",
+    color: "var(--color-fulfillment-unfulfilled-fg)",
   },
   partially_fulfilled: {
     label: "Partial",
-    bg: "var(--color-status-warning-bg)",
-    color: "var(--color-status-warning-fg)",
+    bg: "var(--color-fulfillment-partial-bg)",
+    color: "var(--color-fulfillment-partial-fg)",
   },
   fulfilled: {
     label: "Fulfilled",
-    bg: "var(--color-status-success-bg)",
-    color: "var(--color-status-success-fg)",
+    bg: "var(--color-fulfillment-fulfilled-bg)",
+    color: "var(--color-fulfillment-fulfilled-fg)",
   },
   cancelled: {
     label: "Cancelled",
-    bg: "var(--color-status-info-bg)",
-    color: "var(--color-status-info-fg)",
+    bg: "var(--color-fulfillment-cancelled-bg)",
+    color: "var(--color-fulfillment-cancelled-fg)",
   },
 };
 

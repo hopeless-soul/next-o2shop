@@ -41,6 +41,26 @@
   --color-status-info-bg: #cce5ff;
   --color-status-info-fg: #004085;
 
+  /* ── Payment status badge colors ── */
+  --color-payment-paid-bg: #d4edda;
+  --color-payment-paid-fg: #155724;
+  --color-payment-pending-bg: #fff3cd;
+  --color-payment-pending-fg: #856404;
+  --color-payment-refunded-bg: #ffe0d6;
+  --color-payment-refunded-fg: #c65a43;
+  --color-payment-failed-bg: #f8d7da;
+  --color-payment-failed-fg: #e1000d;
+
+  /* ── Fulfillment status badge colors ── */
+  --color-fulfillment-unfulfilled-bg: #f1f1f1;
+  --color-fulfillment-unfulfilled-fg: #666666;
+  --color-fulfillment-partial-bg: #cce5ff;
+  --color-fulfillment-partial-fg: #004085;
+  --color-fulfillment-fulfilled-bg: #d4edda;
+  --color-fulfillment-fulfilled-fg: #155724;
+  --color-fulfillment-cancelled-bg: #ffd2d5;
+  --color-fulfillment-cancelled-fg: #e1000d;
+
   /* ── Typography ── */
   --font-primary: "Fjalla One", Arial, Tahoma, Verdana, sans-serif;
   --font-secondary: Montserrat, Helvetica, Arial, sans-serif;
@@ -208,6 +228,22 @@
   --color-status-warning-fg: var(--color-status-warning-fg);
   --color-status-info-bg: var(--color-status-info-bg);
   --color-status-info-fg: var(--color-status-info-fg);
+  --color-payment-paid-bg: var(--color-payment-paid-bg);
+  --color-payment-paid-fg: var(--color-payment-paid-fg);
+  --color-payment-pending-bg: var(--color-payment-pending-bg);
+  --color-payment-pending-fg: var(--color-payment-pending-fg);
+  --color-payment-refunded-bg: var(--color-payment-refunded-bg);
+  --color-payment-refunded-fg: var(--color-payment-refunded-fg);
+  --color-payment-failed-bg: var(--color-payment-failed-bg);
+  --color-payment-failed-fg: var(--color-payment-failed-fg);
+  --color-fulfillment-unfulfilled-bg: var(--color-fulfillment-unfulfilled-bg);
+  --color-fulfillment-unfulfilled-fg: var(--color-fulfillment-unfulfilled-fg);
+  --color-fulfillment-partial-bg: var(--color-fulfillment-partial-bg);
+  --color-fulfillment-partial-fg: var(--color-fulfillment-partial-fg);
+  --color-fulfillment-fulfilled-bg: var(--color-fulfillment-fulfilled-bg);
+  --color-fulfillment-fulfilled-fg: var(--color-fulfillment-fulfilled-fg);
+  --color-fulfillment-cancelled-bg: var(--color-fulfillment-cancelled-bg);
+  --color-fulfillment-cancelled-fg: var(--color-fulfillment-cancelled-fg);
 
   /* Border Radius */
   --radius-none: var(--radius-none);

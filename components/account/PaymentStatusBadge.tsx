@@ -12,23 +12,23 @@ const STATUS_CONFIG: Record<
 > = {
   paid: {
     label: "Paid",
-    bg: "var(--color-status-success-bg)",
-    color: "var(--color-status-success-fg)",
+    bg: "var(--color-payment-paid-bg)",
+    color: "var(--color-payment-paid-fg)",
   },
   pending: {
     label: "Pending",
-    bg: "var(--color-muted-2)",
-    color: "var(--color-foreground-muted)",
+    bg: "var(--color-payment-pending-bg)",
+    color: "var(--color-payment-pending-fg)",
   },
   refunded: {
     label: "Refunded",
-    bg: "var(--color-status-warning-bg)",
-    color: "var(--color-status-warning-fg)",
+    bg: "var(--color-payment-refunded-bg)",
+    color: "var(--color-payment-refunded-fg)",
   },
   failed: {
     label: "Failed",
-    bg: "var(--color-muted-2)",
-    color: "var(--color-destructive)",
+    bg: "var(--color-payment-failed-bg)",
+    color: "var(--color-payment-failed-fg)",
   },
 };
 
