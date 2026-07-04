@@ -1,5 +1,6 @@
 // lib/api/shipping.ts
 import clientApi from "./client"
+import type { PaginatedResponse } from "../types"
 
 export type ShippingMethod = {
   id: string
@@ -10,13 +11,6 @@ export type ShippingMethod = {
   isActive: boolean
   createdAt: string
   updatedAt: string
-}
-
-type PaginatedResponse<T> = {
-  total: number
-  page: number
-  limit: number
-  data: T[]
 }
 
 export async function listShippingMethods(): Promise<ShippingMethod[]> {

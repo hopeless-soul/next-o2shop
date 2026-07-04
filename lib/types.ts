@@ -1,4 +1,13 @@
-// ── Navigation ────────────────────────────────────────────────────────────────
+/* Shared ─────────────────────────────────────────────────────────────────── */
+
+export type PaginatedResponse<T> = {
+  total: number;
+  page: number;
+  limit: number;
+  data: T[];
+};
+
+/* Navigation ─────────────────────────────────────────────────────────────── */
 
 export type SubCategory = {
   id: string;
@@ -6,6 +15,7 @@ export type SubCategory = {
   displayName: string;
   categoryId: string;
 };
+
 
 export type Category = {
   id: string;
@@ -27,7 +37,7 @@ export type Collection = {
   updatedAt: string;
 };
 
-// ── Address ───────────────────────────────────────────────────────────────────
+/* Address ────────────────────────────────────────────────────────────────── */
 
 export type AddressDto = {
   firstName: string;
@@ -52,7 +62,7 @@ export type SavedAddress = {
   updatedAt: string;
 };
 
-// ── Product ───────────────────────────────────────────────────────────────────
+/* Product ─────────────────────────────────────────────────────────────────── */
 
 export type ProductPhoto = {
   id: string;
@@ -126,7 +136,7 @@ export type Product = {
   type?: string
 };
 
-// ── Review ────────────────────────────────────────────────────────────────────
+/* Review ─────────────────────────────────────────────────────────────────── */
 
 // rating is on a 1–10 scale (API). Normalise to 0–5 for StarRating: rating / 2
 export type Review = {
@@ -140,7 +150,7 @@ export type Review = {
   createdAt: string;
 };
 
-// ── Order ─────────────────────────────────────────────────────────────────────
+/* Order ───────────────────────────────────────────────────────────────────── */
 
 export type OrderItem = {
   id: string;

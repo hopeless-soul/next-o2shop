@@ -1,6 +1,5 @@
 import clientApi from './client'
-import type { Review } from '../types'
-import type { PaginatedResponse } from './reviews'
+import type { PaginatedResponse, Review } from '../types'
 
 export async function listReviewsByProductClient(
   productId: string,

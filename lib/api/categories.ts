@@ -1,12 +1,5 @@
 import serverApi from './server'
-import type { Category } from '../types'
-
-export type PaginatedResponse<T> = {
-  total: number
-  page: number
-  limit: number
-  data: T[]
-}
+import type { Category, PaginatedResponse } from '../types'
 
 export async function listCategories(
   params: { page?: number; limit?: number } = {},

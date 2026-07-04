@@ -1,12 +1,5 @@
 import serverApi from './server'
-import type { Order } from '../types'
-
-export type PaginatedResponse<T> = {
-  total: number
-  page: number
-  limit: number
-  data: T[]
-}
+import type { Order, PaginatedResponse } from '../types'
 
 export async function listMyOrders(
   params: { page?: number; limit?: number } = {},

@@ -1,12 +1,5 @@
 import serverApi from './server'
-import type { Product } from '../types'
-
-export type PaginatedResponse<T> = {
-  total: number
-  page: number
-  limit: number
-  data: T[]
-}
+import type { PaginatedResponse, Product } from '../types'
 
 export type ProductListParams = {
   page?: number
