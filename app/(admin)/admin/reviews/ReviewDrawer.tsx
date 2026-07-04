@@ -47,28 +47,38 @@ export default function ReviewDrawer({
   type ProductExtra = { displayName: string; primaryPhoto: ProductPhoto | null | undefined; rating: number | null | undefined }
   type CustomerExtra = { id: string; displayName?: string } | null
 
-  const [productExtra, setProductExtra] = useState<ProductExtra | null>(null)
-  const [customer, setCustomer] = useState<CustomerExtra | undefined>(undefined) // undefined = loading
+  const [result, setResult] = useState<{
+    reviewId: string
+    productExtra: ProductExtra | null
+    customer: CustomerExtra
+  } | null>(null)
 
   useEffect(() => {
-    if (!open) {
-      setProductExtra(null)
-      setCustomer(undefined)
-      return
-    }
-    setProductExtra(null)
-    setCustomer(undefined)
+    if (!open) return
+    let cancelled = false
     Promise.all([
       getAdminProductById(review.productId),
       findUserByEmailClient(review.email),
     ]).then(([product, user]) => {
-      setProductExtra({ displayName: product.displayName, primaryPhoto: product.primaryPhoto, rating: product.rating })
-      setCustomer(user ? { id: user.id, displayName: user.displayName } : null)
+      if (cancelled) return
+      setResult({
+        reviewId: review.id,
+        productExtra: { displayName: product.displayName, primaryPhoto: product.primaryPhoto, rating: product.rating },
+        customer: user ? { id: user.id, displayName: user.displayName } : null,
+      })
     }).catch(() => {
-      setProductExtra(null)
-      setCustomer(null)
+      if (cancelled) return
+      setResult({ reviewId: review.id, productExtra: null, customer: null })
     })
+    return () => {
+      cancelled = true
+    }
   }, [open, review.id, review.productId, review.email])
+
+  // Loading state is derived rather than reset via setState in the effect:
+  // stale results from a previous review.id/open cycle are discarded here.
+  const productExtra = result?.reviewId === review.id ? result.productExtra : null
+  const customer = result?.reviewId === review.id ? result.customer : undefined
 
   async function handleStatusChange(status: 'approved' | 'rejected') {
     setActionLoading(status === 'approved' ? 'approve' : 'reject')
