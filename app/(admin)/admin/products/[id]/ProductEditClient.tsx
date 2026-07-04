@@ -595,12 +595,17 @@ export default function ProductEditClient({
 }: ProductEditClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const activeTab = searchParams.get('tab') ?? 'details'
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') ?? 'details')
 
+  // Switching tabs only changes which already-loaded section is shown, so this
+  // updates the URL directly (no Next.js navigation) instead of router.replace —
+  // this route reads cookies() and is forced-dynamic, so router.replace would
+  // re-run the whole page and refetch product/categories/collections on every click.
   function handleTabChange(tab: string) {
+    setActiveTab(tab)
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', tab)
-    router.replace(`?${params.toString()}`, { scroll: false })
+    window.history.replaceState(null, '', `?${params.toString()}`)
   }
 
   // ── Details form state ───────────────────────────────────

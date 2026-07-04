@@ -10,8 +10,9 @@ import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge from '@/components/admin/AdminBadge'
 import type { AdminProductListItem } from '@/lib/api/admin/admin-products'
 import { Search, Eye } from 'lucide-react'
+import { env } from '@/lib/env'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
+const API_BASE = env.NEXT_PUBLIC_API_URL
 
 function resolveUrl(url: string) {
   if (url.startsWith('http')) return url

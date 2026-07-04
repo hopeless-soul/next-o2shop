@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Loader2, X } from 'lucide-react'
 import type { AdminOrder, AdminOrderAddress, UpdateRecipientDto } from '@/lib/api/admin/admin-orders'
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 
 interface EditRecipientModalProps {
   order: AdminOrder
@@ -108,10 +109,7 @@ export default function EditRecipientModal({ order, onSave, onClose, onSubmit }:
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = '' }
-  }, [])
+  useBodyScrollLock()
 
   function patchShipping(field: keyof AdminOrderAddress, value: string) {
     setShipping(prev => ({ ...prev, [field]: value }))

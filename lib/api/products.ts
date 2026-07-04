@@ -1,5 +1,6 @@
 import serverApi from './server'
 import type { PaginatedResponse, Product } from '../types'
+import { env } from '../env'
 
 export type ProductListParams = {
   page?: number
@@ -15,7 +16,7 @@ export type ProductListParams = {
   sortOrder?: 'asc' | 'desc'
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+const API_BASE = env.NEXT_PUBLIC_API_URL
 
 function resolveUrl(url: string): string {
   return url.startsWith('/') ? `${API_BASE}${url}` : url

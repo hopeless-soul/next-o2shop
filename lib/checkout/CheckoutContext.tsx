@@ -1,4 +1,3 @@
-// lib/checkout/CheckoutContext.tsx
 "use client"
 
 import {
@@ -34,7 +33,6 @@ const INITIAL: CheckoutState = {
   shippingPrice: 0,
 }
 
-const STORAGE_KEY = "o2shop_checkout"
 
 type CheckoutContextValue = {
   checkout: CheckoutState
@@ -43,6 +41,8 @@ type CheckoutContextValue = {
 }
 
 const CheckoutContext = createContext<CheckoutContextValue | null>(null)
+
+const STORAGE_KEY = "o2shop_checkout"
 
 function loadFromStorage(): CheckoutState {
   if (typeof window === "undefined") return INITIAL
@@ -59,7 +59,6 @@ function loadFromStorage(): CheckoutState {
   }
   return INITIAL
 }
-
 export function CheckoutProvider({ children }: { children: ReactNode }) {
   const [checkout, setCheckout] = useState<CheckoutState>(loadFromStorage)
 
@@ -82,6 +81,9 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// Guards against using the checkout outside <CheckoutProvider>, e.g. forgetting to
+// wrap a page/layout, and surfaces it as an explicit error instead of a
+// silent null-reference bug at the call site.
 export function useCheckout() {
   const ctx = useContext(CheckoutContext)
   if (!ctx) throw new Error("useCheckout must be used inside CheckoutProvider")

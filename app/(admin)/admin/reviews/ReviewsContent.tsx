@@ -16,8 +16,9 @@ import StarRating from '@/components/ui/StarRating'
 import { deleteReview } from '@/lib/api/admin/admin-reviews'
 import type { AdminReview } from '@/lib/api/admin/admin-reviews'
 import ReviewDrawer from './ReviewDrawer'
+import { env } from '@/lib/env'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
+const API_BASE = env.NEXT_PUBLIC_API_URL
 
 function resolveUrl(url: string) {
   return url.startsWith('http') ? url : `${API_BASE}${url}`

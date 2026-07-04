@@ -5,6 +5,7 @@ import 'server-only'
 import axios from 'axios'
 import { cookies } from 'next/headers'
 import { parseApiError } from './errors'
+import { env } from '../env'
 
 /**
  * Server-side Axios instance for use in RSC pages and Server Actions.
@@ -12,7 +13,7 @@ import { parseApiError } from './errors'
  * as a Bearer token, since the server has no browser to send cookies for it.
  */
 const serverApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: env.NEXT_PUBLIC_API_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 

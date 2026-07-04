@@ -11,8 +11,9 @@ import { updateReviewStatus, findUserByEmailClient } from '@/lib/api/admin/admin
 import { getAdminProductById } from '@/lib/api/admin/admin-products'
 import type { AdminReview } from '@/lib/api/admin/admin-reviews'
 import type { ProductPhoto } from '@/lib/api/admin/admin-products'
+import { env } from '@/lib/env'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
+const API_BASE = env.NEXT_PUBLIC_API_URL
 
 function resolveUrl(url: string) {
   return url.startsWith('http') ? url : `${API_BASE}${url}`

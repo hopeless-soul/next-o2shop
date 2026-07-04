@@ -9,6 +9,7 @@ import SearchPopup from "@/components/layout/SearchPopup";
 import BackButton from "@/components/ui/BackButton";
 import { NAV_CATEGORIES } from "@/lib/nav-config";
 import { useCart } from "@/lib/cart/CartContext";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { cn } from "@/lib/utils";
 
 interface NavbarProps {
@@ -41,7 +42,7 @@ export default function Navbar({
     }
     : pathname.startsWith("/products")
       ? {
-        background: "transparent",
+        background: "var(--color-background)",
         textColor: "var(--color-foreground-dark)",
         scrolledBackground: "var(--color-foreground-dark)",
         scrolledColor: "var(--color-on-dark)",
@@ -71,12 +72,7 @@ export default function Navbar({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = (mobileOpen || searchOpen) ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileOpen, searchOpen]);
+  useBodyScrollLock(mobileOpen || searchOpen);
 
   const openDropdown = (slug: string) => {
     if (dropdownTimer.current) clearTimeout(dropdownTimer.current);

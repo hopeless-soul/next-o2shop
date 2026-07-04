@@ -15,10 +15,9 @@ import { useCheckout } from "@/lib/checkout/CheckoutContext"
 import axios from "axios"
 import clientApi from "@/lib/api/client"
 import type { Order } from "@/lib/types"
+import { env } from "@/lib/env"
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-)
+const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 type PaymentFormProps = {
   orderNumber: string

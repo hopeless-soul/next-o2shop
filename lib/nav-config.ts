@@ -1,9 +1,3 @@
-export type NavSubCategory = {
-  slug: string;
-  displayName: string;
-  href: string;
-};
-
 export type NavCategory = {
   slug: string;
   displayName: string;
@@ -11,6 +5,13 @@ export type NavCategory = {
   subCategories: NavSubCategory[];
 };
 
+export type NavSubCategory = {
+  slug: string;
+  displayName: string;
+  href: string;
+};
+
+/* Hardcoded navigation categories ────────────────────────────────────────── */
 export const NAV_CATEGORIES: NavCategory[] = [
   {
     slug: "all",

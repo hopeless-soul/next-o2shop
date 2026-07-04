@@ -1,6 +1,8 @@
 import clientApi from './client'
 import type { PaginatedResponse, Review } from '../types'
 
+// Client-only counterpart to reviews-server.ts. Use in Client Components;
+// clientApi sends cookies via withCredentials and retries once on 401.
 export async function listReviewsByProductClient(
   productId: string,
   params: { page?: number; limit?: number } = {},

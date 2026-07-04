@@ -1,5 +1,11 @@
-// No cart resource exists in the current API. This file is a typed stub.
-// Fill in when the backend exposes cart endpoints.
+/**
+ * WARNING: Unused — no code in this repo imports from this file. Cart state is
+ * currently handled entirely client-side by lib/cart/CartContext.tsx. Every
+ * function here throws until the backend actually exposes cart endpoints.
+ * 
+ * No cart resource exists in the current API. This file is a typed stub.
+ * Fill in when the backend exposes cart endpoints.
+ */
 
 export type CartItem = {
   id: string

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { SavedAddress, AddressDto } from '@/lib/types'
 import type { SaveAddressPayload } from '@/lib/api/addresses'
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 
 interface AddressFormModalProps {
   address?: SavedAddress
@@ -181,10 +182,7 @@ export default function AddressFormModal({
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = '' }
-  }, [])
+  useBodyScrollLock()
 
   function patchShipping(field: keyof AddressDto, value: string) {
     setShipping(prev => ({ ...prev, [field]: value }))

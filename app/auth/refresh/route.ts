@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { env } from "@/lib/env";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const apiUrl = env.NEXT_PUBLIC_API_URL;
 
 // GET /auth/refresh?next=... — called by middleware redirects.
 // The browser sends refresh_token here because the request path matches

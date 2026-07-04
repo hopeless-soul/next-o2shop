@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
+import { env } from "./lib/env";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const apiUrl = env.NEXT_PUBLIC_API_URL;
 const { protocol, hostname, port } = new URL(apiUrl);
 
 const nextConfig: NextConfig = {

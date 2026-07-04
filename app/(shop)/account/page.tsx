@@ -203,7 +203,7 @@ export default async function AccountPage() {
             </table>
           </div>
         </section>
-
+        {/* Addresses Section */}
         <section>
           <AddressesSection initialAddresses={addresses} />
         </section>
