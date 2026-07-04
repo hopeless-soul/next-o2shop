@@ -1,4 +1,4 @@
-import clientApi from './client'
+import clientApi from '../client'
 import type { AdminUser } from './admin-users'
 
 export type ReviewStatus = 'pending' | 'approved' | 'rejected'

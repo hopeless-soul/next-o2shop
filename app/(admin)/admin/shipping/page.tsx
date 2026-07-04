@@ -1,7 +1,7 @@
-import { getShippingMethods } from '@/lib/api/admin-shipping-server'
+import { getShippingMethods } from '@/lib/api/admin/admin-shipping-server'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import ShippingPageClient from './ShippingPageClient'
-import type { ShippingMethod } from '@/lib/api/admin-shipping'
+import type { ShippingMethod } from '@/lib/api/admin/admin-shipping'
 
 interface ShippingPageProps {
   searchParams: Promise<Record<string, string>>

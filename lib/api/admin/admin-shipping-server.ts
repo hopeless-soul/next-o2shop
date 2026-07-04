@@ -1,4 +1,4 @@
-import serverApi from './server'
+import serverApi from '../server'
 import type { PaginatedShippingMethods } from './admin-shipping'
 
 export async function getShippingMethods(

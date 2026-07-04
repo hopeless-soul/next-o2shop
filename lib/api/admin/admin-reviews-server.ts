@@ -1,4 +1,4 @@
-import serverApi from './server'
+import serverApi from '../server'
 import type {
   AdminReview,
   PaginatedAdminReviews,

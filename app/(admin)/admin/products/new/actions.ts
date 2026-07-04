@@ -6,7 +6,7 @@ import type {
   CreateProductDto,
   ProductVariant,
   CreateVariantDto,
-} from '@/lib/api/admin-products'
+} from '@/lib/api/admin/admin-products'
 
 export async function createProductAction(dto: CreateProductDto): Promise<AdminProduct> {
   const res = await serverApi.post<AdminProduct>('/admin/products', dto)

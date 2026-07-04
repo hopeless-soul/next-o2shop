@@ -16,7 +16,7 @@ import {
 import FormCard from '@/components/admin/FormCard'
 import AdminBadge from '@/components/admin/AdminBadge'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
-import type { AdminProduct, ProductVariant, ProductPhoto, DescriptionBlock } from '@/lib/api/admin-products'
+import type { AdminProduct, ProductVariant, ProductPhoto, DescriptionBlock } from '@/lib/api/admin/admin-products'
 import DescriptionEditor from '@/components/admin/products/DescriptionEditor'
 import {
   updateProductAction,
@@ -29,8 +29,8 @@ import {
   deleteFeaturedPhotoAction,
   deleteProductAction,
 } from './actions'
-import type { AdminCategory } from '@/lib/api/admin-categories'
-import type { AdminCollection } from '@/lib/api/admin-collections'
+import type { AdminCategory } from '@/lib/api/admin/admin-categories'
+import type { AdminCollection } from '@/lib/api/admin/admin-collections'
 import VariantDialog from './VariantDialog'
 
 interface ProductEditClientProps {

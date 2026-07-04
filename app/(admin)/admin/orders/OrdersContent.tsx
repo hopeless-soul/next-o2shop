@@ -9,7 +9,7 @@ import DataTable from '@/components/admin/DataTable'
 import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge, { fulfillmentVariant, paymentVariant } from '@/components/admin/AdminBadge'
-import type { AdminOrder } from '@/lib/api/admin-orders'
+import type { AdminOrder } from '@/lib/api/admin/admin-orders'
 
 
 interface OrdersContentProps {

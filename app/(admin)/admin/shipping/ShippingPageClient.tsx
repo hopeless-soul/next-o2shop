@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { Button } from '@/components/admin/ui/button'
 import ShippingContent from './ShippingContent'
-import type { ShippingMethod } from '@/lib/api/admin-shipping'
+import type { ShippingMethod } from '@/lib/api/admin/admin-shipping'
 
 interface ShippingPageClientProps {
   methods: ShippingMethod[]

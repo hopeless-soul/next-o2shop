@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Loader2, X } from 'lucide-react'
-import type { AdminOrder, AdminOrderAddress, UpdateRecipientDto } from '@/lib/api/admin-orders'
+import type { AdminOrder, AdminOrderAddress, UpdateRecipientDto } from '@/lib/api/admin/admin-orders'
 
 interface EditRecipientModalProps {
   order: AdminOrder

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import type { CreateVariantDto } from '@/lib/api/admin-products'
+import type { CreateVariantDto } from '@/lib/api/admin/admin-products'
 
 export interface VariantDialogProps {
   mode: 'create' | 'edit'

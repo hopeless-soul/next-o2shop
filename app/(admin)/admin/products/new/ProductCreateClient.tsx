@@ -15,9 +15,9 @@ import {
   SelectValue,
 } from '@/components/admin/ui/select'
 import FormCard from '@/components/admin/FormCard'
-import type { AdminCategory } from '@/lib/api/admin-categories'
-import type { AdminCollection } from '@/lib/api/admin-collections'
-import type { CreateVariantDto } from '@/lib/api/admin-products'
+import type { AdminCategory } from '@/lib/api/admin/admin-categories'
+import type { AdminCollection } from '@/lib/api/admin/admin-collections'
+import type { CreateVariantDto } from '@/lib/api/admin/admin-products'
 import { createProductAction, createVariantAction } from './actions'
 
 const inputCls =

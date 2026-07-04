@@ -5,7 +5,7 @@ import { Drawer } from '@base-ui/react/drawer'
 import { X } from 'lucide-react'
 import AdminBadge from '@/components/admin/AdminBadge'
 import type { AdminBadgeVariant } from '@/components/admin/AdminBadge'
-import type { AuditLogEntry, AuditAction } from '@/lib/api/admin-audit-log'
+import type { AuditLogEntry, AuditAction } from '@/lib/api/admin/admin-audit-log'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-US', {

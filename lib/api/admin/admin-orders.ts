@@ -1,4 +1,4 @@
-import clientApi from './client'
+import clientApi from '../client'
 
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 export type FulfillmentStatus = 'unfulfilled' | 'fulfilled' | 'partially_fulfilled' | 'cancelled'

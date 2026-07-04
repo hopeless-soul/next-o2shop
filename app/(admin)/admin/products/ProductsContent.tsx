@@ -8,7 +8,7 @@ import DataTable from '@/components/admin/DataTable'
 import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge from '@/components/admin/AdminBadge'
-import type { AdminProductListItem } from '@/lib/api/admin-products'
+import type { AdminProductListItem } from '@/lib/api/admin/admin-products'
 import { Search, Eye, Tag } from 'lucide-react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''

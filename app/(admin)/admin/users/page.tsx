@@ -1,5 +1,5 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminUsers } from '@/lib/api/admin-users-server'
+import { getAdminUsers } from '@/lib/api/admin/admin-users-server'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import UsersContent from './UsersContent'
 

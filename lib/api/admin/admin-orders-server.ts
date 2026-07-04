@@ -1,4 +1,4 @@
-import serverApi from './server'
+import serverApi from '../server'
 import type { AdminOrder, PaginatedAdminOrders, GetAdminOrdersParams } from './admin-orders'
 
 export async function getAdminOrders(params: GetAdminOrdersParams = {}): Promise<PaginatedAdminOrders> {

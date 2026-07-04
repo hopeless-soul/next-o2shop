@@ -10,7 +10,7 @@ import type {
   UpdatePhotoDto,
   CreateVariantDto,
   UpdateVariantDto,
-} from '@/lib/api/admin-products'
+} from '@/lib/api/admin/admin-products'
 
 export async function updateProductAction(id: string, dto: UpdateProductDto): Promise<AdminProduct> {
   const res = await serverApi.patch<AdminProduct>(`/admin/products/${id}`, dto)

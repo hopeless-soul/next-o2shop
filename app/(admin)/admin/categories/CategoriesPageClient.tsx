@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { Button } from '@/components/admin/ui/button'
 import CategoriesContent from './CategoriesContent'
-import type { AdminCategory } from '@/lib/api/admin-categories'
+import type { AdminCategory } from '@/lib/api/admin/admin-categories'
 
 interface CategoriesPageClientProps {
   categories: AdminCategory[]

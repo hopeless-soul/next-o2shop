@@ -1,4 +1,4 @@
-import { getAdminCollections } from '@/lib/api/admin-collections-server'
+import { getAdminCollections } from '@/lib/api/admin/admin-collections-server'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import CollectionsPageClient from './CollectionsPageClient'
 

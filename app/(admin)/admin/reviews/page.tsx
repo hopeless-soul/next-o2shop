@@ -1,6 +1,6 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminReviews } from '@/lib/api/admin-reviews-server'
-import type { AdminReview, ReviewStatus } from '@/lib/api/admin-reviews'
+import { getAdminReviews } from '@/lib/api/admin/admin-reviews-server'
+import type { AdminReview, ReviewStatus } from '@/lib/api/admin/admin-reviews'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import ReviewsContent from './ReviewsContent'
 

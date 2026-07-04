@@ -1,6 +1,6 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminOrders } from '@/lib/api/admin-orders-server'
-import type { AdminOrder, PaymentStatus, FulfillmentStatus } from '@/lib/api/admin-orders'
+import { getAdminOrders } from '@/lib/api/admin/admin-orders-server'
+import type { AdminOrder, PaymentStatus, FulfillmentStatus } from '@/lib/api/admin/admin-orders'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import OrdersContent from './OrdersContent'
 

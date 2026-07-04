@@ -1,4 +1,4 @@
-import serverApi from './server'
+import serverApi from '../server'
 import type { PaginatedAdminCollections } from './admin-collections'
 
 export async function getAdminCollections(

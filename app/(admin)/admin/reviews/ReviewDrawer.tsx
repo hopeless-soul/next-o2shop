@@ -7,10 +7,10 @@ import { X, Loader2, CheckCircle, XCircle, Trash2, UserCheck, UserX } from 'luci
 import AdminBadge, { reviewVariant } from '@/components/admin/AdminBadge'
 import StarRating from '@/components/ui/StarRating'
 import { Button } from '@/components/admin/ui/button'
-import { updateReviewStatus, findUserByEmailClient } from '@/lib/api/admin-reviews'
-import { getAdminProductById } from '@/lib/api/admin-products'
-import type { AdminReview } from '@/lib/api/admin-reviews'
-import type { ProductPhoto } from '@/lib/api/admin-products'
+import { updateReviewStatus, findUserByEmailClient } from '@/lib/api/admin/admin-reviews'
+import { getAdminProductById } from '@/lib/api/admin/admin-products'
+import type { AdminReview } from '@/lib/api/admin/admin-reviews'
+import type { ProductPhoto } from '@/lib/api/admin/admin-products'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 

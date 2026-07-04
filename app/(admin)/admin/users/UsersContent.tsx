@@ -10,7 +10,7 @@ import DataTable from '@/components/admin/DataTable'
 import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge, { roleVariant } from '@/components/admin/AdminBadge'
-import type { AdminUser } from '@/lib/api/admin-users'
+import type { AdminUser } from '@/lib/api/admin/admin-users'
 
 interface UsersContentProps {
   users: AdminUser[]

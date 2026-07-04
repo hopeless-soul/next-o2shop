@@ -1,4 +1,4 @@
-import clientApi from './client'
+import clientApi from '../client'
 
 export type AdminUser = {
   id: string

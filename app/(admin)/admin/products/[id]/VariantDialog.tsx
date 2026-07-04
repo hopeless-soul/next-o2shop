@@ -1,7 +1,7 @@
 'use client'
 
 import SharedVariantDialog from '@/components/admin/products/VariantDialog'
-import type { ProductVariant, CreateVariantDto } from '@/lib/api/admin-products'
+import type { ProductVariant, CreateVariantDto } from '@/lib/api/admin/admin-products'
 import { createVariantAction, updateVariantAction } from './actions'
 
 interface VariantDialogProps {

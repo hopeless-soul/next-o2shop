@@ -1,5 +1,5 @@
 import serverApi from './server'
-import type { AdminUser, PaginatedAdminUsers, GetAdminUsersParams } from './admin-users'
+import type { AdminUser, PaginatedAdminUsers, GetAdminUsersParams } from './admin/admin-users'
 
 export async function getAdminUsers(params: GetAdminUsersParams = {}): Promise<PaginatedAdminUsers> {
   const res = await serverApi.get<PaginatedAdminUsers>('/admin/users', { params })

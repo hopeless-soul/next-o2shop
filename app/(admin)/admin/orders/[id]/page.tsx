@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminOrder, getOrderNotes } from '@/lib/api/admin-orders-server'
+import { getAdminOrder, getOrderNotes } from '@/lib/api/admin/admin-orders-server'
 import { NotFoundError, AuthError } from '@/lib/api/errors'
 import OrderDetailClient from './OrderDetailClient'
 

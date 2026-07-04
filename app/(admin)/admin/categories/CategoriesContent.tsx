@@ -35,7 +35,7 @@ import {
   deleteSubcategory,
   type AdminCategory,
   type AdminSubCategory,
-} from '@/lib/api/admin-categories'
+} from '@/lib/api/admin/admin-categories'
 
 interface CategoriesContentProps {
   categories: AdminCategory[]

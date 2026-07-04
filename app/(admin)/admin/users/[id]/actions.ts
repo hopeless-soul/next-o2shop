@@ -1,7 +1,7 @@
 'use server'
 
 import serverApi from '@/lib/api/server'
-import type { AdminUser, UpdateAdminUserDto } from '@/lib/api/admin-users'
+import type { AdminUser, UpdateAdminUserDto } from '@/lib/api/admin/admin-users'
 
 export async function updateUserAction(id: string, dto: UpdateAdminUserDto): Promise<AdminUser> {
   const res = await serverApi.patch<AdminUser>(`/admin/users/${id}`, dto)

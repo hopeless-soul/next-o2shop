@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/admin/ui/select'
-import type { DescriptionBlock } from '@/lib/api/admin-products'
+import type { DescriptionBlock } from '@/lib/api/admin/admin-products'
 
 const inputCls =
   'h-9 px-2.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30 w-full'

@@ -1,5 +1,5 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAdminProducts } from '@/lib/api/admin-products-server'
+import { getAdminProducts } from '@/lib/api/admin/admin-products-server'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import ProductsContent from './ProductsContent'
 

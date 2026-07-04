@@ -1,6 +1,6 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { getAuditLog } from '@/lib/api/admin-audit-log-server'
-import type { AuditAction, AuditLogEntry } from '@/lib/api/admin-audit-log'
+import { getAuditLog } from '@/lib/api/admin/admin-audit-log-server'
+import type { AuditAction, AuditLogEntry } from '@/lib/api/admin/admin-audit-log'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import ChangesContent from './ChangesContent'
 

@@ -1,4 +1,4 @@
-import serverApi from './server'
+import serverApi from '../server'
 import type { PaginatedAdminCategories } from './admin-categories'
 
 export async function getAdminCategories(

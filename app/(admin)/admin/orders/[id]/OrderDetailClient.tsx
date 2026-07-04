@@ -18,7 +18,7 @@ import type {
   AdminOrderAddress,
   PaymentStatus,
   FulfillmentStatus,
-} from '@/lib/api/admin-orders'
+} from '@/lib/api/admin/admin-orders'
 import { updateOrderStatusAction, updateRecipientAction, addNoteAction } from './actions'
 
 // ── Internal helpers ─────────────────────────────────────

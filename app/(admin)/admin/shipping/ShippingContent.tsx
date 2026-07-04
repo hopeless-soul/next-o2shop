@@ -23,7 +23,7 @@ import {
   deleteShippingMethod,
   type ShippingMethod,
   type CreateShippingMethodDto,
-} from '@/lib/api/admin-shipping'
+} from '@/lib/api/admin/admin-shipping'
 
 interface ShippingContentProps {
   methods: ShippingMethod[]

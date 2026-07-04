@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { NotFoundError, AuthError } from '@/lib/api/errors'
-import { getAdminUser } from '@/lib/api/admin-users-server'
+import { getAdminUser } from '@/lib/api/admin/admin-users-server'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import UserEditClient from './UserEditClient'
 

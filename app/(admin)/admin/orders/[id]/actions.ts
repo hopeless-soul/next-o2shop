@@ -1,7 +1,7 @@
 'use server'
 
 import serverApi from '@/lib/api/server'
-import type { AdminOrder, UpdateOrderStatusDto, UpdateRecipientDto } from '@/lib/api/admin-orders'
+import type { AdminOrder, UpdateOrderStatusDto, UpdateRecipientDto } from '@/lib/api/admin/admin-orders'
 
 export async function updateOrderStatusAction(
   id: string,

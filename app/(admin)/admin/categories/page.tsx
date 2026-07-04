@@ -1,4 +1,4 @@
-import { getAdminCategories } from '@/lib/api/admin-categories-server'
+import { getAdminCategories } from '@/lib/api/admin/admin-categories-server'
 import { parsePagination } from '@/lib/admin/parse-search-params'
 import CategoriesPageClient from './CategoriesPageClient'
 

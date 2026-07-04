@@ -10,7 +10,7 @@ import FilterBar from '@/components/admin/FilterBar'
 import AdminPagination from '@/components/admin/AdminPagination'
 import AdminBadge from '@/components/admin/AdminBadge'
 import type { AdminBadgeVariant } from '@/components/admin/AdminBadge'
-import type { AuditLogEntry, AuditAction } from '@/lib/api/admin-audit-log'
+import type { AuditLogEntry, AuditAction } from '@/lib/api/admin/admin-audit-log'
 import ChangeDrawer from './ChangeDrawer'
 
 function formatValue(v: unknown): string {

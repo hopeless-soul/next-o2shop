@@ -14,7 +14,7 @@ import {
 import FormCard from '@/components/admin/FormCard'
 import AdminBadge, { roleVariant } from '@/components/admin/AdminBadge'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
-import type { AdminUser } from '@/lib/api/admin-users'
+import type { AdminUser } from '@/lib/api/admin/admin-users'
 import { updateUserAction, deleteUserAction } from './actions'
 import { formatDate } from '@/lib/admin/formatters'
 

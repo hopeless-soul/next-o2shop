@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { Button } from '@/components/admin/ui/button'
 import CollectionsContent from './CollectionsContent'
-import type { AdminCollection } from '@/lib/api/admin-collections'
+import type { AdminCollection } from '@/lib/api/admin/admin-collections'
 
 interface CollectionsPageClientProps {
   collections: AdminCollection[]

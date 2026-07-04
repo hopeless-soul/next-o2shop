@@ -31,7 +31,7 @@ import {
   updateCollection,
   deleteCollection,
   type AdminCollection,
-} from '@/lib/api/admin-collections'
+} from '@/lib/api/admin/admin-collections'
 
 type CollectionForm = {
   displayName: string
