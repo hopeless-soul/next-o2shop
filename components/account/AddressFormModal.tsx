@@ -1,9 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import type { SavedAddress, AddressDto } from '@/lib/types'
 import type { SaveAddressPayload } from '@/lib/api/addresses'
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
+import { addressSchema } from '@/lib/validation/address'
+import AddressFields, { labelClass, inputClass } from './AddressFields'
 
 interface AddressFormModalProps {
   address?: SavedAddress
@@ -24,144 +28,10 @@ const EMPTY_ADDRESS: AddressDto = {
   phone: '',
 }
 
-function AddressFields({
-  prefix,
-  values,
-  onChange,
-}: {
-  prefix: string
-  values: AddressDto
-  onChange: (field: keyof AddressDto, value: string) => void
-}) {
-  const inputClass =
-    'w-full border border-border px-3 py-2 text-sm outline-none focus:border-current font-secondary text-foreground bg-background'
-  const labelClass =
-    'block font-sans text-[10px] uppercase tracking-widest mb-1 text-foreground-subtle'
+const sectionHeadingClass =
+  'font-sans text-[12px] uppercase tracking-widest mb-4 text-foreground-dark'
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div>
-        <label htmlFor={`${prefix}-firstName`} className={labelClass}>
-          First name *
-        </label>
-        <input
-          id={`${prefix}-firstName`}
-          value={values.firstName}
-          onChange={e => onChange('firstName', e.target.value)}
-          required
-          className={inputClass}
-        />
-      </div>
-      <div>
-        <label htmlFor={`${prefix}-lastName`} className={labelClass}>
-          Last name *
-        </label>
-        <input
-          id={`${prefix}-lastName`}
-          value={values.lastName}
-          onChange={e => onChange('lastName', e.target.value)}
-          required
-          className={inputClass}
-        />
-      </div>
-      <div className="col-span-2">
-        <label htmlFor={`${prefix}-company`} className={labelClass}>
-          Company
-        </label>
-        <input
-          id={`${prefix}-company`}
-          value={values.company ?? ''}
-          onChange={e => onChange('company', e.target.value)}
-          className={inputClass}
-        />
-      </div>
-      <div className="col-span-2">
-        <label htmlFor={`${prefix}-address1`} className={labelClass}>
-          Address *
-        </label>
-        <input
-          id={`${prefix}-address1`}
-          value={values.address1}
-          onChange={e => onChange('address1', e.target.value)}
-          required
-          className={inputClass}
-        />
-      </div>
-      <div className="col-span-2">
-        <label htmlFor={`${prefix}-address2`} className={labelClass}>
-          Apartment, suite, etc.
-        </label>
-        <input
-          id={`${prefix}-address2`}
-          value={values.address2 ?? ''}
-          onChange={e => onChange('address2', e.target.value)}
-          className={inputClass}
-        />
-      </div>
-      <div>
-        <label htmlFor={`${prefix}-city`} className={labelClass}>
-          City *
-        </label>
-        <input
-          id={`${prefix}-city`}
-          value={values.city}
-          onChange={e => onChange('city', e.target.value)}
-          required
-          className={inputClass}
-        />
-      </div>
-      <div>
-        <label htmlFor={`${prefix}-province`} className={labelClass}>
-          State / Province *
-        </label>
-        <input
-          id={`${prefix}-province`}
-          value={values.province}
-          onChange={e => onChange('province', e.target.value)}
-          required
-          className={inputClass}
-        />
-      </div>
-      <div>
-        <label htmlFor={`${prefix}-country`} className={labelClass}>
-          Country *
-        </label>
-        <input
-          id={`${prefix}-country`}
-          value={values.country}
-          onChange={e => onChange('country', e.target.value)}
-          required
-          className={inputClass}
-        />
-      </div>
-      <div>
-        <label htmlFor={`${prefix}-postalCode`} className={labelClass}>
-          Postal code *
-        </label>
-        <input
-          id={`${prefix}-postalCode`}
-          value={values.postalCode}
-          onChange={e => onChange('postalCode', e.target.value)}
-          required
-          className={inputClass}
-        />
-      </div>
-      <div className="col-span-2">
-        <label htmlFor={`${prefix}-phone`} className={labelClass}>
-          Phone
-        </label>
-        <input
-          id={`${prefix}-phone`}
-          type="tel"
-          value={values.phone ?? ''}
-          onChange={e => onChange('phone', e.target.value)}
-          className={inputClass}
-        />
-      </div>
-    </div>
-  )
-}
-
+// Slide-in modal for creating or editing a saved address (shipping + optional billing).
 export default function AddressFormModal({
   address,
   onSave,
@@ -169,42 +39,55 @@ export default function AddressFormModal({
 }: AddressFormModalProps) {
   const isEditing = !!address
 
+  /**
+   * Note: Shipping and billing are two independent forms rather than one nested
+   * form: billing is optional (skipped entirely when billingSame is true),
+   * so it gets its own resolver/validation instead of a shared schema that
+   * has to branch on billingSame internally.
+   */
+  const shippingForm = useForm<AddressDto>({
+    resolver: zodResolver(addressSchema),
+    mode: 'onTouched',
+    defaultValues: address?.shippingAddress ?? { ...EMPTY_ADDRESS },
+  })
+  const billingForm = useForm<AddressDto>({
+    resolver: zodResolver(addressSchema),
+    mode: 'onTouched',
+    defaultValues: address?.billingAddress ?? { ...EMPTY_ADDRESS },
+  })
+
+  // Local state for the address label, billing toggle, and pending state.
   const [name, setName] = useState(address?.name ?? '')
-  const [shipping, setShipping] = useState<AddressDto>(
-    address?.shippingAddress ?? { ...EMPTY_ADDRESS },
-  )
-  const [billing, setBilling] = useState<AddressDto>(
-    address?.billingAddress ?? { ...EMPTY_ADDRESS },
-  )
   const [billingSame, setBillingSame] = useState(
     address?.billingIsSameAsShipping ?? true,
   )
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
 
+  // Lock body scroll while modal is open, so the background content doesn't scroll. 
   useBodyScrollLock()
 
-  function patchShipping(field: keyof AddressDto, value: string) {
-    setShipping(prev => ({ ...prev, [field]: value }))
-  }
-
-  function patchBilling(field: keyof AddressDto, value: string) {
-    setBilling(prev => ({ ...prev, [field]: value }))
-  }
-
+  // Validates shipping (and billing, if distinct) then hands the result to onSave.
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setApiError(null)
+
+    // Only validate billing when it's actually going to be submitted.
+    const shippingValid = await shippingForm.trigger()
+    const billingValid = billingSame ? true : await billingForm.trigger()
+    if (!shippingValid || !billingValid) return
+
     setPending(true)
-    setError(null)
     try {
+      const shipping = shippingForm.getValues()
       await onSave({
         name,
         shippingAddress: shipping,
-        billingAddress: billingSame ? shipping : billing,
+        billingAddress: billingSame ? shipping : billingForm.getValues(),
         billingIsSameAsShipping: billingSame,
       })
     } catch {
-      setError('Something went wrong. Please try again.')
+      setApiError('Something went wrong. Please try again.')
       setPending(false)
     }
   }
@@ -234,10 +117,7 @@ export default function AddressFormModal({
         <form onSubmit={handleSubmit} className="flex flex-col gap-8 px-6 py-6 flex-1">
           {/* Address label */}
           <div>
-            <label
-              htmlFor="addr-name"
-              className="block font-sans text-[10px] uppercase tracking-widest mb-1 text-foreground-subtle"
-            >
+            <label htmlFor="addr-name" className={labelClass}>
               Address label *
             </label>
             <input
@@ -246,16 +126,14 @@ export default function AddressFormModal({
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Home, Office"
               required
-              className="w-full border border-border px-3 py-2 text-sm outline-none focus:border-current font-secondary text-foreground bg-background"
+              className={inputClass}
             />
           </div>
 
           {/* Shipping address */}
           <div>
-            <p className="font-sans text-[12px] uppercase tracking-widest mb-4 text-foreground-dark">
-              Shipping Address
-            </p>
-            <AddressFields prefix="ship" values={shipping} onChange={patchShipping} />
+            <p className={sectionHeadingClass}>Shipping Address</p>
+            <AddressFields form={shippingForm} prefix="shipping" />
           </div>
 
           {/* Billing same as shipping toggle */}
@@ -275,16 +153,14 @@ export default function AddressFormModal({
           {/* Billing address */}
           {!billingSame && (
             <div>
-              <p className="font-sans text-[12px] uppercase tracking-widest mb-4 text-foreground-dark">
-                Billing Address
-              </p>
-              <AddressFields prefix="bill" values={billing} onChange={patchBilling} />
+              <p className={sectionHeadingClass}>Billing Address</p>
+              <AddressFields form={billingForm} prefix="billing" />
             </div>
           )}
 
-          {error && (
+          {apiError && (
             <p className="text-sm font-secondary text-destructive">
-              {error}
+              {apiError}
             </p>
           )}
 
