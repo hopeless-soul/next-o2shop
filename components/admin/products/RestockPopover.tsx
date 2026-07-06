@@ -24,7 +24,10 @@ export default function RestockPopover({ currentStock, onSave }: RestockPopoverP
   }
 
   function adjust(delta: number) {
-    setValue(prev => String(Math.max(0, Number(prev || '0') + delta)))
+    setValue(prev => {
+      const current = Number(prev) || 0
+      return String(Math.max(0, current + delta))
+    })
   }
 
   async function handleSave() {
