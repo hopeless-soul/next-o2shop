@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, GripVertical, ChevronUp, ChevronDown, Plus, Trash2 } from 'lucide-react'
 import Image from 'next/image'
@@ -16,10 +16,16 @@ import {
 import FormCard from '@/components/admin/FormCard'
 import AdminBadge from '@/components/admin/AdminBadge'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
-import type { AdminProduct, ProductVariant, ProductPhoto, DescriptionBlock } from '@/lib/api/admin/admin-products'
+import type { AdminProduct, ProductVariant, ProductPhoto, DescriptionBlock, CreateVariantDto } from '@/lib/api/admin/admin-products'
+import { groupVariantsByColor } from '@/lib/utils/variant-grouping'
+import VariantColorCard from '@/components/admin/products/VariantColorCard'
+import RestockPopover from '@/components/admin/products/RestockPopover'
+import type { VariantDialogMode } from '@/components/admin/products/VariantDialog'
 import DescriptionEditor from '@/components/admin/products/DescriptionEditor'
 import {
   updateProductAction,
+  createVariantAction,
+  updateVariantAction,
   deleteVariantAction,
   setDefaultVariantAction,
   uploadPhotoAction,
@@ -556,35 +562,6 @@ function PhotosTab({
 type PhotoWithOrder = ProductPhoto & { sortOrder: number }
 
 // ────────────────────────────────────────────────────────────
-// Variant sorting helpers
-// ────────────────────────────────────────────────────────────
-
-const LETTER_SIZE_ORDER = ['2XS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
-
-function compareSizes(a: string, b: string): number {
-  const aNum = Number(a)
-  const bNum = Number(b)
-  const aIsNum = !isNaN(aNum)
-  const bIsNum = !isNaN(bNum)
-  if (aIsNum && bIsNum) return aNum - bNum
-  if (aIsNum) return -1
-  if (bIsNum) return 1
-  const aIdx = LETTER_SIZE_ORDER.indexOf(a.toUpperCase())
-  const bIdx = LETTER_SIZE_ORDER.indexOf(b.toUpperCase())
-  if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx
-  if (aIdx >= 0) return -1
-  if (bIdx >= 0) return 1
-  return a.localeCompare(b)
-}
-
-function sortVariants(vs: ProductVariant[]): ProductVariant[] {
-  return [...vs].sort((a, b) => {
-    const c = a.colorName.localeCompare(b.colorName)
-    return c !== 0 ? c : compareSizes(a.size, b.size)
-  })
-}
-
-// ────────────────────────────────────────────────────────────
 // Main client component
 // ────────────────────────────────────────────────────────────
 
@@ -633,11 +610,18 @@ export default function ProductEditClient({
   // ── Variants state ───────────────────────────────────────
   const [variants, setVariants] = useState<ProductVariant[]>(product.variants ?? [])
   const [defaultVariantId, setDefaultVariantId] = useState(product.defaultVariant?.id ?? null)
-  const [variantDialogOpen, setVariantDialogOpen] = useState(false)
-  const [editingVariant, setEditingVariant] = useState<ProductVariant | undefined>()
+  const [dialogMode, setDialogMode] = useState<VariantDialogMode | null>(null)
   const [deleteVariantId, setDeleteVariantId] = useState<string | null>(null)
   const [variantActionErrors, setVariantActionErrors] = useState<Record<string, string>>({})
   const [pendingDefaultId, setPendingDefaultId] = useState<string | null>(null)
+
+  const existingColors = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const v of variants) {
+      if (!map.has(v.colorName)) map.set(v.colorName, v.colorValue)
+    }
+    return Array.from(map, ([colorName, colorValue]) => ({ colorName, colorValue }))
+  }, [variants])
 
   // ── Derived data ─────────────────────────────────────────
   const selectedCategory = categories.find(c => c.id === categoryId)
@@ -704,21 +688,50 @@ export default function ProductEditClient({
   }
 
   // ── Variant actions ──────────────────────────────────────
-  function openAddVariant() {
-    setEditingVariant(undefined)
-    setVariantDialogOpen(true)
+  function variantToDto(v: ProductVariant): CreateVariantDto {
+    return {
+      colorName: v.colorName,
+      colorValue: v.colorValue,
+      size: v.size,
+      sku: v.sku,
+      stock: v.stock,
+      priceOverride: v.priceOverride,
+      compareAtPrice: v.compareAtPrice,
+    }
+  }
+
+  function openAddColor() {
+    setDialogMode({ kind: 'add-color' })
+  }
+
+  function openAddSize(group: { colorName: string; colorValue: string; variants: ProductVariant[] }) {
+    setDialogMode({
+      kind: 'add-size',
+      colorName: group.colorName,
+      colorValue: group.colorValue,
+      existingSizes: group.variants.map(v => v.size),
+      priceDefaults: {
+        priceOverride: group.variants[0]?.priceOverride,
+        compareAtPrice: group.variants[0]?.compareAtPrice ?? undefined,
+      },
+    })
   }
 
   function openEditVariant(v: ProductVariant) {
-    setEditingVariant(v)
-    setVariantDialogOpen(true)
+    setDialogMode({ kind: 'edit', variantId: v.id, initialValues: variantToDto(v) })
   }
 
-  function handleVariantSaved(v: ProductVariant) {
-    setVariants(prev => {
-      const idx = prev.findIndex(x => x.id === v.id)
-      return idx >= 0 ? prev.map(x => (x.id === v.id ? v : x)) : [...prev, v]
-    })
+  function handleVariantCreated(v: ProductVariant) {
+    setVariants(prev => [...prev, v])
+  }
+
+  function handleVariantUpdated(v: ProductVariant) {
+    setVariants(prev => prev.map(x => (x.id === v.id ? v : x)))
+  }
+
+  async function handleRestock(variantId: string, stock: number) {
+    const saved = await updateVariantAction(product.id, variantId, { stock })
+    setVariants(prev => prev.map(x => (x.id === variantId ? saved : x)))
   }
 
   async function handleDeleteVariant() {
@@ -1014,7 +1027,7 @@ export default function ProductEditClient({
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={openAddVariant}
+                onClick={openAddColor}
                 className="flex items-center gap-1.5 h-9 px-4 rounded-[4px] text-[13px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150"
               >
                 <Plus className="size-4" />
@@ -1028,91 +1041,96 @@ export default function ProductEditClient({
               </p>
             )}
 
-            <div className="space-y-2">
-              {sortVariants(variants).map(v => (
-                <div
-                  key={v.id}
-                  className="flex items-center gap-3 p-4 bg-white border border-[var(--admin-border)] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-                >
-                  {/* Color swatch */}
-                  <div
-                    className="w-4 h-4 rounded-full shrink-0 border border-[var(--admin-border)]"
-                    style={{ background: v.colorValue }}
-                  />
+            <div className="space-y-3">
+              {groupVariantsByColor(variants).map(group => (
+                <VariantColorCard
+                  key={group.colorName}
+                  group={group}
+                  onAddSize={() => openAddSize(group)}
+                  renderRow={(v) => (
+                    <div
+                      key={v.id}
+                      className="flex items-center gap-3 p-3 border-t border-[var(--admin-border)] first:border-t-0"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[14px] font-medium text-[var(--admin-text-primary)]">
+                            {v.size}
+                          </span>
+                          {v.sku && (
+                            <span className="text-[12px] text-[var(--admin-text-muted)]">
+                              SKU: {v.sku}
+                            </span>
+                          )}
+                          <span className="text-[12px] text-[var(--admin-text-muted)]">
+                            Stock: {v.stock}
+                          </span>
+                          {v.priceOverride != null && (
+                            <span className="text-[12px] text-[var(--admin-text-primary)]">
+                              ${v.priceOverride.toFixed(2)}
+                            </span>
+                          )}
+                          {v.id === defaultVariantId && (
+                            <AdminBadge variant="info" label="Default" />
+                          )}
+                          {v.stock === 0 && (
+                            <AdminBadge variant="warning" label="Out of stock" />
+                          )}
+                        </div>
+                        {variantActionErrors[v.id] && (
+                          <p className="text-[11px] text-[var(--admin-destructive)] mt-0.5">
+                            {variantActionErrors[v.id]}
+                          </p>
+                        )}
+                      </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[14px] font-medium text-[var(--admin-text-primary)]">
-                        {v.colorName}
-                      </span>
-                      <span className="text-[13px] text-[var(--admin-text-muted)]">{v.size}</span>
-                      {v.sku && (
-                        <span className="text-[12px] text-[var(--admin-text-muted)]">
-                          SKU: {v.sku}
-                        </span>
-                      )}
-                      <span className="text-[12px] text-[var(--admin-text-muted)]">
-                        Stock: {v.stock}
-                      </span>
-                      {v.priceOverride != null && (
-                        <span className="text-[12px] text-[var(--admin-text-primary)]">
-                          ${v.priceOverride.toFixed(2)}
-                        </span>
-                      )}
-                      {v.id === defaultVariantId && (
-                        <AdminBadge variant="info" label="Default" />
-                      )}
-                      {v.stock === 0 && (
-                        <AdminBadge variant="warning" label="Out of stock" />
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {v.id !== defaultVariantId && (
+                          <button
+                            type="button"
+                            disabled={pendingDefaultId === v.id}
+                            onClick={() => handleSetDefault(v.id)}
+                            className="flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] disabled:opacity-50 transition-colors"
+                          >
+                            {pendingDefaultId === v.id && <Loader2 className="size-3 animate-spin" />}
+                            Set default
+                          </button>
+                        )}
+                        <RestockPopover
+                          currentStock={v.stock}
+                          onSave={(stock) => handleRestock(v.id, stock)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => openEditVariant(v)}
+                          className="px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteVariantId(v.id)}
+                          className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
                     </div>
-                    {variantActionErrors[v.id] && (
-                      <p className="text-[11px] text-[var(--admin-destructive)] mt-0.5">
-                        {variantActionErrors[v.id]}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    {v.id !== defaultVariantId && (
-                      <button
-                        type="button"
-                        disabled={pendingDefaultId === v.id}
-                        onClick={() => handleSetDefault(v.id)}
-                        className="flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] disabled:opacity-50 transition-colors"
-                      >
-                        {pendingDefaultId === v.id && <Loader2 className="size-3 animate-spin" />}
-                        Set default
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => openEditVariant(v)}
-                      className="px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteVariantId(v.id)}
-                      className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                </div>
+                  )}
+                />
               ))}
             </div>
           </div>
 
           <VariantDialog
             productId={product.id}
-            variant={editingVariant}
-            open={variantDialogOpen}
-            onOpenChange={setVariantDialogOpen}
-            onSaved={handleVariantSaved}
+            productName={product.name}
+            existingColors={existingColors}
+            mode={dialogMode ?? { kind: 'add-color' }}
+            open={dialogMode !== null}
+            onOpenChange={(open) => { if (!open) setDialogMode(null) }}
+            onVariantCreated={handleVariantCreated}
+            onVariantUpdated={handleVariantUpdated}
           />
 
           <ConfirmDialog
