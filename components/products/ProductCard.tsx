@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 
 interface ProductCardProps {
   product: Product;
+  hoverZones?: number;
 }
 
 const PLACEHOLDER_COLORS = [
@@ -16,18 +17,34 @@ const PLACEHOLDER_COLORS = [
   "#c0c0c0",
 ];
 
-export default function ProductCard({ product }: ProductCardProps) {
-  const [activeZone, setActiveZone] = useState<"left" | "right" | null>(null);
+const MAX_HOVER_ZONES = 4;
+const DEFAULT_HOVER_ZONES = 3;
 
-  const photos      = product.photos ?? [];
-  const mainPhoto   = product.primaryPhoto ?? null;
-  const hoverPhoto1 = photos.find(p => p.sortOrder === 1) ?? mainPhoto;
-  const hoverPhoto2 = photos.find(p => p.sortOrder === 2) ?? mainPhoto;
+export default function ProductCard({ product, hoverZones }: ProductCardProps) {
+  const [activeZone, setActiveZone] = useState<number | null>(null);
+
+  const photos    = product.photos ?? [];
+  const mainPhoto = product.primaryPhoto ?? null;
+
+  // Distinct pictures actually available for this product (main + extra photos)
+  const availablePhotoIds = new Set(
+    [mainPhoto?.id, ...photos.map(p => p.id)].filter((id): id is string => Boolean(id))
+  );
+
+  const zoneCount = Math.max(
+    0,
+    Math.min(hoverZones ?? DEFAULT_HOVER_ZONES, MAX_HOVER_ZONES, availablePhotoIds.size)
+  );
+
+  const hoverPhotos = Array.from({ length: zoneCount }, (_, i) =>
+    photos.find(p => p.sortOrder === i + 1) ?? mainPhoto
+  );
 
   // Color fallbacks — used only when mainPhoto is absent
   const mainBg  = product.variants[0]?.colorValue ?? PLACEHOLDER_COLORS[0];
   const hoverBg = product.variants[1]?.colorValue ?? PLACEHOLDER_COLORS[1];
 
+  // Badge
   const badge: "sale" | "new" | "sold-out" | undefined = !product.available
     ? "sold-out"
     : product.compareAtPrice && product.compareAtPrice < product.basePrice
@@ -67,49 +84,33 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="absolute inset-0"
               style={{
                 backgroundColor: hoverBg,
-                opacity: activeZone ? 0.5 : 0,
+                opacity: activeZone !== null ? 0.5 : 0,
                 transition: "var(--transition-nav)",
               }}
             />
           </>
         )}
 
-        {/* Hover zone 1 overlay (left) */}
-        {hoverPhoto1 && (
-          <div
-            className="absolute inset-0"
-            style={{
-              opacity: activeZone === "left" ? 1 : 0,
-              transition: "var(--transition-nav)",
-            }}
-          >
-            <Image
-              src={hoverPhoto1.url}
-              alt={hoverPhoto1.altText ?? product.displayName}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 50vw, 25vw"
-            />
-          </div>
-        )}
-
-        {/* Hover zone 2 overlay (right) */}
-        {hoverPhoto2 && (
-          <div
-            className="absolute inset-0"
-            style={{
-              opacity: activeZone === "right" ? 1 : 0,
-              transition: "var(--transition-nav)",
-            }}
-          >
-            <Image
-              src={hoverPhoto2.url}
-              alt={hoverPhoto2.altText ?? product.displayName}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 50vw, 25vw"
-            />
-          </div>
+        {/* Hover zone overlays */}
+        {hoverPhotos.map((hoverPhoto, i) =>
+          hoverPhoto && (
+            <div
+              key={i}
+              className="absolute inset-0"
+              style={{
+                opacity: activeZone === i ? 1 : 0,
+                transition: "var(--transition-nav)",
+              }}
+            >
+              <Image
+                src={hoverPhoto.url}
+                alt={hoverPhoto.altText ?? product.displayName}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
+            </div>
+          )
         )}
 
         {/* Badge */}
@@ -120,16 +121,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Hover zones */}
-        <div
-          className="absolute inset-y-0 left-0 w-1/2 z-20 cursor-pointer"
-          onMouseEnter={() => setActiveZone("left")}
-          onMouseLeave={() => setActiveZone(null)}
-        />
-        <div
-          className="absolute inset-y-0 right-0 w-1/2 z-20 cursor-pointer"
-          onMouseEnter={() => setActiveZone("right")}
-          onMouseLeave={() => setActiveZone(null)}
-        />
+        {Array.from({ length: zoneCount }, (_, i) => (
+          <div
+            key={i}
+            className="absolute inset-y-0 z-20 cursor-pointer"
+            style={{ left: `${(i * 100) / zoneCount}%`, width: `${100 / zoneCount}%` }}
+            onMouseEnter={() => setActiveZone(i)}
+            onMouseLeave={() => setActiveZone(null)}
+          />
+        ))}
       </div>
 
       {/* Product details */}
