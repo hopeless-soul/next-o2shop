@@ -1,15 +1,8 @@
-import { cn } from "@/lib/utils";
 import type { OrderStatus } from "@/lib/types";
+import StatusBadge, { type StatusBadgeConfig } from "@/components/account/StatusBadge";
 
-interface OrderStatusBadgeProps {
-  status: OrderStatus;
-  className?: string;
-}
-
-const STATUS_CONFIG: Record<
-  OrderStatus,
-  { label: string; bg: string; color: string }
-> = {
+// Maps each status to its label and color
+const FULFILLMENT_STATUS_CONFIG: Record<OrderStatus, StatusBadgeConfig> = {
   unfulfilled: {
     label: "Unfulfilled",
     bg: "var(--color-fulfillment-unfulfilled-bg)",
@@ -32,17 +25,16 @@ const STATUS_CONFIG: Record<
   },
 };
 
+interface OrderStatusBadgeProps {
+  status: OrderStatus;
+  className?: string;
+}
+
 export default function OrderStatusBadge({
   status,
-  className = "",
+  className,
 }: OrderStatusBadgeProps) {
-  const cfg = STATUS_CONFIG[status];
   return (
-    <span
-      className={cn("inline-flex items-center justify-center h-6 min-w-[72px] text-[11px] uppercase tracking-widest font-sans rounded-none", className)}
-      style={{ backgroundColor: cfg.bg, color: cfg.color }}
-    >
-      {cfg.label}
-    </span>
+    <StatusBadge config={FULFILLMENT_STATUS_CONFIG[status]} className={className} />
   );
 }

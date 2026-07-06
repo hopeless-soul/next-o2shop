@@ -1,15 +1,8 @@
-import { cn } from "@/lib/utils";
 import type { PaymentStatus } from "@/lib/types";
+import StatusBadge, { type StatusBadgeConfig } from "@/components/account/StatusBadge";
 
-interface PaymentStatusBadgeProps {
-  status: PaymentStatus;
-  className?: string;
-}
-
-const STATUS_CONFIG: Record<
-  PaymentStatus,
-  { label: string; bg: string; color: string }
-> = {
+// Maps each status to its label and color
+const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, StatusBadgeConfig> = {
   paid: {
     label: "Paid",
     bg: "var(--color-payment-paid-bg)",
@@ -32,17 +25,14 @@ const STATUS_CONFIG: Record<
   },
 };
 
+interface PaymentStatusBadgeProps {
+  status: PaymentStatus;
+  className?: string;
+}
+
 export default function PaymentStatusBadge({
   status,
-  className = "",
+  className,
 }: PaymentStatusBadgeProps) {
-  const cfg = STATUS_CONFIG[status];
-  return (
-    <span
-      className={cn("inline-flex items-center justify-center h-6 min-w-[72px] text-[11px] uppercase tracking-widest font-sans rounded-none", className)}
-      style={{ backgroundColor: cfg.bg, color: cfg.color }}
-    >
-      {cfg.label}
-    </span>
-  );
+  return <StatusBadge config={PAYMENT_STATUS_CONFIG[status]} className={className} />;
 }
