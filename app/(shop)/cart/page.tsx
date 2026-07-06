@@ -12,7 +12,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center gap-6 pt-[var(--header-height-desktop)]"
+        className="min-h-screen flex flex-col items-center justify-center gap-6 pt-[calc(var(--navbar-height-desktop)_+_20px)]"
       >
         <ShoppingBag
           size={48}
@@ -35,7 +35,7 @@ export default function CartPage() {
 
   return (
     <div
-      className="pt-[var(--header-height-desktop)] px-[var(--header-px-desktop)]"
+      className="pt-[calc(var(--navbar-height-desktop)_+_20px)] px-[var(--header-px-desktop)]"
     >
       {/* Page heading */}
       <div

@@ -81,6 +81,7 @@
   /* ── Border Radius ── */
   --radius-none: 0px;
   --radius-swatch: 2px;
+  --radius-badge: 2px;
   --radius-sm: 4px;
   --radius-base: 6px;
   --radius-md: 8px;
@@ -102,6 +103,7 @@
 
   /* ── Layout constants ── */
   --header-height-desktop: 92px;
+  --navbar-height-desktop: calc(var(--header-height-desktop) + 20px);
   --header-height-mobile: 80px;
   --header-px-desktop: 60px;
   --header-px-mobile: 15px;
@@ -365,6 +367,15 @@ body {
   opacity: 0.5;
 }
 
+.atc-button.atc-added,
+.atc-button.atc-added:hover {
+  background-color: var(--color-status-success-bg) !important;
+  color: var(--color-status-success-fg) !important;
+  -webkit-text-stroke: 0.6px var(--color-status-success-fg) !important;
+  background-image: none !important;
+  animation: none !important;
+}
+
 .color-swatch-selected {
   background-image:
     repeating-linear-gradient(90deg,  #ffffff 0, #ffffff 14px, transparent 0, transparent 26px),
@@ -380,6 +391,21 @@ body {
 @keyframes shimmer {
   0%   { background-position: -800px 0; }
   100% { background-position: 800px 0; }
+}
+
+.splash-line {
+  position: absolute;
+  width: 2px;
+  opacity: 1;
+  transform: translate(0, 0) rotate(var(--rotation));
+  transition: transform 0.45s ease-out, opacity 0.5s ease-out;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.splash-line.animate {
+  transform: translate(var(--dx), var(--dy)) rotate(var(--rotation));
+  opacity: 0;
 }
 
 .skeleton {

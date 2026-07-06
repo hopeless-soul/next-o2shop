@@ -15,7 +15,7 @@ export default function StatusBadge({ config, className = "" }: StatusBadgeProps
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center h-6 min-w-[72px] text-[11px] uppercase tracking-widest font-sans rounded-none",
+        "inline-flex items-center justify-center h-6 min-w-[72px] text-[11px] rounded-[var(--radius-badge)] uppercase tracking-widest font-sans",
         className
       )}
       style={{ backgroundColor: config.bg, color: config.color }}

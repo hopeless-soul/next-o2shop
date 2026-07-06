@@ -189,7 +189,7 @@ export default async function AccountPage() {
                     <td className="py-4">
                       <Link
                         href={`/account/orders/${order.orderNumber}`}
-                        className="font-sans text-[11px] uppercase tracking-widest px-3 py-2 hover:opacity-80 bg-accent text-accent-foreground"
+                        className="font-sans text-[11px] uppercase tracking-widest px-3 py-2 hover:opacity-80 bg-accent text-accent-foreground rounded-[var(--radius-sm)]"
                         style={{
                           transition: "var(--transition-nav)",
                         }}
