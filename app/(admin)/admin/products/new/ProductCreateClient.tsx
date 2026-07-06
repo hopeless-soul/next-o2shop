@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
@@ -18,6 +18,10 @@ import FormCard from '@/components/admin/FormCard'
 import type { AdminCategory } from '@/lib/api/admin/admin-categories'
 import type { AdminCollection } from '@/lib/api/admin/admin-collections'
 import type { CreateVariantDto } from '@/lib/api/admin/admin-products'
+import { groupVariantsByColor } from '@/lib/utils/variant-grouping'
+import VariantColorCard from '@/components/admin/products/VariantColorCard'
+import RestockPopover from '@/components/admin/products/RestockPopover'
+import type { VariantDialogMode, VariantSubmitResult } from '@/components/admin/products/VariantDialog'
 import { createProductAction, createVariantAction } from './actions'
 
 const inputCls =
@@ -32,6 +36,8 @@ function slugify(s: string): string {
 }
 
 const RequiredAsterisk = () => <span className="text-admin-destructive">*</span>
+
+type PendingVariant = CreateVariantDto & { _key: number }
 
 // ────────────────────────────────────────────────────────────
 // Tag chip input (copied pattern from ProductEditClient)
@@ -100,9 +106,9 @@ export default function ProductCreateClient({ categories, collections }: Product
   const [isPublished, setIsPublished] = useState(false)
 
   // Pending variants
-  const [pendingVariants, setPendingVariants] = useState<CreateVariantDto[]>([])
-  const [variantDialogOpen, setVariantDialogOpen] = useState(false)
-  const [editVariantIndex, setEditVariantIndex] = useState<number | null>(null)
+  const nextKeyRef = useRef(0)
+  const [pendingVariants, setPendingVariants] = useState<PendingVariant[]>([])
+  const [dialogMode, setDialogMode] = useState<VariantDialogMode | null>(null)
 
   // Submit state
   const [saving, setSaving] = useState(false)
@@ -111,27 +117,70 @@ export default function ProductCreateClient({ categories, collections }: Product
   const selectedCategory = categories.find(c => c.id === categoryId)
   const subCategories = selectedCategory?.subCategories ?? []
 
+  const existingColors = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const v of pendingVariants) {
+      if (!map.has(v.colorName)) map.set(v.colorName, v.colorValue)
+    }
+    return Array.from(map, ([colorName, colorValue]) => ({ colorName, colorValue }))
+  }, [pendingVariants])
+
   // Variant handlers
-  function openAddVariant() {
-    setEditVariantIndex(null)
-    setVariantDialogOpen(true)
+  function openAddColor() {
+    setDialogMode({ kind: 'add-color' })
   }
 
-  function openEditVariant(index: number) {
-    setEditVariantIndex(index)
-    setVariantDialogOpen(true)
+  function openAddSize(group: { colorName: string; colorValue: string; variants: PendingVariant[] }) {
+    setDialogMode({
+      kind: 'add-size',
+      colorName: group.colorName,
+      colorValue: group.colorValue,
+      existingSizes: group.variants.map(v => v.size),
+      priceDefaults: {
+        priceOverride: group.variants[0]?.priceOverride,
+        compareAtPrice: group.variants[0]?.compareAtPrice ?? undefined,
+      },
+    })
   }
 
-  function handleVariantSave(dto: CreateVariantDto) {
+  function openEditVariant(v: PendingVariant) {
+    setDialogMode({
+      kind: 'edit',
+      variantId: String(v._key),
+      initialValues: {
+        colorName: v.colorName,
+        colorValue: v.colorValue,
+        size: v.size,
+        sku: v.sku,
+        stock: v.stock,
+        priceOverride: v.priceOverride,
+        compareAtPrice: v.compareAtPrice,
+      },
+    })
+  }
+
+  async function handleSubmitMany(dtos: CreateVariantDto[]): Promise<VariantSubmitResult[]> {
+    setPendingVariants(prev => [
+      ...prev,
+      ...dtos.map(dto => ({ ...dto, _key: nextKeyRef.current++ })),
+    ])
+    return dtos.map(() => ({ ok: true as const }))
+  }
+
+  async function handleSubmitOne(dto: CreateVariantDto) {
+    if (dialogMode?.kind !== 'edit') return
+    const key = dialogMode.variantId
     setPendingVariants(prev =>
-      editVariantIndex !== null
-        ? prev.map((v, i) => (i === editVariantIndex ? dto : v))
-        : [...prev, dto]
+      prev.map(v => (String(v._key) === key ? { ...dto, _key: v._key } : v))
     )
   }
 
-  function removeVariant(index: number) {
-    setPendingVariants(prev => prev.filter((_, i) => i !== index))
+  async function handleRestockPending(key: number, stock: number) {
+    setPendingVariants(prev => prev.map(v => (v._key === key ? { ...v, stock } : v)))
+  }
+
+  function removeVariant(key: number) {
+    setPendingVariants(prev => prev.filter(v => v._key !== key))
   }
 
   // Submit
@@ -162,7 +211,7 @@ export default function ProductCreateClient({ categories, collections }: Product
 
       // Batch-create pending variants — best-effort; redirect regardless
       await Promise.allSettled(
-        pendingVariants.map(v => createVariantAction(product.id, v))
+        pendingVariants.map(({ _key, ...dto }) => createVariantAction(product.id, dto))
       )
 
       router.push(`/admin/products/${product.id}`)
@@ -394,11 +443,10 @@ export default function ProductCreateClient({ categories, collections }: Product
 
           {/* ── VARIANTS TAB ── */}
           <TabsContent value="variants" className="space-y-4">
-            {/* "Add variant" button */}
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={openAddVariant}
+                onClick={openAddColor}
                 className="flex items-center gap-1.5 h-9 px-4 rounded-[4px] text-[13px] font-medium bg-[var(--admin-primary)] text-[var(--admin-text-on-dark)] hover:bg-[var(--admin-primary-hover)] transition-colors duration-150"
               >
                 <Plus className="size-4" />
@@ -412,42 +460,48 @@ export default function ProductCreateClient({ categories, collections }: Product
               </p>
             )}
 
-            <div className="space-y-2">
-              {pendingVariants.map((v, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 p-4 bg-white border border-[var(--admin-border)] rounded-[6px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-                >
-                  <div
-                    className="w-4 h-4 rounded-full shrink-0 border border-[var(--admin-border)]"
-                    style={{ background: v.colorValue }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[14px] font-medium text-[var(--admin-text-primary)]">{v.colorName}</span>
-                      <span className="text-[13px] text-[var(--admin-text-muted)]">{v.size}</span>
-                      {v.sku && <span className="text-[12px] text-[var(--admin-text-muted)]">SKU: {v.sku}</span>}
-                      {v.stock != null && <span className="text-[12px] text-[var(--admin-text-muted)]">Stock: {v.stock}</span>}
-                      {v.priceOverride != null && <span className="text-[12px] text-[var(--admin-text-primary)]">${v.priceOverride.toFixed(2)}</span>}
+            <div className="space-y-3">
+              {groupVariantsByColor(pendingVariants).map(group => (
+                <VariantColorCard
+                  key={group.colorName}
+                  group={group}
+                  onAddSize={() => openAddSize(group)}
+                  renderRow={(v) => (
+                    <div
+                      key={v._key}
+                      className="flex items-center gap-3 p-3 border-t border-[var(--admin-border)] first:border-t-0"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[14px] font-medium text-[var(--admin-text-primary)]">{v.size}</span>
+                          {v.sku && <span className="text-[12px] text-[var(--admin-text-muted)]">SKU: {v.sku}</span>}
+                          {v.stock != null && <span className="text-[12px] text-[var(--admin-text-muted)]">Stock: {v.stock}</span>}
+                          {v.priceOverride != null && <span className="text-[12px] text-[var(--admin-text-primary)]">${v.priceOverride.toFixed(2)}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <RestockPopover
+                          currentStock={v.stock ?? 0}
+                          onSave={(stock) => handleRestockPending(v._key, stock)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => openEditVariant(v)}
+                          className="px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeVariant(v._key)}
+                          className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => openEditVariant(idx)}
-                      className="px-2.5 py-1 text-[12px] font-medium rounded-[4px] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:bg-[var(--admin-border)] transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeVariant(idx)}
-                      className="p-1.5 rounded-[4px] text-[var(--admin-destructive)] hover:bg-[var(--admin-status-error-bg)] transition-colors"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                </div>
+                  )}
+                />
               ))}
             </div>
           </TabsContent>
@@ -477,11 +531,13 @@ export default function ProductCreateClient({ categories, collections }: Product
       </form>
 
       <VariantDialog
-        mode="create"
-        open={variantDialogOpen}
-        onOpenChange={setVariantDialogOpen}
-        initialValues={editVariantIndex !== null ? pendingVariants[editVariantIndex] : undefined}
-        onSubmit={handleVariantSave}
+        open={dialogMode !== null}
+        onOpenChange={(open) => { if (!open) setDialogMode(null) }}
+        productName={name || 'product'}
+        existingColors={existingColors}
+        mode={dialogMode ?? { kind: 'add-color' }}
+        onSubmitOne={handleSubmitOne}
+        onSubmitMany={handleSubmitMany}
       />
     </>
   )
