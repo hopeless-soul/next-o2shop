@@ -321,13 +321,14 @@ function DesktopInformationLayout({
 
 type Props = {
   addresses: SavedAddress[]
+  accountEmail: string | null
 }
 
-export default function InformationClient({ addresses }: Props) {
+export default function InformationClient({ addresses, accountEmail }: Props) {
   const router = useRouter()
   const { checkout, updateCheckout } = useCheckout()
 
-  const [email, setEmail] = useState(checkout.email)
+  const [email, setEmail] = useState(checkout.email || accountEmail || "")
   const [shipping, setShipping] = useState<Partial<AddressDto>>(
     checkout.shippingAddress ?? {},
   )

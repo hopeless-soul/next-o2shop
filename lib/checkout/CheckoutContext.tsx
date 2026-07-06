@@ -42,12 +42,12 @@ type CheckoutContextValue = {
 
 const CheckoutContext = createContext<CheckoutContextValue | null>(null)
 
-const STORAGE_KEY = "o2shop_checkout"
+export const CHECKOUT_STORAGE_KEY = "o2shop_checkout"
 
 function loadFromStorage(): CheckoutState {
   if (typeof window === "undefined") return INITIAL
   try {
-    const stored = sessionStorage.getItem(STORAGE_KEY)
+    const stored = sessionStorage.getItem(CHECKOUT_STORAGE_KEY)
     if (stored) {
       const parsed = JSON.parse(stored)
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
@@ -63,14 +63,14 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   const [checkout, setCheckout] = useState<CheckoutState>(loadFromStorage)
 
   useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(checkout))
+    sessionStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(checkout))
   }, [checkout])
 
   const updateCheckout = (partial: Partial<CheckoutState>) =>
     setCheckout((prev) => ({ ...prev, ...partial }))
 
   const clearCheckout = () => {
-    sessionStorage.removeItem(STORAGE_KEY)
+    sessionStorage.removeItem(CHECKOUT_STORAGE_KEY)
     setCheckout(INITIAL)
   }
 

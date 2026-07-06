@@ -104,7 +104,7 @@ type CartContextValue = CartState & {
 
 const CartContext = createContext<CartContextValue | null>(null)
 
-const STORAGE_KEY = "o2shop_cart"
+export const CART_STORAGE_KEY = "o2shop_cart"
 
 export function CartProvider({ children }: { children: ReactNode }) {
   // Reducer always starts from an empty cart because localStorage isn't
@@ -119,7 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // initial empty cart.
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
+      const stored = localStorage.getItem(CART_STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored)
         if (Array.isArray(parsed)) {
@@ -137,7 +137,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // state) and immediately overwrite whatever was saved from a prior visit.
   useEffect(() => {
     if (!isHydrated.current) return
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items))
   }, [state.items])
 
   const value = useMemo(

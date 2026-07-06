@@ -1,4 +1,5 @@
 import { listAddresses } from "@/lib/api/addresses-server"
+import { getMe } from "@/lib/api/auth"
 import type { SavedAddress } from "@/lib/types"
 import InformationClient from "./InformationClient"
 
@@ -9,5 +10,13 @@ export default async function InformationPage() {
   } catch {
     // unauthenticated or fetch error — render without saved addresses
   }
-  return <InformationClient addresses={addresses} />
+
+  let accountEmail: string | null = null
+  try {
+    accountEmail = (await getMe()).email
+  } catch {
+    // unauthenticated — no account email to prefill
+  }
+
+  return <InformationClient addresses={addresses} accountEmail={accountEmail} />
 }

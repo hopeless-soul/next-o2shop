@@ -3,6 +3,7 @@
 // on the browser automatically attaching cookies to same-origin requests.import 'client-only'
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { parseApiError, AuthError } from './errors'
+import { clearLocalAppState } from '@/lib/auth/clearLocalAppState'
 
 // Proxies through Next.js (/api/* → NEXT_PUBLIC_API_URL/*) so cookies stay same-origin.
 const clientApi = axios.create({
@@ -75,6 +76,7 @@ clientApi.interceptors.response.use(
       )
       waitQueue = []
       if (typeof window !== 'undefined') {
+        clearLocalAppState()
         window.location.href = '/login'
         // Stays pending so no rejection handler fires during navigation.
         return new Promise(() => {})

@@ -11,6 +11,8 @@ import { Form, FormField, FormItem, FormControl, FormMessage } from "@/component
 import { login } from "@/lib/api/auth-client";
 import { ApiError } from "@/lib/api/errors";
 import { loginSchema, type LoginFormValues } from "@/lib/validation/auth";
+import { useCart } from "@/lib/cart/CartContext";
+import { clearLocalAppState } from "@/lib/auth/clearLocalAppState";
 
 const inputClass =
   "w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground";
@@ -19,6 +21,7 @@ const labelClass =
 
 export default function LoginForm() {
   const router = useRouter();
+  const { clearCart } = useCart();
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
@@ -47,6 +50,7 @@ export default function LoginForm() {
     setIsPending(true);
     try {
       await login(values);
+      clearLocalAppState(clearCart);
       router.push("/account");
     } catch (err) {
       // ApiError (normalized error provided by the frontend API) carries backend validation messages;
