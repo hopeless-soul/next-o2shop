@@ -12,11 +12,13 @@ interface AddressesSectionProps {
 }
 
 export default function AddressesSection({ initialAddresses }: AddressesSectionProps) {
+  // Local states
   const [addresses, setAddresses] = useState<SavedAddress[]>(initialAddresses)
   const [modal, setModal] = useState<null | 'new' | SavedAddress>(null)
   const [deletePending, setDeletePending] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
 
+  // Handles saving a new or updated address, then updates the local state.
   async function handleSave(payload: SaveAddressPayload) {
     if (modal === 'new') {
       const created = await createAddressAction(payload)
@@ -28,6 +30,7 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
     setModal(null)
   }
 
+  // Handles deleting an address, then updates the local state.
   async function handleDelete(id: string) {
     setDeletePending(id)
     try {
@@ -41,6 +44,7 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
 
   return (
     <>
+      {/* 'Saved Addresses' + trigger for the "add address" modal */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-sans text-[18px] uppercase tracking-[0.36px] text-foreground-dark">
           Saved Addresses
@@ -54,12 +58,14 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
         </button>
       </div>
 
+      {/* Empty state */}
       {addresses.length === 0 && (
         <p className="text-sm font-secondary text-foreground-subtle">
           No saved addresses yet.
         </p>
       )}
 
+      {/* Address grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
         {addresses.map(addr => (
           <div key={addr.id} className="relative">
@@ -70,6 +76,7 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
               onEdit={() => setModal(addr)}
               onDelete={() => setDeleteConfirm(addr.id)}
             />
+            {/* Delete confirmation overlay, shown in place of the card for the address being removed */}
             {deleteConfirm === addr.id && (
               <div
                 className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4"
@@ -102,6 +109,7 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
         ))}
       </div>
 
+      {/* Add/edit modal, shared between the "new" and per-address edit flows */}
       {modal !== null && (
         <AddressFormModal
           address={modal === 'new' ? undefined : modal}
