@@ -11,11 +11,14 @@ interface AddressCardProps {
 export default function AddressCard({ address, heading, editable = false, onEdit, onDelete }: AddressCardProps) {
   return (
     <div className="p-5 border border-border flex flex-col">
+      {/* Section label*/}
       {heading && (
         <p className="font-sans text-[11px] uppercase tracking-widest mb-3 text-foreground-subtle">
           {heading}
         </p>
       )}
+
+      {/* Address details */}
       <div className="text-sm leading-6 font-secondary text-foreground">
         <p className="font-semibold text-foreground-dark">
           {address.firstName} {address.lastName}
@@ -27,6 +30,8 @@ export default function AddressCard({ address, heading, editable = false, onEdit
         </p>
         <p>{address.country}</p>
       </div>
+
+      {/* Edit / delete actions */}
       {editable && (
         <div className="flex-1 flex items-end gap-2 pt-4">
           <button

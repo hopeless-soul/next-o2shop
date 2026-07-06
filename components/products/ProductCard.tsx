@@ -157,7 +157,7 @@ export default function ProductCard({ product, hoverZones }: ProductCardProps) {
           </span>
         </div>
 
-        {/* Sub row */}
+        {/* Description row (Category + Currency) */}
         <div className="flex items-center justify-between">
           <span
             className="text-[12px] tracking-[0.3px] font-secondary text-foreground-subtle"
