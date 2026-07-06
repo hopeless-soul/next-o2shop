@@ -1,50 +1,63 @@
+// app/(admin)/admin/products/[id]/VariantDialog.tsx
 'use client'
 
-import SharedVariantDialog from '@/components/admin/products/VariantDialog'
+import SharedVariantDialog, {
+  type VariantDialogMode,
+  type VariantSubmitResult,
+} from '@/components/admin/products/VariantDialog'
 import type { ProductVariant, CreateVariantDto } from '@/lib/api/admin/admin-products'
 import { createVariantAction, updateVariantAction } from './actions'
 
 interface VariantDialogProps {
   productId: string
-  variant?: ProductVariant
+  productName: string
+  existingColors: { colorName: string; colorValue: string }[]
+  mode: VariantDialogMode
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSaved: (v: ProductVariant) => void
-}
-
-function variantToDto(v: ProductVariant): CreateVariantDto {
-  return {
-    colorName: v.colorName,
-    colorValue: v.colorValue,
-    size: v.size,
-    sku: v.sku,
-    stock: v.stock,
-    priceOverride: v.priceOverride,
-    compareAtPrice: v.compareAtPrice,
-  }
+  onVariantCreated: (v: ProductVariant) => void
+  onVariantUpdated: (v: ProductVariant) => void
 }
 
 export default function VariantDialog({
   productId,
-  variant,
+  productName,
+  existingColors,
+  mode,
   open,
   onOpenChange,
-  onSaved,
+  onVariantCreated,
+  onVariantUpdated,
 }: VariantDialogProps) {
-  async function handleSubmit(dto: CreateVariantDto) {
-    const saved = variant
-      ? await updateVariantAction(productId, variant.id, dto)
-      : await createVariantAction(productId, dto)
-    onSaved(saved)
+  async function handleSubmitOne(dto: CreateVariantDto) {
+    if (mode.kind !== 'edit') return
+    const saved = await updateVariantAction(productId, mode.variantId, dto)
+    onVariantUpdated(saved)
+  }
+
+  async function handleSubmitMany(dtos: CreateVariantDto[]): Promise<VariantSubmitResult[]> {
+    const settled = await Promise.allSettled(dtos.map(dto => createVariantAction(productId, dto)))
+    return settled.map(result => {
+      if (result.status === 'fulfilled') {
+        onVariantCreated(result.value)
+        return { ok: true }
+      }
+      return {
+        ok: false,
+        error: result.reason instanceof Error ? result.reason.message : 'Failed to create variant.',
+      }
+    })
   }
 
   return (
     <SharedVariantDialog
-      mode={variant ? 'edit' : 'create'}
       open={open}
       onOpenChange={onOpenChange}
-      initialValues={variant ? variantToDto(variant) : undefined}
-      onSubmit={handleSubmit}
+      productName={productName}
+      existingColors={existingColors}
+      mode={mode}
+      onSubmitOne={handleSubmitOne}
+      onSubmitMany={handleSubmitMany}
     />
   )
 }
