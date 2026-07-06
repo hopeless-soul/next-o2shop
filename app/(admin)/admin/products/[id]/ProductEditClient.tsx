@@ -24,7 +24,6 @@ import type { VariantDialogMode } from '@/components/admin/products/VariantDialo
 import DescriptionEditor from '@/components/admin/products/DescriptionEditor'
 import {
   updateProductAction,
-  createVariantAction,
   updateVariantAction,
   deleteVariantAction,
   setDefaultVariantAction,
