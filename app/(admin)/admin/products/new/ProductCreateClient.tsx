@@ -7,6 +7,7 @@ import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import VariantDialog from '@/components/admin/products/VariantDialog'
+import DescriptionEditor from '@/components/admin/products/DescriptionEditor'
 import {
   Select,
   SelectContent,
@@ -17,7 +18,7 @@ import {
 import FormCard from '@/components/admin/FormCard'
 import type { AdminCategory } from '@/lib/api/admin/admin-categories'
 import type { AdminCollection } from '@/lib/api/admin/admin-collections'
-import type { CreateVariantDto } from '@/lib/api/admin/admin-products'
+import type { CreateVariantDto, DescriptionBlock } from '@/lib/api/admin/admin-products'
 import { groupVariantsByColor } from '@/lib/utils/variant-grouping'
 import VariantColorCard from '@/components/admin/products/VariantColorCard'
 import RestockPopover from '@/components/admin/products/RestockPopover'
@@ -102,7 +103,7 @@ export default function ProductCreateClient({ categories, collections }: Product
   const [compareAtPrice, setCompareAtPrice] = useState('')
   const [currency, setCurrency] = useState('USD')
   const [tags, setTags] = useState<string[]>([])
-  const [description, setDescription] = useState('')
+  const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([])
   const [isPublished, setIsPublished] = useState(false)
 
   // Pending variants
@@ -136,7 +137,8 @@ export default function ProductCreateClient({ categories, collections }: Product
       colorName: group.colorName,
       colorValue: group.colorValue,
       existingSizes: group.variants.map(v => v.size),
-      priceDefaults: {
+      defaults: {
+        stock: group.variants[0]?.stock,
         priceOverride: group.variants[0]?.priceOverride,
         compareAtPrice: group.variants[0]?.compareAtPrice ?? undefined,
       },
@@ -191,7 +193,6 @@ export default function ProductCreateClient({ categories, collections }: Product
     setSaveError(null)
 
     try {
-      const trimmedDescription = description.trim()
       const product = await createProductAction({
         name,
         displayName,
@@ -204,9 +205,7 @@ export default function ProductCreateClient({ categories, collections }: Product
         tags: tags.length > 0 ? tags : undefined,
         type: type || null,
         isPublished,
-        description: trimmedDescription
-          ? { blocks: [{ type: 'text', content: trimmedDescription }] }
-          : undefined,
+        description: descriptionBlocks.length > 0 ? { blocks: descriptionBlocks } : undefined,
       })
 
       // Batch-create pending variants — best-effort; redirect regardless
@@ -415,13 +414,7 @@ export default function ProductCreateClient({ categories, collections }: Product
 
             <FormCard title="Description">
               <div className="mt-3">
-                <textarea
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  rows={5}
-                  placeholder="Product description (optional)"
-                  className="w-full px-2.5 py-2 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30 resize-y"
-                />
+                <DescriptionEditor blocks={descriptionBlocks} onChange={setDescriptionBlocks} />
               </div>
             </FormCard>
 

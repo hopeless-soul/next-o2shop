@@ -709,7 +709,8 @@ export default function ProductEditClient({
       colorName: group.colorName,
       colorValue: group.colorValue,
       existingSizes: group.variants.map(v => v.size),
-      priceDefaults: {
+      defaults: {
+        stock: group.variants[0]?.stock,
         priceOverride: group.variants[0]?.priceOverride,
         compareAtPrice: group.variants[0]?.compareAtPrice ?? undefined,
       },

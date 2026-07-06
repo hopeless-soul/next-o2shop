@@ -1,7 +1,7 @@
 // components/admin/products/VariantDialog.tsx
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   Dialog,
@@ -14,6 +14,39 @@ import type { CreateVariantDto } from '@/lib/api/admin/admin-products'
 import { generateSkuPreview } from '@/lib/utils/sku'
 
 const SIZE_PRESETS = ['2XS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
+
+// The native color-input's eyedropper hands focus to an OS-level surface, which fires
+// `blur` on the input immediately (before the eyedropper is even used) — so `blur` alone
+// re-enables the dialog's focus trap mid-interaction and the trap never lets go afterward.
+// Instead, track activation explicitly and only deactivate on a real outside click.
+function useColorPickerTrapGuard(onActiveChange: (active: boolean) => void) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(false)
+
+  useEffect(() => {
+    if (!active) return
+    function handlePointerDown(e: PointerEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        // Defer re-enabling the trap: right after the eyedropper closes, window focus is
+        // still transitioning back from the OS-level surface. Reclaiming focus synchronously
+        // here races that handoff and makes Windows beep instead of focusing anything.
+        setTimeout(() => {
+          setActive(false)
+          onActiveChange(false)
+        }, 0)
+      }
+    }
+    document.addEventListener('pointerdown', handlePointerDown, true)
+    return () => document.removeEventListener('pointerdown', handlePointerDown, true)
+  }, [active, onActiveChange])
+
+  function activate() {
+    setActive(true)
+    onActiveChange(true)
+  }
+
+  return { containerRef, activate }
+}
 
 const inputCls =
   'h-9 px-2.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30'
@@ -29,7 +62,7 @@ export type VariantDialogMode =
       colorName: string
       colorValue: string
       existingSizes: string[]
-      priceDefaults: { priceOverride?: number; compareAtPrice?: number | null }
+      defaults: { stock?: number; priceOverride?: number; compareAtPrice?: number | null }
     }
 
 export interface VariantDialogProps {
@@ -74,14 +107,17 @@ function EditVariantForm({
   initialValues,
   onSubmit,
   onClose,
+  onColorPickerActiveChange,
 }: {
   initialValues: CreateVariantDto
   onSubmit: (dto: CreateVariantDto) => Promise<void>
   onClose: () => void
+  onColorPickerActiveChange: (active: boolean) => void
 }) {
   const [form, setForm] = useState<EditFormState>(() => editFormFromDto(initialValues))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const colorPickerGuard = useColorPickerTrapGuard(onColorPickerActiveChange)
 
   function handleColorPickerChange(hex: string) {
     setForm(f => ({ ...f, colorValue: hex, colorHex: hex }))
@@ -134,7 +170,7 @@ function EditVariantForm({
 
         <div className="col-span-2 flex flex-col gap-1">
           <label className={labelCls}>Color Value</label>
-          <div className="flex items-center gap-2">
+          <div ref={colorPickerGuard.containerRef} className="flex items-center gap-2">
             <div
               className="w-7 h-7 rounded-full border border-[var(--admin-border-input)] shrink-0"
               style={{ background: form.colorValue }}
@@ -143,6 +179,8 @@ function EditVariantForm({
               type="color"
               value={form.colorValue}
               onChange={e => handleColorPickerChange(e.target.value)}
+              onMouseDown={colorPickerGuard.activate}
+              onFocus={colorPickerGuard.activate}
               className="w-9 h-9 cursor-pointer rounded-[4px] border border-[var(--admin-border-input)] p-0.5 bg-transparent"
             />
             <input
@@ -249,9 +287,6 @@ type SizeRow = {
   size: string
   skuTouched: boolean
   sku: string
-  stock: string
-  priceOverride: string
-  compareAtPrice: string
   error?: string
 }
 
@@ -261,20 +296,23 @@ function AddSizesForm({
   mode,
   onSubmitMany,
   onClose,
+  onColorPickerActiveChange,
 }: {
   productName: string
   existingColors: { colorName: string; colorValue: string }[]
   mode: AddSizesMode
   onSubmitMany: (dtos: CreateVariantDto[]) => Promise<VariantSubmitResult[]>
   onClose: () => void
+  onColorPickerActiveChange: (active: boolean) => void
 }) {
   const isLocked = mode.kind === 'add-size'
   const existingSizes = mode.kind === 'add-size' ? mode.existingSizes : []
-  const priceDefaults = mode.kind === 'add-size' ? mode.priceDefaults : {}
+  const defaults = mode.kind === 'add-size' ? mode.defaults : {}
 
   const [colorName, setColorName] = useState(mode.kind === 'add-size' ? mode.colorName : '')
   const [colorValue, setColorValue] = useState(mode.kind === 'add-size' ? mode.colorValue : '#000000')
   const [colorHex, setColorHex] = useState(mode.kind === 'add-size' ? mode.colorValue : '#000000')
+  const colorPickerGuard = useColorPickerTrapGuard(onColorPickerActiveChange)
 
   const [customSizeInput, setCustomSizeInput] = useState('')
   const [customSizes, setCustomSizes] = useState<string[]>([])
@@ -283,20 +321,23 @@ function AddSizesForm({
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
+  // Shared across every checked size in this batch — sizes of the same color are
+  // almost always priced and stocked the same way, so these aren't per-row fields.
+  const [sharedStock, setSharedStock] = useState(defaults.stock != null ? String(defaults.stock) : '')
+  const [sharedPriceOverride, setSharedPriceOverride] = useState(
+    defaults.priceOverride != null ? String(defaults.priceOverride) : ''
+  )
+  const [sharedCompareAtPrice, setSharedCompareAtPrice] = useState(
+    defaults.compareAtPrice != null ? String(defaults.compareAtPrice) : ''
+  )
+
   const allSizeOptions = useMemo(
     () => [...SIZE_PRESETS, ...customSizes].filter(size => !existingSizes.includes(size)),
     [customSizes, existingSizes]
   )
 
   function defaultRow(size: string): SizeRow {
-    return {
-      size,
-      skuTouched: false,
-      sku: '',
-      stock: '',
-      priceOverride: priceDefaults.priceOverride != null ? String(priceDefaults.priceOverride) : '',
-      compareAtPrice: priceDefaults.compareAtPrice != null ? String(priceDefaults.compareAtPrice) : '',
-    }
+    return { size, skuTouched: false, sku: '' }
   }
 
   function toggleSize(size: string, checked: boolean) {
@@ -371,9 +412,9 @@ function AddSizesForm({
         colorValue,
         size,
         sku: sku || undefined,
-        stock: row.stock !== '' ? Number(row.stock) : undefined,
-        priceOverride: row.priceOverride !== '' ? Number(row.priceOverride) : undefined,
-        compareAtPrice: row.compareAtPrice !== '' ? Number(row.compareAtPrice) : null,
+        stock: sharedStock !== '' ? Number(sharedStock) : undefined,
+        priceOverride: sharedPriceOverride !== '' ? Number(sharedPriceOverride) : undefined,
+        compareAtPrice: sharedCompareAtPrice !== '' ? Number(sharedCompareAtPrice) : null,
       }
     })
 
@@ -430,7 +471,7 @@ function AddSizesForm({
           </div>
           <div className="col-span-2 flex flex-col gap-1">
             <label className={labelCls}>Color Value</label>
-            <div className="flex items-center gap-2">
+            <div ref={colorPickerGuard.containerRef} className="flex items-center gap-2">
               <div
                 className="w-7 h-7 rounded-full border border-[var(--admin-border-input)] shrink-0"
                 style={{ background: colorValue }}
@@ -442,6 +483,8 @@ function AddSizesForm({
                   setColorValue(e.target.value)
                   setColorHex(e.target.value)
                 }}
+                onMouseDown={colorPickerGuard.activate}
+                onFocus={colorPickerGuard.activate}
                 className="w-9 h-9 cursor-pointer rounded-[4px] border border-[var(--admin-border-input)] p-0.5 bg-transparent"
               />
               <input
@@ -505,67 +548,77 @@ function AddSizesForm({
       </div>
 
       {checkedSizes.length > 0 && (
-        <div className="flex flex-col gap-3">
-          {checkedSizes.map(size => {
-            const row = rows[size]
-            if (!row) return null
-            const skuValue = row.skuTouched
-              ? row.sku
-              : generateSkuPreview(productName, colorName || '(color)', size)
-            return (
-              <div key={size} className="border border-[var(--admin-border)] rounded-[6px] p-3 flex flex-col gap-2">
-                <div className="text-[13px] font-medium text-[var(--admin-text-primary)]">Size {size}</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2 flex flex-col gap-1">
-                    <label className={labelCls}>SKU</label>
+        <>
+          <div className="flex flex-col gap-2">
+            <label className={labelCls}>Applies to all {checkedSizes.length} selected size{checkedSizes.length === 1 ? '' : 's'}</label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className={labelCls}>Stock</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={sharedStock}
+                  onChange={e => setSharedStock(e.target.value)}
+                  className={inputCls}
+                  placeholder="0"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className={labelCls}>Price Override</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={sharedPriceOverride}
+                  onChange={e => setSharedPriceOverride(e.target.value)}
+                  className={inputCls}
+                  placeholder="Optional"
+                />
+              </div>
+              <div className="col-span-2 flex flex-col gap-1">
+                <label className={labelCls}>Compare At Price</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={sharedCompareAtPrice}
+                  onChange={e => setSharedCompareAtPrice(e.target.value)}
+                  className={inputCls}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className={labelCls}>SKU per size</label>
+            <div className="flex flex-col gap-2">
+              {checkedSizes.map(size => {
+                const row = rows[size]
+                if (!row) return null
+                const skuValue = row.skuTouched
+                  ? row.sku
+                  : generateSkuPreview(productName, colorName || '(color)', size)
+                return (
+                  <div key={size} className="flex items-center gap-2">
+                    <span className="w-14 shrink-0 text-[13px] font-medium text-[var(--admin-text-primary)]">
+                      {size}
+                    </span>
                     <input
                       value={skuValue}
                       onChange={e => handleSkuChange(size, e.target.value)}
-                      className={`${inputCls} font-mono`}
+                      className={`flex-1 ${inputCls} font-mono`}
                     />
+                    {row.error && (
+                      <span className="text-[11px] text-[var(--admin-destructive)] shrink-0">{row.error}</span>
+                    )}
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className={labelCls}>Stock</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={row.stock}
-                      onChange={e => updateRow(size, { stock: e.target.value })}
-                      className={inputCls}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className={labelCls}>Price Override</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={row.priceOverride}
-                      onChange={e => updateRow(size, { priceOverride: e.target.value })}
-                      className={inputCls}
-                      placeholder="Optional"
-                    />
-                  </div>
-                  <div className="col-span-2 flex flex-col gap-1">
-                    <label className={labelCls}>Compare At Price</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={row.compareAtPrice}
-                      onChange={e => updateRow(size, { compareAtPrice: e.target.value })}
-                      className={inputCls}
-                      placeholder="Optional"
-                    />
-                  </div>
-                </div>
-                {row.error && <p className="text-[12px] text-[var(--admin-destructive)]">{row.error}</p>}
-              </div>
-            )
-          })}
-        </div>
+                )
+              })}
+            </div>
+          </div>
+        </>
       )}
 
       {formError && <p className="text-[13px] text-[var(--admin-destructive)]">{formError}</p>}
@@ -605,8 +658,14 @@ export default function VariantDialog({
   onSubmitOne,
   onSubmitMany,
 }: VariantDialogProps) {
+  // Base UI's Dialog traps focus while `modal`. The native color-input's eyedropper
+  // hands focus to an OS-level surface outside the DOM, which the trap treats as focus
+  // escaping the modal and fights to reclaim — leaving the trap stuck. Drop the trap for
+  // the duration of the color-input interaction so focus returns normally afterward.
+  const [colorPickerActive, setColorPickerActive] = useState(false)
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} modal={!colorPickerActive}>
       <DialogContent className="max-w-lg rounded-[8px]" style={{ fontFamily: 'var(--font-admin, inherit)' }}>
         <DialogHeader>
           <DialogTitle className="text-[16px] font-semibold text-[var(--admin-text-primary)]">
@@ -620,6 +679,7 @@ export default function VariantDialog({
             initialValues={mode.initialValues}
             onSubmit={onSubmitOne}
             onClose={() => onOpenChange(false)}
+            onColorPickerActiveChange={setColorPickerActive}
           />
         )}
 
@@ -631,6 +691,7 @@ export default function VariantDialog({
             mode={mode}
             onSubmitMany={onSubmitMany}
             onClose={() => onOpenChange(false)}
+            onColorPickerActiveChange={setColorPickerActive}
           />
         )}
       </DialogContent>
