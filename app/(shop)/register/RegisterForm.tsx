@@ -10,6 +10,8 @@ import { Form, FormField, FormItem, FormControl, FormMessage } from "@/component
 import { register, login } from "@/lib/api/auth-client";
 import { ApiError } from "@/lib/api/errors";
 import { registerSchema, type RegisterFormValues } from "@/lib/validation/auth";
+import { useCart } from "@/lib/cart/CartContext";
+import { clearLocalAppState } from "@/lib/auth/clearLocalAppState";
 
 const inputClass =
   "w-full px-4 py-3 text-sm outline-none font-secondary border border-border-input bg-input text-foreground";
@@ -18,6 +20,7 @@ const labelClass =
 
 export default function RegisterForm() {
   const router = useRouter();
+  const { clearCart } = useCart();
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
 
@@ -34,6 +37,7 @@ export default function RegisterForm() {
     try {
       await register({ email: values.email, password: values.password });
       await login({ email: values.email, password: values.password });
+      clearLocalAppState(clearCart);
       router.push("/account");
     } catch (err) {
       if (err instanceof ApiError) {
