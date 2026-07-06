@@ -283,7 +283,10 @@ function AddSizesForm({
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
-  const allSizeOptions = useMemo(() => [...SIZE_PRESETS, ...customSizes], [customSizes])
+  const allSizeOptions = useMemo(
+    () => [...SIZE_PRESETS, ...customSizes].filter(size => !existingSizes.includes(size)),
+    [customSizes, existingSizes]
+  )
 
   function defaultRow(size: string): SizeRow {
     return {
