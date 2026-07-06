@@ -165,7 +165,7 @@ export default function Navbar({
                 <span
                   className="absolute -top-1.5 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-white leading-none font-secondary"
                   style={{
-                    backgroundColor: "var(--color-badge-cart)",
+                    backgroundColor: "var(--color-accent)",
                     fontSize: "9px",
                     fontWeight: 700,
                   }}
@@ -214,7 +214,11 @@ export default function Navbar({
               {/* Dropdown panel */}
               {activeDropdown === cat.slug && (
                 <div
-                  className="absolute top-full left-0 min-w-[190px] py-3 bg-foreground-strong shadow-4"
+                  className="absolute top-full left-0 min-w-[190px] py-3 shadow-4"
+                  style={{
+                    backgroundColor: currentBackground,
+                    transition: "background-color var(--transition-nav)",
+                  }}
                   onMouseEnter={() => openDropdown(cat.slug)}
                   onMouseLeave={closeDropdown}
                 >
@@ -222,8 +226,8 @@ export default function Navbar({
                     <Link
                       key={subCat.slug}
                       href={subCat.href}
-                      className="block px-5 py-2 font-sans text-[12px] uppercase tracking-widest opacity-70 hover:opacity-100 text-on-dark"
-                      style={{ transition: "var(--transition-nav)" }}
+                      className="block px-5 py-2 font-sans text-[12px] uppercase tracking-[0.3px] opacity-70 hover:opacity-100"
+                      style={{ color: currentColor, transition: "var(--transition-nav)" }}
                     >
                       {subCat.displayName}
                     </Link>
@@ -265,20 +269,21 @@ export default function Navbar({
 
       {/* ── Mobile drawer panel ── */}
       <div
-        className={cn("fixed top-0 left-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col transition-transform duration-300 ease-in-out bg-foreground-strong", mobileOpen ? "translate-x-0" : "-translate-x-full")}
+        className={cn("fixed top-0 left-0 h-full z-[61] w-[80vw] max-w-sm flex flex-col", mobileOpen ? "translate-x-0" : "-translate-x-full")}
+        style={{ backgroundColor: currentBackground, color: currentColor, transition: "background-color var(--transition-nav), translate 300ms ease-in-out" }}
       >
         <div
           className="flex items-center justify-between px-5 py-5 border-b"
           style={{ borderColor: "rgba(255,255,255,0.1)" }}
         >
           <span
-            className="font-sans text-[18px] tracking-widest uppercase text-on-dark"
+            className="font-sans text-[18px] tracking-widest uppercase"
           >
-            Menu
+            Categories
           </span>
           <button
             onClick={() => setMobileOpen(false)}
-            className="opacity-70 hover:opacity-100 text-on-dark"
+            className="opacity-70 hover:opacity-100"
             style={{ transition: "var(--transition-nav)" }}
             aria-label="Close menu"
           >
@@ -289,17 +294,20 @@ export default function Navbar({
         <nav className="flex-1 overflow-y-auto px-5 py-6">
           {NAV_CATEGORIES.map((cat) =>
             cat.subCategories.length ? (
-              <div key={cat.slug} className="mb-7">
-                <p
-                  className="font-sans text-[11px] uppercase tracking-widest mb-3 text-on-dark opacity-40"
+              <div key={cat.slug} className="mb-5">
+                <Link
+                  href={cat.href}
+                  className="block py-3 font-sans text-[22px] uppercase tracking-[0.2em] opacity-90 hover:opacity-100"
+                  style={{ transition: "var(--transition-nav)" }}
+                  onClick={() => setMobileOpen(false)}
                 >
                   {cat.displayName}
-                </p>
+                </Link>
                 {cat.subCategories.map((subCat) => (
                   <Link
                     key={subCat.slug}
                     href={subCat.href}
-                    className="block py-2 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100 text-on-dark"
+                    className="block py-2 pl-3 font-sans text-[17px] uppercase tracking-[0.2em] opacity-50 hover:opacity-80"
                     style={{ transition: "var(--transition-nav)" }}
                     onClick={() => setMobileOpen(false)}
                   >
@@ -311,7 +319,7 @@ export default function Navbar({
               <Link
                 key={cat.slug}
                 href={cat.href}
-                className="block py-2 mb-4 font-sans text-[15px] uppercase tracking-[0.2em] opacity-80 hover:opacity-100 text-on-dark"
+                className="block py-3 mb-4 font-sans text-[22px] uppercase tracking-[0.2em] opacity-90 hover:opacity-100"
                 style={{ transition: "var(--transition-nav)" }}
                 onClick={() => setMobileOpen(false)}
               >
@@ -324,7 +332,7 @@ export default function Navbar({
         <div className="px-5 py-6 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
           <Link
             href="/account"
-            className="flex items-center gap-3 opacity-70 hover:opacity-100 text-on-dark"
+            className="flex items-center gap-3 opacity-70 hover:opacity-100"
             style={{ transition: "var(--transition-nav)" }}
             onClick={() => setMobileOpen(false)}
           >

@@ -10,7 +10,7 @@ interface AddressCardProps {
 
 export default function AddressCard({ address, heading, editable = false, onEdit, onDelete }: AddressCardProps) {
   return (
-    <div className="p-5 border border-border flex flex-col">
+    <div className="p-5 border border-border rounded-[var(--radius-sm)] flex flex-col">
       {/* Section label*/}
       {heading && (
         <p className="font-sans text-[11px] uppercase tracking-widest mb-3 text-foreground-subtle">

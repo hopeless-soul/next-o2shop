@@ -29,7 +29,7 @@ export default async function ProductsPage({
   const pageTitle = getProductsPageTitle({ category, subcategory, q, sale });
 
   return (
-    <div className="pt-26">
+    <div className="pt-[var(--navbar-height-desktop)]">
       {/* Page header */}
       <div
         className="flex items-end justify-between py-6 border-b px-[var(--header-px-desktop)] border-border"
@@ -73,7 +73,7 @@ export default async function ProductsPage({
         // Product grid
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" style={{ gap: "2px", padding: "2px" }}>
           {result === null
-            // Fetch failed or is still pending resolution — placeholder cards instead of a jarring empty page
+            // Fetch failed or is still pending resolution — placeholder cards instead of a empty page
             ? Array.from({ length: 12 }).map((_, i) => <ProductCardSkeleton key={i} />)
             : products.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>

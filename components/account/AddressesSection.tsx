@@ -51,7 +51,7 @@ export default function AddressesSection({ initialAddresses }: AddressesSectionP
         </h2>
         <button
           onClick={() => setModal('new')}
-          className="font-sans text-[11px] uppercase tracking-widest px-4 py-2 border border-border text-foreground-muted hover:opacity-70"
+          className="font-sans text-[11px] uppercase tracking-widest px-4 py-2 border border-border rounded-[var(--radius-base)] text-foreground-muted hover:opacity-70"
           style={{ transition: 'var(--transition-base)' }}
         >
           + Add Address
