@@ -35,6 +35,14 @@ function normalizeProduct(p: Product): Product {
         ? { ...v.featuredImage, url: resolveUrl(v.featuredImage.url) }
         : undefined,
     })),
+    defaultVariant: p.defaultVariant
+      ? {
+        ...p.defaultVariant,
+        featuredImage: p.defaultVariant.featuredImage
+          ? { ...p.defaultVariant.featuredImage, url: resolveUrl(p.defaultVariant.featuredImage.url) }
+          : undefined,
+      }
+      : undefined,
   }
 }
 

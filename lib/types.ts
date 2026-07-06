@@ -130,6 +130,7 @@ export type Product = {
   featuredPhoto?: ProductPhotoSummary | null;
   photos?: ProductPhoto[];
   variants: ProductVariant[];
+  defaultVariant?: ProductVariant;
   collection?: Collection;
   category?: Category;
   subCategory?: SubCategory;
