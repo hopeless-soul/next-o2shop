@@ -159,6 +159,7 @@ export type OrderItem = {
   productSku: string;
   productPrice: number;
   productCurrency: string;
+  productImageUrl?: string;
   quantity: number;
   total: number;
 };

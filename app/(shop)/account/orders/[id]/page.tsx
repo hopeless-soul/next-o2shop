@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getOrderByNumber } from "@/lib/api/orders";
 import { NotFoundError } from "@/lib/api/errors";
@@ -22,6 +23,24 @@ const STATUS_STEPS: OrderStatus[] = [
 ];
 
 type OrderDetail = Awaited<ReturnType<typeof getOrderByNumber>>
+type OrderLineItem = OrderDetail["items"][number]
+
+function ItemThumbnail({ item, className }: { item: OrderLineItem; className: string }) {
+  if (!item.productImageUrl) {
+    return <div className={cn(className, "bg-border-light shrink-0")} />;
+  }
+  return (
+    <div className={cn(className, "relative overflow-hidden shrink-0 bg-border-light")}>
+      <Image
+        src={item.productImageUrl}
+        alt={item.productName}
+        fill
+        className="object-cover"
+        sizes="64px"
+      />
+    </div>
+  );
+}
 
 function MobileOrderView({
   order,
@@ -43,30 +62,33 @@ function MobileOrderView({
           {order.items.map((item) => (
             <div
               key={item.id}
-              className="border p-4 border-border shadow-1"
+              className="flex gap-3 border p-4 border-border shadow-1"
             >
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <span
-                  className="font-sans text-[13px] uppercase tracking-widest leading-tight text-foreground-dark"
+              <ItemThumbnail item={item} className="w-16 h-16 rounded-sm" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <span
+                    className="font-sans text-[13px] uppercase tracking-widest leading-tight text-foreground-dark"
+                  >
+                    {item.productName}
+                  </span>
+                  <span
+                    className="font-sans text-[13px] shrink-0 text-foreground-dark"
+                  >
+                    ${item.total}
+                  </span>
+                </div>
+                <p
+                  className="font-secondary text-[11px] mb-1 text-foreground-muted"
                 >
-                  {item.productName}
-                </span>
-                <span
-                  className="font-sans text-[13px] shrink-0 text-foreground-dark"
+                  {item.productSku}
+                </p>
+                <p
+                  className="font-secondary text-[11px] text-foreground-muted"
                 >
-                  ${item.total}
-                </span>
+                  ${item.productPrice} × {item.quantity}
+                </p>
               </div>
-              <p
-                className="font-secondary text-[11px] mb-1 text-foreground-muted"
-              >
-                {item.productSku}
-              </p>
-              <p
-                className="font-secondary text-[11px] text-foreground-muted"
-              >
-                ${item.productPrice} × {item.quantity}
-              </p>
             </div>
           ))}
         </div>
@@ -117,7 +139,7 @@ function MobileOrderView({
         <h2
           className="font-sans text-[15px] uppercase tracking-widest mb-4 text-foreground-dark"
         >
-          Addresses
+          Address
         </h2>
         <div className="flex flex-col gap-4">
           <AddressCard address={order.shippingAddress} heading="Shipping Address" />
@@ -258,11 +280,14 @@ export default async function OrderPage({
                     className="border-b border-border-light"
                   >
                     <td className="py-4 pr-6">
-                      <span
-                        className="font-sans text-[13px] uppercase tracking-widest text-foreground-dark"
-                      >
-                        {item.productName}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <ItemThumbnail item={item} className="w-12 h-12 rounded-sm" />
+                        <span
+                          className="font-sans text-[13px] uppercase tracking-widest text-foreground-dark"
+                        >
+                          {item.productName}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-4 pr-6">
                       <span
@@ -340,7 +365,7 @@ export default async function OrderPage({
           <h2
             className="font-sans text-[15px] uppercase tracking-widest mb-5 text-foreground-dark"
           >
-            Addresses
+            Address
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
             <AddressCard address={order.shippingAddress} heading="Shipping Address" />
