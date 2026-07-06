@@ -1,15 +1,19 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { createSplashEffect } from "@/lib/effects/splash";
 import type { ProductColor, ProductSize } from "@/lib/types";
 
 const LETTER_SIZE_ORDER = ["2xs", "xs", "s", "m", "l", "xl", "2xl", "3xl"];
 const COLS = 4;
 
+// Detects numeric size sets, so they can be sorted numerically
 function isNumberBased(sizes: ProductSize[]): boolean {
   return sizes.length > 0 && sizes.every((s) => !isNaN(Number(s.label)));
 }
 
+// Numeric sizes sort by value; 
+// letter sizes sort by position in LETTER_SIZE_ORDER, unrecognized labels pushed to the end.
 function sortSizes(sizes: ProductSize[]): ProductSize[] {
   if (isNumberBased(sizes)) {
     return [...sizes].sort((a, b) => Number(a.label) - Number(b.label));
@@ -44,10 +48,12 @@ export default function VariantPicker({
   highlightColor = "#a19c93",
 }: VariantPickerProps) {
   const sortedSizes = sortSizes(sizes);
+  // Used below to know which row is the last one, since the grid can end mid-row.
   const totalRows = Math.ceil(sortedSizes.length / COLS);
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Color swatches */}
       {colors.length > 0 && (
         <div>
           <p
@@ -64,11 +70,17 @@ export default function VariantPicker({
             {colors.map((color) => (
               <button
                 key={color.name}
-                onClick={() => color.available && onColorChange(color.name)}
+                onClick={(e) => {
+                  if (!color.available) return;
+                  onColorChange(color.name);
+                  createSplashEffect(e.currentTarget, "var(--color-accent)");
+                }}
                 title={color.name}
                 className={cn(
                   "relative flex items-center justify-center font-sans text-[12px] uppercase tracking-widest font-secondary",
                   selectedColor === color.name && "color-swatch-selected",
+                  // Light swatches need dark label text for contrast; everything else
+                  // gets light "on-dark" text. Hardcoded against the known light hexes.
                   color.hex === "#f5f5f5" || color.hex === "#f5f5dc" || color.hex === "#d2b48c"
                     ? "text-foreground"
                     : "text-on-dark"
@@ -95,6 +107,7 @@ export default function VariantPicker({
         </div>
       )}
 
+      {/* Size grid */}
       {sortedSizes.length > 0 && (
         <div>
           <p
@@ -119,8 +132,14 @@ export default function VariantPicker({
               const col = index % COLS;
               const row = Math.floor(index / COLS);
               const isLastRow = row === totalRows - 1;
+              // A cell is the "right edge" if it's the last column, or if it's the very
+              // last cell overall (covers a final partial row that doesn't reach COLS).
               const isRightEdge = col === COLS - 1 || index === sortedSizes.length - 1;
+              // For a partial final row, cells directly above the missing slots also
+              // need a bottom border since there's no cell below to draw one.
               const cellBelowEmpty = (row + 1) * COLS + col >= sortedSizes.length;
+              // Only the four outer corners of the whole grid get rounded — each corner
+              // condition targets exactly one cell (or edge cell for a ragged last row).
               const tl = index === 0 ? 6 : 0;
               const tr = row === 0 && isRightEdge ? 6 : 0;
               const br = isLastRow && isRightEdge ? 6 : 0;
@@ -129,14 +148,20 @@ export default function VariantPicker({
               return (
                 <button
                   key={size.label}
-                  onClick={() => size.available && onSizeChange(size.label)}
+                  onClick={(e) => {
+                    if (!size.available) return;
+                    onSizeChange(size.label);
+                    createSplashEffect(e.currentTarget, "var(--color-accent)");
+                  }}
                   className={cn(
-                    "relative font-sans text-[12px] uppercase tracking-widest flex items-center justify-center overflow-hidden",
+                    "relative font-sans text-[12px] uppercase tracking-widest flex items-center justify-center",
                     isSelected ? "text-foreground-dark" : "text-foreground"
                   )}
                   style={{
                     height: "44px",
                     padding: "5px 8px",
+                    // Top/left borders are drawn by every cell; right/bottom borders are
+                    // only added on edge cells so adjoining cells don't double up borders.
                     borderTop: "1px solid #2b272a",
                     borderLeft: "1px solid #2b272a",
                     borderRight: isRightEdge ? "1px solid #2b272a" : "none",
@@ -153,6 +178,7 @@ export default function VariantPicker({
                 >
                   {size.label}
                   {!size.available && (
+                    // Diagonal strike-through overlay for sold-out sizes.
                     <svg
                       aria-hidden="true"
                       style={{

@@ -1,19 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import type { Product, Review, ProductColor, ProductSize } from "@/lib/types";
+import type { Product, Review, ProductColor, ProductSize, ProductVariant } from "@/lib/types";
 import VariantPicker from "@/components/products/VariantPicker";
 import StarRating from "@/components/ui/StarRating";
 import ReviewsBlock from "./ReviewsBlock";
-import { Star } from "lucide-react";
+import { CircleCheck, Star } from "lucide-react";
 import { useCart } from "@/lib/cart/CartContext";
 import { cn } from "@/lib/utils";
+import { createSplashEffect } from "@/lib/effects/splash";
 
 interface Props {
   product: Product;
   reviews: Review[];
   totalReviews: number;
+}
+
+function dedupeSizes(variants: ProductVariant[]): ProductSize[] {
+  return variants.reduce<ProductSize[]>((acc, v) => {
+    if (!acc.find((s) => s.label === v.size)) {
+      acc.push({ label: v.size, available: v.available });
+    }
+    return acc;
+  }, []);
 }
 
 export default function ProductDetailClient({ product, reviews, totalReviews }: Props) {
@@ -27,28 +37,45 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
     [],
   );
 
-  const [selectedColor, setSelectedColor] = useState<string | null>(
-    uniqueColors[0]?.name ?? null,
+  const defaultVariant = product.variants.find(
+    (v) => v.id === product.defaultVariant?.id,
   );
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
+  // First color (in array order) that has at least one available size —
+  // guarantees a purchasable default when defaultVariant is missing/out of stock.
+  const fallbackColorName =
+    uniqueColors.find((c) =>
+      dedupeSizes(product.variants.filter((v) => v.colorName === c.name)).some((s) => s.available),
+    )?.name ?? uniqueColors[0]?.name ?? null;
+
+  const fallbackSizeLabel = fallbackColorName
+    ? dedupeSizes(product.variants.filter((v) => v.colorName === fallbackColorName)).find(
+      (s) => s.available,
+    )?.label ?? null
+    : null;
+
+  const defaultColorName = defaultVariant?.available ? defaultVariant.colorName : fallbackColorName;
+  const defaultSizeLabel =
+    defaultVariant?.available && defaultVariant.colorName === defaultColorName
+      ? defaultVariant.size
+      : fallbackSizeLabel;
+
+  const [selectedColor, setSelectedColor] = useState<string | null>(defaultColorName);
+  const [selectedSize, setSelectedSize] = useState<string | null>(defaultSizeLabel);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [justAdded, setJustAdded] = useState(false);
+  const addedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { addItem } = useCart();
 
-  const uniqueSizes: ProductSize[] = selectedColor
-    ? product.variants
-      .filter((v) => v.colorName === selectedColor)
-      .reduce<ProductSize[]>((acc, v) => {
-        if (!acc.find((s) => s.label === v.size)) {
-          acc.push({ label: v.size, available: v.available });
-        }
-        return acc;
-      }, [])
-    : product.variants.reduce<ProductSize[]>((acc, v) => {
-      if (!acc.find((s) => s.label === v.size)) {
-        acc.push({ label: v.size, available: v.available });
-      }
-      return acc;
-    }, []);
+  useEffect(() => {
+    return () => {
+      if (addedTimeoutRef.current) clearTimeout(addedTimeoutRef.current);
+    };
+  }, []);
+
+  const uniqueSizes: ProductSize[] = dedupeSizes(
+    selectedColor ? product.variants.filter((v) => v.colorName === selectedColor) : product.variants,
+  );
 
   // ratings are 1–10 in API; normalise to 0–5 for StarRating
   const avgRating =
@@ -74,7 +101,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
 
   const productType = product.type ?? product.category?.displayName;
 
-  function handleAddToCart() {
+  function handleAddToCart(e: React.MouseEvent<HTMLButtonElement>) {
     if (!selectedColor || !selectedSize) return;
     const variant = product.variants.find(
       (v) => v.colorName === selectedColor && v.size === selectedSize,
@@ -95,6 +122,11 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
         product.primaryPhoto?.url ??
         undefined,
     });
+
+    if (addedTimeoutRef.current) clearTimeout(addedTimeoutRef.current);
+    setJustAdded(true);
+    createSplashEffect(e.currentTarget, "var(--color-accent)", 14);
+    addedTimeoutRef.current = setTimeout(() => setJustAdded(false), 1800);
   }
 
   return (
@@ -107,7 +139,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           paddingBottom: "var(--space-10)",
         }}
       >
-        {/* ── Left: image gallery (50%) ── */}
+        {/* Left: image gallery */}
         <div className="md:w-1/2 md:h-screen">
           <div className="flex flex-col md:flex-row md:h-full gap-2 md:gap-1">
 
@@ -186,7 +218,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
           </div>
         </div>
 
-        {/* ── Right: product info (50%) ── */}
+        {/* Right: product info */}
         <div
           className="md:w-1/2 flex flex-col gap-5 mt-8 md:mt-10 px-4 sm:px-10 md:pl-10 md:pr-10"
         >
@@ -292,6 +324,7 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
             })}
           </div>
 
+          {/* Variant picker */}
           <VariantPicker
             colors={uniqueColors}
             sizes={uniqueSizes}
@@ -301,10 +334,14 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
             onSizeChange={setSelectedSize}
           />
 
+          {/* Add to cart */}
           <button
             onClick={handleAddToCart}
             disabled={!selectedColor || !selectedSize}
-            className="atc-button w-full font-sans text-[24px] uppercase tracking-widest text-primary-foreground flex items-center"
+            className={cn(
+              "atc-button w-full font-sans text-[24px] uppercase tracking-widest text-primary-foreground flex items-center",
+              justAdded && "atc-added",
+            )}
             style={{
               justifyContent: 'space-between',
               height: "var(--atc-height)",
@@ -314,25 +351,31 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
               cursor: !selectedColor || !selectedSize ? "not-allowed" : "pointer",
               opacity: !selectedColor || !selectedSize ? 0.6 : 1,
               WebkitTextStroke: '0.6px white',
-              padding: '20px'
+              padding: '20px',
+              position: 'relative',
+              overflow: 'visible',
             }}
           >
             <span className="tracking-[0.44px]">
-              Add to Cart
+              {justAdded ? "Added to Cart" : "Add to Cart"}
             </span>
-            <span className="flex gap-2">
-              <span className="font-sans text-[24px] tracking-[0.44px]">
-                ${product.compareAtPrice ? product.compareAtPrice : product.basePrice}
+            {justAdded ? (
+              <CircleCheck size={26} aria-hidden="true" />
+            ) : (
+              <span className="flex gap-2">
+                <span className="font-sans text-[24px] tracking-[0.44px]">
+                  ${product.compareAtPrice ? product.compareAtPrice : product.basePrice}
+                </span>
+                {product.compareAtPrice != null && (
+                  <span
+                    className="atc-compare-price font-sans text-[24px] tracking-[0.44px] line-through opacity-50"
+                  >${product.basePrice}</span>
+                )}
               </span>
-              {product.compareAtPrice != null && (
-                <span
-                  className="atc-compare-price font-sans text-[24px] tracking-[0.44px] line-through opacity-50"
-                >${product.basePrice}</span>
-              )}
-            </span>
+            )}
           </button>
 
-          {/* ── Reviews ── */}
+          {/* Reviews */}
           <div id="reviewBlock"></div>
           <ReviewsBlock
             productId={product.id}
