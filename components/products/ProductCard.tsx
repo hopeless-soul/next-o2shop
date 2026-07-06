@@ -18,7 +18,7 @@ const PLACEHOLDER_COLORS = [
 ];
 
 const MAX_HOVER_ZONES = 4;
-const DEFAULT_HOVER_ZONES = 3;
+const DEFAULT_HOVER_ZONES = 2;
 
 export default function ProductCard({ product, hoverZones }: ProductCardProps) {
   const [activeZone, setActiveZone] = useState<number | null>(null);
