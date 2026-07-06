@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { logout } from '@/lib/api/auth-client'
+import { clearLocalAppState } from '@/lib/auth/clearLocalAppState'
 
 interface NavItem {
   label: string
@@ -89,6 +90,7 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
     try {
       await logout()
     } finally {
+      clearLocalAppState()
       router.push('/login')
     }
   }
