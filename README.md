@@ -87,6 +87,8 @@ One root layout (`app/layout.tsx`) wraps two route groups plus route handlers:
 
 **Data fetching model:** Server Components fetch on the server via `serverApi`; Client Components handle mutations and interactive state via `clientApi`. The boundary is enforced at the module level (`server-only` / `client-only` imports) — see [API Layer](#api-layer).
 
+**Client-side cart:** there's no cart endpoint on the backend yet (`lib/api/cart.ts` is a stub), so the cart is a `localStorage`-backed React Context (`lib/cart/CartContext.tsx`), provided in `app/(shop)/layout.tsx`. `lib/checkout/CheckoutContext.tsx` carries in-progress order state across the multi-step checkout. Both are cleared on login/logout/register via `lib/auth/clearLocalAppState.ts`.
+
 **Access control:** centralized in one place, `middleware.ts`, rather than scattered per-page checks.
 
 ## Getting Started
@@ -158,8 +160,16 @@ components/
 lib/
   api/         — Axios instances + domain service modules (see API Layer)
   admin/       — Admin-specific formatters and param parsers
+  auth/        — clearLocalAppState (wipes cart/checkout state on login/logout/register)
+  cart/        — CartContext (localStorage-backed cart state)
+  checkout/    — CheckoutContext (in-progress order state across checkout steps)
+  effects/     — splash.ts (add-to-cart confirmation animation)
+  product/     — page-title.ts and other product-page helpers
+  utils/       — sku.ts (client-side SKU preview), variant-grouping.ts (group variants by color)
+  validation/  — Zod schemas for auth and address forms
   types.ts     — Shared TypeScript types (Product, Order, Review…)
   utils.ts     — Utility helpers (cn, etc.)
+  env.ts       — Environment variable access
   nav-config.ts
 
 specs/         — Design reference files (not part of the app)
@@ -185,11 +195,12 @@ All HTTP calls go through Axios — never use `fetch` directly.
 | `auth.ts` / `auth-client.ts` | login, register, logout, refresh, `/me` |
 | `products.ts` | paginated product list (filters), product by slug |
 | `categories.ts` | category list, category by id |
-| `reviews.ts` / `reviews-server.ts` | reviews by product, delete review |
+| `reviews.ts` / `reviews-client.ts` / `reviews-server.ts` | reviews by product, delete review |
 | `orders.ts` | `/me/orders`, `/orders/{orderNumber}` |
 | `addresses.ts` / `addresses-server.ts` | list, create, update, delete saved addresses |
-| `cart.ts` | stub (cart endpoint not yet in API) |
-| `admin-*` | admin CRUD for products, users, orders, categories, collections, reviews, shipping, audit log |
+| `shipping.ts` | shipping methods |
+| `cart.ts` | stub (cart endpoint not yet in API — see [client-side cart](#architecture)) |
+| `admin/admin-*` | admin CRUD for products, users, orders, categories, collections, reviews, shipping, audit log |
 
 **Error handling:** `lib/api/errors.ts` normalises all errors into typed subclasses: `AuthError`, `NotFoundError`, `ValidationError`, `ForbiddenError`, `ApiError`. In RSC pages: catch `NotFoundError` → `notFound()`, catch `AuthError` → `redirect('/login')`.
 
@@ -217,11 +228,13 @@ All visual tokens are defined as CSS custom properties in `app/globals.css` and 
 **Storefront**
 - Product catalog with pagination, category/collection filtering
 - Product detail with photo gallery, color/size variant picker, and customer reviews
+- Client-side cart (`CartContext`, `localStorage`-backed) with add-to-cart splash/confirmation feedback
 - Multi-step checkout: address → shipping method selection → Stripe payment → confirmation
 - Customer account: order history with detail view, saved address CRUD
+- Auth forms (login/register/addresses) validated with React Hook Form + Zod
 
 **Admin Panel** (`/admin`)
-- Product management: create/edit with variant dialog, rich description editor
+- Product management: create/edit with color-grouped variant dialog (multi-size add, shared stock/price/compare-at, SKU preview, restock popover), rich description editor
 - Order management with fulfillment status tracking
 - User management
 - Category, collection, and shipping method CRUD
@@ -232,6 +245,7 @@ All visual tokens are defined as CSS custom properties in `app/globals.css` and 
 - HttpOnly cookie auth with silent token refresh on 401
 - Server-side data fetching in RSC pages; client mutations via `clientApi`
 - Stripe integration for payment processing
+- Local app state (cart, checkout) cleared on login/logout/register
 
 ## Auth Flow
 
