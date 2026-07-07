@@ -130,12 +130,11 @@ export default function ProductDetailClient({ product, reviews, totalReviews }: 
   }
 
   return (
-    <div className="pt-[var(--header-height-desktop)]" style={{ marginTop: 8 }}>
+    <div>
       {/* Main layout */}
       <div
         className="flex flex-col md:flex-row"
         style={{
-          paddingTop: "var(--space-10)",
           paddingBottom: "var(--space-10)",
         }}
       >
