@@ -22,7 +22,7 @@ export default async function ProductPage({
   const reviewsResult = await listReviewsByProduct(product.id, { limit: 20 });
 
   return (
-    <div className="pt-[var(--header-height-mobile)] md:pt-[var(--navbar-height-desktop)]">
+    <div className="pt-[var(--header-height-mobile)] md:pt-[calc(var(--navbar-height-desktop)_+_20px)]">
       <ProductDetailClient
         product={product}
         reviews={reviewsResult.data}
