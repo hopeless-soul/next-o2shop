@@ -1,7 +1,7 @@
 // components/admin/products/VariantDialog.tsx
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   Dialog,
@@ -14,39 +14,6 @@ import type { CreateVariantDto } from '@/lib/api/admin/admin-products'
 import { generateSkuPreview } from '@/lib/utils/sku'
 
 const SIZE_PRESETS = ['2XS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
-
-// The native color-input's eyedropper hands focus to an OS-level surface, which fires
-// `blur` on the input immediately (before the eyedropper is even used) — so `blur` alone
-// re-enables the dialog's focus trap mid-interaction and the trap never lets go afterward.
-// Instead, track activation explicitly and only deactivate on a real outside click.
-function useColorPickerTrapGuard(onActiveChange: (active: boolean) => void) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [active, setActive] = useState(false)
-
-  useEffect(() => {
-    if (!active) return
-    function handlePointerDown(e: PointerEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        // Defer re-enabling the trap: right after the eyedropper closes, window focus is
-        // still transitioning back from the OS-level surface. Reclaiming focus synchronously
-        // here races that handoff and makes Windows beep instead of focusing anything.
-        setTimeout(() => {
-          setActive(false)
-          onActiveChange(false)
-        }, 0)
-      }
-    }
-    document.addEventListener('pointerdown', handlePointerDown, true)
-    return () => document.removeEventListener('pointerdown', handlePointerDown, true)
-  }, [active, onActiveChange])
-
-  function activate() {
-    setActive(true)
-    onActiveChange(true)
-  }
-
-  return { containerRef, activate }
-}
 
 const inputCls =
   'h-9 px-2.5 rounded-[4px] border border-[var(--admin-border-input)] bg-[var(--admin-bg)] text-[14px] text-[var(--admin-text-primary)] outline-none focus:border-[var(--admin-ring)] focus:ring-2 focus:ring-[var(--admin-ring)]/30'
@@ -107,17 +74,14 @@ function EditVariantForm({
   initialValues,
   onSubmit,
   onClose,
-  onColorPickerActiveChange,
 }: {
   initialValues: CreateVariantDto
   onSubmit: (dto: CreateVariantDto) => Promise<void>
   onClose: () => void
-  onColorPickerActiveChange: (active: boolean) => void
 }) {
   const [form, setForm] = useState<EditFormState>(() => editFormFromDto(initialValues))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const colorPickerGuard = useColorPickerTrapGuard(onColorPickerActiveChange)
 
   function handleColorPickerChange(hex: string) {
     setForm(f => ({ ...f, colorValue: hex, colorHex: hex }))
@@ -170,7 +134,7 @@ function EditVariantForm({
 
         <div className="col-span-2 flex flex-col gap-1">
           <label className={labelCls}>Color Value</label>
-          <div ref={colorPickerGuard.containerRef} className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <div
               className="w-7 h-7 rounded-full border border-[var(--admin-border-input)] shrink-0"
               style={{ background: form.colorValue }}
@@ -179,8 +143,6 @@ function EditVariantForm({
               type="color"
               value={form.colorValue}
               onChange={e => handleColorPickerChange(e.target.value)}
-              onMouseDown={colorPickerGuard.activate}
-              onFocus={colorPickerGuard.activate}
               className="w-9 h-9 cursor-pointer rounded-[4px] border border-[var(--admin-border-input)] p-0.5 bg-transparent"
             />
             <input
@@ -296,14 +258,12 @@ function AddSizesForm({
   mode,
   onSubmitMany,
   onClose,
-  onColorPickerActiveChange,
 }: {
   productName: string
   existingColors: { colorName: string; colorValue: string }[]
   mode: AddSizesMode
   onSubmitMany: (dtos: CreateVariantDto[]) => Promise<VariantSubmitResult[]>
   onClose: () => void
-  onColorPickerActiveChange: (active: boolean) => void
 }) {
   const isLocked = mode.kind === 'add-size'
   const existingSizes = mode.kind === 'add-size' ? mode.existingSizes : []
@@ -312,7 +272,6 @@ function AddSizesForm({
   const [colorName, setColorName] = useState(mode.kind === 'add-size' ? mode.colorName : '')
   const [colorValue, setColorValue] = useState(mode.kind === 'add-size' ? mode.colorValue : '#000000')
   const [colorHex, setColorHex] = useState(mode.kind === 'add-size' ? mode.colorValue : '#000000')
-  const colorPickerGuard = useColorPickerTrapGuard(onColorPickerActiveChange)
 
   const [customSizeInput, setCustomSizeInput] = useState('')
   const [customSizes, setCustomSizes] = useState<string[]>([])
@@ -471,7 +430,7 @@ function AddSizesForm({
           </div>
           <div className="col-span-2 flex flex-col gap-1">
             <label className={labelCls}>Color Value</label>
-            <div ref={colorPickerGuard.containerRef} className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <div
                 className="w-7 h-7 rounded-full border border-[var(--admin-border-input)] shrink-0"
                 style={{ background: colorValue }}
@@ -483,8 +442,6 @@ function AddSizesForm({
                   setColorValue(e.target.value)
                   setColorHex(e.target.value)
                 }}
-                onMouseDown={colorPickerGuard.activate}
-                onFocus={colorPickerGuard.activate}
                 className="w-9 h-9 cursor-pointer rounded-[4px] border border-[var(--admin-border-input)] p-0.5 bg-transparent"
               />
               <input
@@ -658,14 +615,14 @@ export default function VariantDialog({
   onSubmitOne,
   onSubmitMany,
 }: VariantDialogProps) {
-  // Base UI's Dialog traps focus while `modal`. The native color-input's eyedropper
-  // hands focus to an OS-level surface outside the DOM, which the trap treats as focus
-  // escaping the modal and fights to reclaim — leaving the trap stuck. Drop the trap for
-  // the duration of the color-input interaction so focus returns normally afterward.
-  const [colorPickerActive, setColorPickerActive] = useState(false)
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={!colorPickerActive}>
+    // `modal={false}` disables Base UI's Floating-UI focus trap. The native color-input's
+    // eyedropper hands focus to an OS-level surface outside the DOM; when the trap is active
+    // it treats that as focus escaping the dialog and fights to reclaim it the instant focus
+    // returns, racing the browser's own focus handoff and leaving clicks stuck (Chrome/Windows
+    // beeps instead of focusing anything). Escape-to-close and backdrop-click-to-close still
+    // work without the trap — only the tab-focus-looping behavior is lost.
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
       <DialogContent className="max-w-lg rounded-[8px]" style={{ fontFamily: 'var(--font-admin, inherit)' }}>
         <DialogHeader>
           <DialogTitle className="text-[16px] font-semibold text-[var(--admin-text-primary)]">
@@ -679,7 +636,6 @@ export default function VariantDialog({
             initialValues={mode.initialValues}
             onSubmit={onSubmitOne}
             onClose={() => onOpenChange(false)}
-            onColorPickerActiveChange={setColorPickerActive}
           />
         )}
 
@@ -691,7 +647,6 @@ export default function VariantDialog({
             mode={mode}
             onSubmitMany={onSubmitMany}
             onClose={() => onOpenChange(false)}
-            onColorPickerActiveChange={setColorPickerActive}
           />
         )}
       </DialogContent>
